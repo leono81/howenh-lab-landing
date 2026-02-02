@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="dark" lang="es">
 
 <head>
   <meta charset="utf-8" />
@@ -190,26 +190,37 @@
   <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-5">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <!-- Logo -->
-      <div class="flex items-center gap-3 animate-fade delay-300">
-        <div
-          class="size-9 rounded-lg flex items-center justify-center bg-primary/20 border border-primary/30 backdrop-blur-sm">
-          <span class="material-symbols-outlined text-primary text-[20px]">terrain</span>
-        </div>
+      <a href="#" class="flex items-center gap-2 animate-fade delay-300">
+        <!-- Isotipo SVG - Mountain + Heartbeat -->
+        <svg class="h-7 w-auto" viewBox="0 0 100 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 32 
+                   C4 32, 6 30, 8 28 
+                   L14 22 
+                   L18 26 
+                   C20 28, 22 28, 24 26 
+                   L32 14 
+                   L38 8 
+                   L44 18 
+                   C46 22, 48 26, 52 30 
+                   L56 34 
+                   C58 36, 60 34, 62 30 
+                   L66 18 
+                   L70 10 
+                   L74 24 
+                   L76 28 
+                   L82 28 
+                   L98 28" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+            fill="none" />
+        </svg>
         <span class="text-white text-lg font-semibold tracking-tight">Howenh Labs</span>
-      </div>
+      </a>
 
-      <!-- Nav Links -->
+      <!-- Nav Links - Moved to right -->
       <div class="hidden md:flex items-center gap-8 animate-fade delay-500">
-        <a href="#solutions" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Solutions</a>
+        <a href="#solutions" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Soluciones</a>
         <a href="#kenos" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Kenos SaaS</a>
-        <a href="#about" class="text-white/80 hover:text-white text-sm font-medium transition-colors">About</a>
+        <a href="#about" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Nosotros</a>
       </div>
-
-      <!-- CTA Button -->
-      <button
-        class="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium hover:bg-white/20 transition-all animate-fade delay-700">
-        <span>Get Started</span>
-      </button>
 
       <!-- Mobile Menu -->
       <button class="md:hidden text-white">
@@ -224,33 +235,25 @@
     <!-- Spacer for navbar -->
     <div class="h-20"></div>
 
-    <!-- Main Hero Text - Left aligned like Rift -->
-    <div class="flex-1 flex items-center">
+    <!-- Main Hero Text - Right aligned -->
+    <div class="flex-1 flex items-center justify-end">
       <div class="max-w-4xl">
-        <h1 class="hero-title text-white text-glow">
-          <span class="block animate-reveal delay-1000">Enterprise AI</span>
-          <span class="block animate-reveal delay-1500">& Automation,</span>
-          <span class="block text-primary animate-reveal delay-2000">Made Real.</span>
+        <h1 class="hero-title text-white text-glow text-right">
+          <span class="block animate-reveal delay-1000"><span class="text-primary">Redefiniendo</span> los
+            límites</span>
+          <span class="block animate-reveal delay-1500">de la eficiencia operativa</span>
+          <span class="block animate-reveal delay-2000">con <span class="text-primary">IA Aplicada</span>.</span>
         </h1>
       </div>
     </div>
 
-    <!-- Bottom Section: CTA Left + Description Right -->
-    <div class="flex flex-col md:flex-row justify-between items-end gap-8 pb-8">
-      <!-- Left: CTA -->
-      <div class="animate-reveal delay-2500">
-        <p class="text-white/60 text-sm mb-4">Start building the future</p>
-        <button
-          class="flex items-center gap-3 px-6 py-3 rounded-full bg-white text-black text-sm font-semibold hover:bg-primary transition-all shadow-lg shadow-white/10">
-          <span class="material-symbols-outlined text-lg">arrow_forward</span>
-          <span>Explore Solutions</span>
-        </button>
-      </div>
-
-      <!-- Right: Description -->
-      <div class="max-w-sm text-right animate-reveal delay-3000">
-        <p class="text-white/70 text-sm leading-relaxed">
-          Howenh Labs transforms complex systems into intelligent, automated workflows that just make sense.
+    <!-- Bottom Section: Description Left -->
+    <div class="flex justify-start pb-8">
+      <!-- Left: Description -->
+      <div class="max-w-md text-left animate-reveal delay-2500">
+        <p class="text-white/80 text-base md:text-lg leading-relaxed">
+          Howenh Labs transforma sistemas complejos en flujos de trabajo inteligentes y automatizados que simplemente
+          tienen sentido.
         </p>
       </div>
     </div>
@@ -258,8 +261,8 @@
     <!-- Scroll Indicator -->
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-fade delay-3000">
       <a href="#solutions"
-        class="scroll-indicator flex flex-col items-center gap-2 text-white/40 hover:text-white/60 transition-colors">
-        <span class="text-xs uppercase tracking-widest">Scroll</span>
+        class="scroll-indicator flex flex-col items-center gap-2 text-white/50 hover:text-white/80 transition-colors">
+        <span class="text-sm font-medium tracking-wide">Empieza a construir el futuro</span>
         <span class="material-symbols-outlined text-lg">keyboard_arrow_down</span>
       </a>
     </div>
@@ -434,10 +437,30 @@
       <div class="max-w-7xl mx-auto px-6 md:px-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div class="md:col-span-1">
-            <div class="flex items-center gap-2 text-white mb-6">
-              <span class="material-symbols-outlined">terrain</span>
-              <span class="font-bold text-lg">Howenh Labs</span>
-            </div>
+            <a href="#" class="flex items-center gap-2 text-white mb-6">
+              <!-- Isotipo SVG - Mountain + Heartbeat -->
+              <svg class="h-7 w-auto" viewBox="0 0 100 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 32 
+                         C4 32, 6 30, 8 28 
+                         L14 22 
+                         L18 26 
+                         C20 28, 22 28, 24 26 
+                         L32 14 
+                         L38 8 
+                         L44 18 
+                         C46 22, 48 26, 52 30 
+                         L56 34 
+                         C58 36, 60 34, 62 30 
+                         L66 18 
+                         L70 10 
+                         L74 24 
+                         L76 28 
+                         L82 28 
+                         L98 28" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                  fill="none" />
+              </svg>
+              <span class="font-semibold text-lg">Howenh Labs</span>
+            </a>
             <p class="text-gray-500 mb-6">
               Engineering logic from the end of the world. Building the next generation of resilient software systems.
             </p>
@@ -471,15 +494,15 @@
             <div class="flex flex-col gap-3 text-gray-500 font-mono text-xs">
               <div class="flex justify-between border-b border-gray-800 pb-2">
                 <span>LAT</span>
-                <span class="text-primary">54.8019° S</span>
+                <span class="text-primary">53.7877° S</span>
               </div>
               <div class="flex justify-between border-b border-gray-800 pb-2">
                 <span>LONG</span>
-                <span class="text-primary">68.3030° W</span>
+                <span class="text-primary">67.7095° W</span>
               </div>
               <div class="flex justify-between pt-2">
                 <span>LOC</span>
-                <span class="text-white">USHUAIA, TDF</span>
+                <span class="text-white">RIO GRANDE, TDF</span>
               </div>
             </div>
           </div>
