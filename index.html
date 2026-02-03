@@ -954,6 +954,70 @@
     // Initialize on page load
     const workflowAnim = new WorkflowAnimation();
     workflowAnim.init();
+
+    // Kenos Parallax Controller
+    class KenosParallax {
+      constructor() {
+        this.container = document.getElementById('kenos-parallax');
+        this.windows = [];
+        this.isEnabled = window.innerWidth >= 768; // Disable on mobile
+      }
+
+      init() {
+        if (!this.container || !this.isEnabled) return;
+
+        this.windows = Array.from(this.container.querySelectorAll('.kenos-window'));
+
+        this.container.addEventListener('mousemove', (e) => {
+          this.handleMouseMove(e);
+        });
+
+        // Reset on mouse leave
+        this.container.addEventListener('mouseleave', () => {
+          this.reset();
+        });
+      }
+
+      handleMouseMove(e) {
+        const rect = this.container.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        // Calculate mouse position relative to center (-1 to 1)
+        const mouseX = (e.clientX - rect.left - centerX) / centerX;
+        const mouseY = (e.clientY - rect.top - centerY) / centerY;
+
+        this.windows.forEach(window => {
+          const depth = parseFloat(window.dataset.depth);
+
+          // Movement amount based on depth (closer = more movement)
+          const moveX = mouseX * depth * 30; // Max 30px movement
+          const moveY = mouseY * depth * 30;
+
+          // Rotation based on mouse position
+          const rotateY = mouseX * depth * 5; // Max 5deg rotation
+          const rotateX = -mouseY * depth * 5;
+
+          // Apply transform
+          window.style.transform = `
+            translate3d(${moveX}px, ${moveY}px, ${depth * 50}px)
+            rotateX(${rotateX}deg)
+            rotateY(${rotateY}deg)
+          `;
+        });
+      }
+
+      reset() {
+        this.windows.forEach(window => {
+          const depth = parseFloat(window.dataset.depth);
+          window.style.transform = `translate3d(0, 0, ${depth * 50}px)`;
+        });
+      }
+    }
+
+    // Initialize parallax
+    const kenosParallax = new KenosParallax();
+    kenosParallax.init();
   </script>
 </body>
 
