@@ -172,6 +172,42 @@
     html {
       scroll-behavior: smooth;
     }
+
+    /* Workflow animation states */
+    .workflow-node {
+      transition: all 0.4s ease;
+    }
+
+    .workflow-node.completed {
+      fill: #9CA3AF;
+    }
+
+    .workflow-node.powered {
+      fill: #ffb200;
+      filter: drop-shadow(0 0 8px rgba(255, 178, 0, 0.6));
+    }
+
+    .workflow-connection {
+      stroke-dasharray: 5, 5;
+      animation: dash 20s linear infinite;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -1000;
+      }
+    }
+
+    .workflow-particle {
+      r: 3;
+      fill: #9CA3AF;
+      opacity: 0.8;
+    }
+
+    .workflow-particle.fast {
+      fill: #ffb200;
+      filter: drop-shadow(0 0 4px rgba(255, 178, 0, 0.8));
+    }
   </style>
 </head>
 
@@ -282,6 +318,28 @@
 
   <!-- Main Content (scrollable after hero) -->
   <main class="relative z-10 bg-void">
+
+    <!-- Workflow Section -->
+    <section id="workflow" class="relative z-10 py-24 px-6 md:px-12 bg-void">
+      <div class="max-w-7xl mx-auto">
+        <!-- Title -->
+        <div class="text-center mb-16">
+          <h2 class="text-white text-4xl md:text-5xl font-bold tracking-tight mb-4">
+            Automatización <span class="text-primary">Inteligente</span>
+          </h2>
+          <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+            Observa cómo la IA transforma flujos complejos en procesos optimizados
+          </p>
+        </div>
+
+        <!-- Workflow Animation Container -->
+        <div id="workflow-animation" class="relative w-full h-[500px] flex items-center justify-center">
+          <svg id="workflow-svg" class="w-full h-full" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg">
+            <!-- Nodes and connections will be added in next task -->
+          </svg>
+        </div>
+      </div>
+    </section>
 
     <!-- Kenos Bento Grid -->
     <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="kenos">
