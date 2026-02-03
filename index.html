@@ -171,9 +171,28 @@
       animation: bounce 2s infinite;
     }
 
-    /* Smooth scroll */
+    /* Smooth scroll with snap */
     html {
       scroll-behavior: smooth;
+      scroll-snap-type: y proximity;
+    }
+
+    /* Fullscreen sections */
+    .section-fullscreen {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Content sections (flexible height) */
+    .section-content {
+      min-height: 70vh;
+    }
+
+    .section-content-lg {
+      min-height: 80vh;
     }
 
     /* Workflow animation - styles managed by GSAP */
@@ -211,6 +230,29 @@
     /* Data particles glow */
     .data-particle {
       filter: drop-shadow(0 0 3px rgba(255, 178, 0, 0.8));
+    }
+
+    /* Animated dashed lines */
+    @keyframes dash-flow {
+      0% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: -28;
+      }
+    }
+
+    .animated-dash {
+      animation: dash-flow 1.5s linear infinite;
+    }
+
+    .animated-dash-reverse {
+      animation: dash-flow 1.5s linear infinite reverse;
+    }
+
+    /* Grid subtle pulse while wave filter animates */
+    #background-grid {
+      filter: url(#wave-distortion);
     }
 
     /* Kenos Parallax Windows */
@@ -550,7 +592,7 @@
   <main class="relative z-10 bg-void">
 
     <!-- Workflow Section -->
-    <section id="workflow" class="relative z-10 py-24 px-6 md:px-12 bg-void">
+    <section id="workflow" class="section-fullscreen relative z-10 py-12 px-6 md:px-12 bg-void">
       <div class="max-w-7xl mx-auto">
         <!-- Title with outline → filled effect -->
         <div class="text-center mb-16">
@@ -610,52 +652,137 @@
                 <stop offset="0%" stop-color="#ffc933" />
                 <stop offset="100%" stop-color="#e6a000" />
               </radialGradient>
+
+              <!-- ORBES CRISTALINOS: Gradiente principal -->
+              <radialGradient id="orbe-gradient" cx="35%" cy="25%">
+                <stop offset="0%" stop-color="#ffe066" />
+                <stop offset="40%" stop-color="#ffb200" />
+                <stop offset="100%" stop-color="#996b00" />
+              </radialGradient>
+
+              <!-- ORBES CRISTALINOS: Gradiente para nodos inactivos (gris cristalino) -->
+              <radialGradient id="orbe-gradient-inactive" cx="35%" cy="25%">
+                <stop offset="0%" stop-color="#6B6B6B" />
+                <stop offset="40%" stop-color="#4A4A4A" />
+                <stop offset="100%" stop-color="#2A2A2A" />
+              </radialGradient>
+
+              <!-- ORBES CRISTALINOS: Gradiente del highlight/reflejo -->
+              <radialGradient id="orbe-highlight" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+              </radialGradient>
+
+              <!-- ORBES CRISTALINOS: Filtro de sombra -->
+              <filter id="orbe-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur" />
+                <feOffset in="blur" dx="0" dy="15" result="offsetBlur" />
+                <feFlood flood-color="#ffb200" flood-opacity="0.25" result="color" />
+                <feComposite in="color" in2="offsetBlur" operator="in" result="shadow" />
+                <feMerge>
+                  <feMergeNode in="shadow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+
+              <!-- ORBES CRISTALINOS: Filtro de sombra inactivo (gris) -->
+              <filter id="orbe-shadow-inactive" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur" />
+                <feOffset in="blur" dx="0" dy="12" result="offsetBlur" />
+                <feFlood flood-color="#000000" flood-opacity="0.3" result="color" />
+                <feComposite in="color" in2="offsetBlur" operator="in" result="shadow" />
+                <feMerge>
+                  <feMergeNode in="shadow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+
+              <!-- Wave distortion filter for background grid -->
+              <filter id="wave-distortion" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.015 0.003"
+                  numOctaves="2"
+                  seed="1"
+                  result="turbulence">
+                  <animate
+                    attributeName="baseFrequency"
+                    dur="20s"
+                    values="0.015 0.003;0.02 0.005;0.015 0.003"
+                    repeatCount="indefinite" />
+                </feTurbulence>
+                <feDisplacementMap
+                  in="SourceGraphic"
+                  in2="turbulence"
+                  scale="12"
+                  xChannelSelector="R"
+                  yChannelSelector="G">
+                  <animate
+                    attributeName="scale"
+                    dur="8s"
+                    values="8;15;8"
+                    repeatCount="indefinite" />
+                </feDisplacementMap>
+              </filter>
             </defs>
 
-            <!-- LAYER 1: Background grid (subtle golden constellation) -->
-            <g id="background-grid" opacity="0.06">
+            <!-- LAYER 1: Background grid (golden constellation with wave animation) -->
+            <g id="background-grid" opacity="0.12">
               <rect width="100%" height="100%" fill="url(#dot-grid)"/>
             </g>
 
             <!-- LAYER 1b: Atmospheric glow (appears with AI node) -->
             <ellipse id="ai-atmosphere" cx="450" cy="300" rx="220" ry="180" fill="url(#atmospheric-glow)" opacity="0"/>
 
-            <!-- PROCESS NODES - Equidistant at positions: 150, 350, 550, 750 (200px spacing) -->
+            <!-- PROCESS NODES - ORBES CRISTALINOS -->
             <g id="process-nodes">
               <!-- Entrada - Position 150 -->
-              <g id="node-entrada" class="process-node">
-                <circle id="circle-entrada" cx="150" cy="120" r="55" fill="#3F3F46" stroke="#52525B" stroke-width="2" />
-                <text id="text-entrada" x="150" y="125" text-anchor="middle" fill="#A1A1AA" font-size="15" font-weight="600" font-family="Space Grotesk, sans-serif">Entrada</text>
-                <text id="label-entrada" x="150" y="190" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Recepción</text>
+              <g id="node-entrada" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
+                <!-- Sombra elíptica del orbe -->
+                <ellipse class="orbe-floor-shadow" cx="150" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
+                <!-- Círculo principal del orbe -->
+                <circle id="circle-entrada" cx="150" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
+                <!-- Reflejo highlight superior -->
+                <ellipse class="orbe-highlight" cx="138" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
+                <!-- Texto del nodo -->
+                <text id="text-entrada" x="150" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Entrada</text>
+                <!-- Label debajo -->
+                <text id="label-entrada" x="150" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Recepción</text>
               </g>
 
               <!-- Documentos - Position 350 -->
-              <g id="node-documentos" class="process-node">
-                <circle id="circle-documentos" cx="350" cy="120" r="55" fill="#3F3F46" stroke="#52525B" stroke-width="2" />
-                <text id="text-documentos" x="350" y="118" text-anchor="middle" fill="#A1A1AA" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Documentos</text>
-                <text id="label-documentos" x="350" y="190" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Gestión</text>
+              <g id="node-documentos" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
+                <ellipse class="orbe-floor-shadow" cx="350" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
+                <circle id="circle-documentos" cx="350" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
+                <ellipse class="orbe-highlight" cx="338" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
+                <text id="text-documentos" x="350" y="125" text-anchor="middle" fill="#A1A1AA" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Documentos</text>
+                <text id="label-documentos" x="350" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Gestión</text>
               </g>
 
               <!-- Controles - Position 550 -->
-              <g id="node-controles" class="process-node">
-                <circle id="circle-controles" cx="550" cy="120" r="55" fill="#3F3F46" stroke="#52525B" stroke-width="2" />
-                <text id="text-controles" x="550" y="125" text-anchor="middle" fill="#A1A1AA" font-size="15" font-weight="600" font-family="Space Grotesk, sans-serif">Controles</text>
-                <text id="label-controles" x="550" y="190" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Verificación</text>
+              <g id="node-controles" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
+                <ellipse class="orbe-floor-shadow" cx="550" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
+                <circle id="circle-controles" cx="550" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
+                <ellipse class="orbe-highlight" cx="538" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
+                <text id="text-controles" x="550" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Controles</text>
+                <text id="label-controles" x="550" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Verificación</text>
               </g>
 
               <!-- Métricas - Position 750 -->
-              <g id="node-metricas" class="process-node">
-                <circle id="circle-metricas" cx="750" cy="120" r="55" fill="#3F3F46" stroke="#52525B" stroke-width="2" />
-                <text id="text-metricas" x="750" y="125" text-anchor="middle" fill="#A1A1AA" font-size="15" font-weight="600" font-family="Space Grotesk, sans-serif">Métricas</text>
-                <text id="label-metricas" x="750" y="190" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Medición</text>
+              <g id="node-metricas" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
+                <ellipse class="orbe-floor-shadow" cx="750" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
+                <circle id="circle-metricas" cx="750" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
+                <ellipse class="orbe-highlight" cx="738" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
+                <text id="text-metricas" x="750" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Métricas</text>
+                <text id="label-metricas" x="750" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Medición</text>
               </g>
             </g>
 
-            <!-- Connections between process nodes -->
+            <!-- Connections between process nodes (animated dashes) -->
             <g id="process-connections" stroke="#52525B" stroke-width="2" fill="none">
-              <line id="conn-1-2" x1="205" y1="120" x2="295" y2="120" stroke-dasharray="8,6" opacity="0.6" />
-              <line id="conn-2-3" x1="405" y1="120" x2="495" y2="120" stroke-dasharray="8,6" opacity="0.6" />
-              <line id="conn-3-4" x1="605" y1="120" x2="695" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+              <line id="conn-1-2" class="animated-dash" x1="205" y1="120" x2="295" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+              <line id="conn-2-3" class="animated-dash" x1="405" y1="120" x2="495" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+              <line id="conn-3-4" class="animated-dash" x1="605" y1="120" x2="695" y2="120" stroke-dasharray="8,6" opacity="0.6" />
             </g>
 
             <!-- AI Node - Centered at x=450 (midpoint between 350 and 550) -->
@@ -693,7 +820,7 @@
               <!-- Optimización -->
               <g id="node-optimizacion">
                 <circle cx="450" cy="480" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
-                <text x="450" y="478" text-anchor="middle" fill="#1a1a1a" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Optimización</text>
+                <text x="450" y="485" text-anchor="middle" fill="#1a1a1a" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Optimización</text>
                 <text x="450" y="540" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Auto-mejora</text>
               </g>
 
@@ -740,7 +867,7 @@
     </section>
 
     <!-- Kenos Section with Parallax -->
-    <section id="kenos" class="py-24 px-6 md:px-12 bg-void relative overflow-hidden">
+    <section id="kenos" class="section-fullscreen py-12 px-6 md:px-12 bg-void relative overflow-hidden">
       <div class="max-w-7xl mx-auto">
         <!-- Title -->
         <div class="text-center mb-16">
@@ -955,7 +1082,7 @@
     </section>
 
     <!-- Chatbot Comparison Section -->
-    <section id="chatbot" class="py-24 px-6 md:px-12 bg-surface relative">
+    <section id="chatbot" class="section-content py-24 px-6 md:px-12 bg-surface relative">
       <div class="max-w-7xl mx-auto">
         <!-- Title -->
         <div class="text-center mb-16">
@@ -1022,7 +1149,7 @@
     </section>
 
     <!-- AI Agents Section -->
-    <section id="about" class="py-20 bg-surface border-y border-white/5 relative overflow-hidden">
+    <section id="about" class="section-content-lg py-20 bg-surface border-y border-white/5 relative overflow-hidden">
       <div class="max-w-6xl mx-auto px-6 md:px-12 relative z-10">
         <div class="grid md:grid-cols-2 gap-12 items-center">
           <div class="order-2 md:order-1">
@@ -1265,12 +1392,17 @@
         gsap.set('#capability-connections', { opacity: 0 });
         gsap.set('#data-particles circle', { opacity: 0 });
 
-        // Reset process nodes to gray
+        // Reset process nodes to gray orbe style
         const nodes = ['entrada', 'documentos', 'controles', 'metricas'];
         nodes.forEach(name => {
-          gsap.set(`#circle-${name}`, { fill: '#3F3F46', stroke: '#52525B', filter: 'none' });
+          const nodeGroup = document.querySelector(`#node-${name}`);
+          if (nodeGroup) {
+            nodeGroup.setAttribute('filter', 'url(#orbe-shadow-inactive)');
+          }
+          gsap.set(`#circle-${name}`, { fill: 'url(#orbe-gradient-inactive)' });
           gsap.set(`#text-${name}`, { fill: '#A1A1AA' });
           gsap.set(`#label-${name}`, { fill: '#71717A' });
+          gsap.set(`#node-${name} .orbe-floor-shadow`, { opacity: 0 });
         });
 
         // Reset connections
@@ -1279,18 +1411,32 @@
 
       illuminateNode(name, delay = 0) {
         const tl = gsap.timeline({ delay });
+        const nodeGroup = document.querySelector(`#node-${name}`);
 
+        // Cambiar al filtro de sombra dorada
+        if (nodeGroup) {
+          tl.set(nodeGroup, { filter: 'url(#orbe-shadow)' });
+        }
+
+        // Animar el círculo al gradiente dorado del orbe
         tl.to(`#circle-${name}`, {
-          fill: 'url(#illuminated-gradient)',
-          stroke: '#ffb200',
+          fill: 'url(#orbe-gradient)',
           duration: 0.8,
           ease: 'power2.inOut'
         })
+        // Mostrar sombra del piso
+        .to(`#node-${name} .orbe-floor-shadow`, {
+          opacity: 0.25,
+          duration: 0.6,
+          ease: 'power2.inOut'
+        }, '-=0.6')
+        // Texto oscuro sobre el orbe dorado
         .to(`#text-${name}`, {
           fill: '#1a1a1a',
           duration: 0.6,
           ease: 'power2.inOut'
         }, '-=0.6')
+        // Label dorado
         .to(`#label-${name}`, {
           fill: '#ffb200',
           duration: 0.6,
@@ -1408,14 +1554,27 @@
 
         const nodes = ['entrada', 'documentos', 'controles', 'metricas'];
         nodes.forEach((name, index) => {
-          // Illuminate node
+          // Cambiar filtro al orbe dorado
+          this.timeline.call(() => {
+            const nodeGroup = document.querySelector(`#node-${name}`);
+            if (nodeGroup) {
+              nodeGroup.setAttribute('filter', 'url(#orbe-shadow)');
+            }
+          }, null, index === 0 ? '+=0' : '-=0.5');
+
+          // Illuminate node con gradiente de orbe cristalino
           this.timeline.to(`#circle-${name}`, {
-            fill: 'url(#illuminated-gradient)',
-            stroke: '#ffb200',
-            filter: 'url(#node-glow)',
+            fill: 'url(#orbe-gradient)',
             duration: 1,
             ease: 'power2.inOut'
           }, index === 0 ? '+=0' : '-=0.5');
+
+          // Mostrar sombra del piso
+          this.timeline.to(`#node-${name} .orbe-floor-shadow`, {
+            opacity: 0.25,
+            duration: 0.8,
+            ease: 'power2.inOut'
+          }, '-=0.8');
 
           this.timeline.to(`#text-${name}`, {
             fill: '#1a1a1a',

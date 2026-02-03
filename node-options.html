@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opciones de Nodos - Howenh Labs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0A0A0B;
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffb200;
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 60px;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .option {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,178,0,0.2);
+      border-radius: 20px;
+      padding: 40px;
+    }
+
+    .option h2 {
+      color: #ffb200;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+
+    .option .description {
+      color: #888;
+      margin-bottom: 30px;
+      font-size: 0.9rem;
+    }
+
+    .nodes-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    /* ========================================
+       OPCIÓN 1: ORBES CRISTALINOS
+    ======================================== */
+    .orbe-cristalino {
+      position: relative;
+      width: 120px;
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .orbe-cristalino .sphere {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 25%, #ffe066 0%, #ffb200 40%, #996b00 100%);
+      position: relative;
+      box-shadow:
+        0 20px 40px rgba(255,178,0,0.3),
+        inset 0 -10px 30px rgba(0,0,0,0.3);
+    }
+
+    .orbe-cristalino .sphere::before {
+      content: '';
+      position: absolute;
+      top: 12%;
+      left: 20%;
+      width: 40%;
+      height: 25%;
+      background: rgba(255,255,255,0.5);
+      border-radius: 50%;
+      filter: blur(3px);
+    }
+
+    .orbe-cristalino .sphere::after {
+      content: '';
+      position: absolute;
+      bottom: 25%;
+      right: 20%;
+      width: 15%;
+      height: 15%;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+    }
+
+    .orbe-cristalino .text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #1a1a1a;
+      font-weight: 600;
+      font-size: 13px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .orbe-cristalino .label {
+      margin-top: 15px;
+      color: #ffb200;
+      font-size: 11px;
+    }
+
+    .orbe-cristalino .shadow {
+      position: absolute;
+      bottom: 25px;
+      width: 80px;
+      height: 15px;
+      background: rgba(255,178,0,0.2);
+      border-radius: 50%;
+      filter: blur(8px);
+    }
+
+    /* ========================================
+       OPCIÓN 2: HEXÁGONOS INDUSTRIALES
+    ======================================== */
+    .hexagono {
+      position: relative;
+      width: 120px;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hexagono .hex-outer {
+      width: 100px;
+      height: 115px;
+      position: relative;
+    }
+
+    .hexagono .hex-shape {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #1a1a0a 0%, #0d0d05 100%);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      border: 2px solid #ffb200;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .hexagono .hex-border {
+      position: absolute;
+      inset: -3px;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: linear-gradient(180deg, #ffb200 0%, #996b00 100%);
+      z-index: -1;
+    }
+
+    .hexagono .icon {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .hexagono .text {
+      color: #ffb200;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .hexagono .circuit-lines {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 2px;
+      height: 15px;
+      background: #ffb200;
+      opacity: 0.4;
+    }
+
+    .hexagono .label {
+      margin-top: 10px;
+      color: #888;
+      font-size: 11px;
+    }
+
+    /* ========================================
+       OPCIÓN 3: BURBUJAS ORGÁNICAS
+    ======================================== */
+    .burbuja {
+      position: relative;
+      width: 130px;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .burbuja .blob {
+      width: 110px;
+      height: 110px;
+      background: radial-gradient(circle at 40% 30%, #ffd54f 0%, #ffb200 100%);
+      border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
+      position: relative;
+      animation: blob-morph 8s ease-in-out infinite;
+      box-shadow: 0 15px 35px rgba(255,178,0,0.3);
+    }
+
+    @keyframes blob-morph {
+      0%, 100% { border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%; }
+      25% { border-radius: 50% 60% 40% 60% / 60% 40% 60% 40%; }
+      50% { border-radius: 40% 50% 60% 50% / 50% 50% 40% 60%; }
+      75% { border-radius: 50% 40% 50% 60% / 40% 60% 50% 50%; }
+    }
+
+    .burbuja .blob::before {
+      content: '';
+      position: absolute;
+      top: 15%;
+      left: 25%;
+      width: 50%;
+      height: 35%;
+      background: rgba(255,255,255,0.25);
+      border-radius: 50%;
+      filter: blur(2px);
+    }
+
+    .burbuja .eyes {
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+    }
+
+    .burbuja .eye {
+      width: 12px;
+      height: 12px;
+      background: #1a1a1a;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .burbuja .eye::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      width: 4px;
+      height: 4px;
+      background: #fff;
+      border-radius: 50%;
+    }
+
+    .burbuja .text {
+      position: absolute;
+      bottom: 25%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #1a1a1a;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .burbuja .particles {
+      position: absolute;
+    }
+
+    .burbuja .particle {
+      position: absolute;
+      background: #ffb200;
+      border-radius: 50%;
+      animation: float-particle 3s ease-in-out infinite;
+    }
+
+    .burbuja .particle:nth-child(1) { width: 8px; height: 8px; top: -5px; right: 5px; animation-delay: 0s; }
+    .burbuja .particle:nth-child(2) { width: 5px; height: 5px; bottom: 20px; left: -5px; animation-delay: 1s; }
+    .burbuja .particle:nth-child(3) { width: 4px; height: 4px; top: 30px; right: -8px; animation-delay: 2s; }
+
+    @keyframes float-particle {
+      0%, 100% { transform: translateY(0); opacity: 0.6; }
+      50% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    .burbuja .label {
+      margin-top: 10px;
+      color: #ffb200;
+      font-size: 11px;
+    }
+
+    /* ========================================
+       OPCIÓN 4: MONEDAS APILADAS (ISOMÉTRICO)
+    ======================================== */
+    .moneda {
+      position: relative;
+      width: 130px;
+      height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .moneda .stack {
+      position: relative;
+      width: 100px;
+      height: 100px;
+    }
+
+    .moneda .coin {
+      position: absolute;
+      width: 100px;
+      height: 30px;
+      border-radius: 50%;
+      left: 0;
+    }
+
+    .moneda .coin-bottom {
+      bottom: 0;
+      background: linear-gradient(180deg, #8B6914 0%, #665010 100%);
+      box-shadow: 0 5px 0 #4a3a0a;
+    }
+
+    .moneda .coin-middle {
+      bottom: 20px;
+      background: linear-gradient(180deg, #cc9900 0%, #a67c00 100%);
+      box-shadow: 0 5px 0 #8B6914;
+    }
+
+    .moneda .coin-top {
+      bottom: 40px;
+      background: linear-gradient(180deg, #ffc233 0%, #ffb200 50%, #e6a000 100%);
+      box-shadow: 0 5px 0 #cc9900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: coin-shine 3s ease-in-out infinite;
+    }
+
+    @keyframes coin-shine {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.2); }
+    }
+
+    .moneda .coin-top::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 20%;
+      width: 60%;
+      height: 8px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+    }
+
+    .moneda .icon {
+      font-size: 18px;
+      position: relative;
+      top: -3px;
+    }
+
+    .moneda .shadow {
+      position: absolute;
+      bottom: -10px;
+      width: 90px;
+      height: 20px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 50%;
+      filter: blur(5px);
+    }
+
+    .moneda .label {
+      margin-top: 25px;
+      color: #ffb200;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .moneda .sublabel {
+      color: #666;
+      font-size: 10px;
+    }
+
+    /* ========================================
+       OPCIÓN 5: NODOS NEÓN RETROFUTURISTAS
+    ======================================== */
+    .neon {
+      position: relative;
+      width: 130px;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .neon .ring-container {
+      position: relative;
+      width: 110px;
+      height: 110px;
+    }
+
+    .neon .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid #ffb200;
+      box-shadow:
+        0 0 5px #ffb200,
+        0 0 10px #ffb200,
+        0 0 20px #ffb200,
+        0 0 40px rgba(255,178,0,0.5),
+        inset 0 0 10px rgba(255,178,0,0.3);
+      animation: neon-flicker 2s ease-in-out infinite;
+    }
+
+    .neon .ring-outer {
+      inset: 0;
+      opacity: 0.4;
+    }
+
+    .neon .ring-main {
+      inset: 5px;
+    }
+
+    .neon .ring-inner {
+      inset: 20px;
+      border-width: 1px;
+      opacity: 0.6;
+    }
+
+    @keyframes neon-flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+      52% { opacity: 1; }
+      54% { opacity: 0.9; }
+    }
+
+    .neon .scan-lines {
+      position: absolute;
+      inset: 25px;
+      overflow: hidden;
+      border-radius: 50%;
+    }
+
+    .neon .scan-line {
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background: #ffb200;
+      opacity: 0.2;
+    }
+
+    .neon .scan-line:nth-child(1) { top: 30%; }
+    .neon .scan-line:nth-child(2) { top: 50%; }
+    .neon .scan-line:nth-child(3) { top: 70%; }
+
+    .neon .text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ffb200;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow:
+        0 0 5px #ffb200,
+        0 0 10px #ffb200,
+        0 0 20px #ffb200;
+      animation: text-flicker 1.5s ease-in-out infinite;
+    }
+
+    @keyframes text-flicker {
+      0%, 100% { opacity: 1; }
+      33% { opacity: 0.9; }
+      66% { opacity: 1; }
+    }
+
+    .neon .label {
+      margin-top: 15px;
+      color: #ffb200;
+      font-size: 10px;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Connector lines for demo */
+    .connector {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffb200, transparent);
+      opacity: 0.3;
+    }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(255,178,0,0.1);
+      border: 1px solid rgba(255,178,0,0.3);
+      border-radius: 20px;
+      font-size: 11px;
+      color: #ffb200;
+      margin-left: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Opciones de Diseño para Nodos</h1>
+  <p class="subtitle">Howenh Labs - Workflow Animation</p>
+
+  <div class="options-grid">
+
+    <!-- OPCIÓN 1: ORBES CRISTALINOS -->
+    <div class="option">
+      <h2>Opción 1: Orbes Cristalinos <span class="tag">3D Premium</span></h2>
+      <p class="description">Esferas de cristal con reflejos y profundidad. Look sofisticado y enterprise.</p>
+
+      <div class="nodes-row">
+        <div class="orbe-cristalino">
+          <div class="shadow"></div>
+          <div class="sphere">
+            <span class="text">Entrada</span>
+          </div>
+          <span class="label">Recepción</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="orbe-cristalino">
+          <div class="shadow"></div>
+          <div class="sphere">
+            <span class="text">Documentos</span>
+          </div>
+          <span class="label">Gestión</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="orbe-cristalino">
+          <div class="shadow"></div>
+          <div class="sphere">
+            <span class="text">Controles</span>
+          </div>
+          <span class="label">Verificación</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="orbe-cristalino">
+          <div class="shadow"></div>
+          <div class="sphere">
+            <span class="text">Métricas</span>
+          </div>
+          <span class="label">Medición</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 2: HEXÁGONOS INDUSTRIALES -->
+    <div class="option">
+      <h2>Opción 2: Hexágonos Industriales <span class="tag">Geométrico Tech</span></h2>
+      <p class="description">Formas hexagonales con bordes biselados, estilo panel de control sci-fi.</p>
+
+      <div class="nodes-row">
+        <div class="hexagono">
+          <div class="hex-outer">
+            <div class="hex-border"></div>
+            <div class="hex-shape">
+              <div class="circuit-lines"></div>
+              <span class="icon">📥</span>
+              <span class="text">ENTRADA</span>
+            </div>
+          </div>
+          <span class="label">Recepción</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="hexagono">
+          <div class="hex-outer">
+            <div class="hex-border"></div>
+            <div class="hex-shape">
+              <div class="circuit-lines"></div>
+              <span class="icon">📄</span>
+              <span class="text">DOCS</span>
+            </div>
+          </div>
+          <span class="label">Gestión</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="hexagono">
+          <div class="hex-outer">
+            <div class="hex-border"></div>
+            <div class="hex-shape">
+              <div class="circuit-lines"></div>
+              <span class="icon">✓</span>
+              <span class="text">CONTROL</span>
+            </div>
+          </div>
+          <span class="label">Verificación</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="hexagono">
+          <div class="hex-outer">
+            <div class="hex-border"></div>
+            <div class="hex-shape">
+              <div class="circuit-lines"></div>
+              <span class="icon">📊</span>
+              <span class="text">METRICS</span>
+            </div>
+          </div>
+          <span class="label">Medición</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 3: BURBUJAS ORGÁNICAS -->
+    <div class="option">
+      <h2>Opción 3: Burbujas Orgánicas <span class="tag">Ilustración Amigable</span></h2>
+      <p class="description">Formas blandas con personalidad amigable. Humaniza la tecnología.</p>
+
+      <div class="nodes-row">
+        <div class="burbuja">
+          <div class="blob">
+            <div class="eyes">
+              <div class="eye"></div>
+              <div class="eye"></div>
+            </div>
+            <span class="text">Entrada</span>
+          </div>
+          <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+          </div>
+          <span class="label">Recepción</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="burbuja">
+          <div class="blob">
+            <div class="eyes">
+              <div class="eye"></div>
+              <div class="eye"></div>
+            </div>
+            <span class="text">Docs</span>
+          </div>
+          <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+          </div>
+          <span class="label">Gestión</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="burbuja">
+          <div class="blob">
+            <div class="eyes">
+              <div class="eye"></div>
+              <div class="eye"></div>
+            </div>
+            <span class="text">Control</span>
+          </div>
+          <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+          </div>
+          <span class="label">Verificación</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="burbuja">
+          <div class="blob">
+            <div class="eyes">
+              <div class="eye"></div>
+              <div class="eye"></div>
+            </div>
+            <span class="text">Métricas</span>
+          </div>
+          <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+          </div>
+          <span class="label">Medición</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 4: MONEDAS APILADAS -->
+    <div class="option">
+      <h2>Opción 4: Monedas Apiladas <span class="tag">3D Isométrico</span></h2>
+      <p class="description">Cilindros en perspectiva isométrica. Comunica valor tangible.</p>
+
+      <div class="nodes-row">
+        <div class="moneda">
+          <div class="stack">
+            <div class="shadow"></div>
+            <div class="coin coin-bottom"></div>
+            <div class="coin coin-middle"></div>
+            <div class="coin coin-top">
+              <span class="icon">📥</span>
+            </div>
+          </div>
+          <span class="label">Entrada</span>
+          <span class="sublabel">Recepción</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="moneda">
+          <div class="stack">
+            <div class="shadow"></div>
+            <div class="coin coin-bottom"></div>
+            <div class="coin coin-middle"></div>
+            <div class="coin coin-top">
+              <span class="icon">📄</span>
+            </div>
+          </div>
+          <span class="label">Documentos</span>
+          <span class="sublabel">Gestión</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="moneda">
+          <div class="stack">
+            <div class="shadow"></div>
+            <div class="coin coin-bottom"></div>
+            <div class="coin coin-middle"></div>
+            <div class="coin coin-top">
+              <span class="icon">✓</span>
+            </div>
+          </div>
+          <span class="label">Controles</span>
+          <span class="sublabel">Verificación</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="moneda">
+          <div class="stack">
+            <div class="shadow"></div>
+            <div class="coin coin-bottom"></div>
+            <div class="coin coin-middle"></div>
+            <div class="coin coin-top">
+              <span class="icon">📊</span>
+            </div>
+          </div>
+          <span class="label">Métricas</span>
+          <span class="sublabel">Medición</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 5: NODOS NEÓN -->
+    <div class="option">
+      <h2>Opción 5: Nodos Neón Retrofuturistas <span class="tag">Synthwave</span></h2>
+      <p class="description">Líneas de neón brillantes con efecto parpadeo. Muy memorable y único.</p>
+
+      <div class="nodes-row">
+        <div class="neon">
+          <div class="ring-container">
+            <div class="ring ring-outer"></div>
+            <div class="ring ring-main"></div>
+            <div class="ring ring-inner"></div>
+            <div class="scan-lines">
+              <div class="scan-line"></div>
+              <div class="scan-line"></div>
+              <div class="scan-line"></div>
+            </div>
+            <span class="text">Entrada</span>
+          </div>
+          <span class="label">Recepción</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="neon">
+          <div class="ring-container">
+            <div class="ring ring-outer"></div>
+            <div class="ring ring-main"></div>
+            <div class="ring ring-inner"></div>
+            <div class="scan-lines">
+              <div class="scan-line"></div>
+              <div class="scan-line"></div>
+              <div class="scan-line"></div>
+            </div>
+            <span class="text">Docs</span>
+          </div>
+          <span class="label">Gestión</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="neon">
+          <div class="ring-container">
+            <div class="ring ring-outer"></div>
+            <div class="ring ring-main"></div>
+            <div class="ring ring-inner"></div>
+            <div class="scan-lines">
+              <div class="scan-line"></div>
+              <div class="scan-line"></div>
+              <div class="scan-line"></div>
+            </div>
+            <span class="text">Control</span>
+          </div>
+          <span class="label">Verificación</span>
+        </div>
+
+        <div class="connector"></div>
+
+        <div class="neon">
+          <div class="ring-container">
+            <div class="ring ring-outer"></div>
+            <div class="ring ring-main"></div>
+            <div class="ring ring-inner"></div>
+            <div class="scan-lines">
+              <div class="scan-line"></div>
+              <div class="scan-line"></div>
+              <div class="scan-line"></div>
+            </div>
+            <span class="text">Metrics</span>
+          </div>
+          <span class="label">Medición</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
