@@ -366,6 +366,57 @@
     .carousel-dot:hover {
       background: #6B7280;
     }
+
+    /* Mobile Responsive Fixes */
+    @media (max-width: 768px) {
+      /* Workflow SVG smaller */
+      #workflow-animation {
+        height: 400px;
+      }
+
+      /* Kenos windows stack */
+      .kenos-window {
+        position: relative !important;
+        width: 100% !important;
+        max-width: 400px;
+        margin: 0 auto 20px !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+      }
+
+      #kenos-parallax {
+        height: auto !important;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      /* Chatbot single column */
+      #chatbot .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .chat-bubble {
+        max-width: 90%;
+      }
+    }
+
+    /* Accessibility: Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      .workflow-connection {
+        animation: none;
+      }
+
+      .typing-dot {
+        animation: none;
+      }
+
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 
