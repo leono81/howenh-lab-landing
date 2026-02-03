@@ -1188,6 +1188,98 @@
     // Initialize parallax
     const kenosParallax = new KenosParallax();
     kenosParallax.init();
+
+    // Chatbot Scenarios Data
+    const chatbotScenarios = [
+      {
+        name: "Agendar Cita",
+        traditional: [
+          { type: 'user', text: 'Necesito agendar una cita' },
+          { type: 'bot', text: 'Por favor complete el formulario en este enlace: [Formulario de Citas]' }
+        ],
+        ai: [
+          { type: 'user', text: 'Necesito agendar una cita' },
+          { type: 'bot', text: '¡Claro! Veo que prefieres las mañanas. ¿Te viene bien el miércoles a las 10am con la Dra. González?' },
+          { type: 'user', text: 'Perfecto' },
+          { type: 'bot', text: 'Excelente. Confirmo:', checkmarks: [
+            'Cita agendada para 05/02 10:00',
+            'Recordatorio enviado a tu email',
+            'Preparación pre-consulta lista'
+          ]}
+        ]
+      },
+      {
+        name: "Consulta Médica",
+        traditional: [
+          { type: 'user', text: 'Me duele la cabeza desde hace 3 días' },
+          { type: 'bot', text: 'Consulta nuestras FAQs sobre síntomas comunes:\n- Dolor de cabeza [link]\n- Migraña [link]\n- Fiebre [link]' }
+        ],
+        ai: [
+          { type: 'user', text: 'Me duele la cabeza desde hace 3 días' },
+          { type: 'bot', text: 'Entiendo tu preocupación. Veo en tu historial que tuviste migrañas en 2024. ¿Este dolor es similar? ¿Viene acompañado de sensibilidad a la luz?' },
+          { type: 'user', text: 'Sí, es similar' },
+          { type: 'bot', text: 'Basándome en tu historial y síntomas:', checkmarks: [
+            'Recomiendo consulta con neurología',
+            'He enviado tus síntomas al Dr. Ramírez',
+            'Mientras tanto, evita pantallas brillantes'
+          ]}
+        ]
+      },
+      {
+        name: "Acción Compleja",
+        traditional: [
+          { type: 'user', text: 'Necesito enviar mis últimos análisis al especialista y agendar seguimiento' },
+          { type: 'bot', text: 'Lo siento, no puedo ayudarte con eso. Por favor contacta a soporte en horario de oficina.' }
+        ],
+        ai: [
+          { type: 'user', text: 'Necesito enviar mis últimos análisis al especialista y agendar seguimiento' },
+          { type: 'bot', text: 'Perfecto, déjame ayudarte:', checkmarks: [
+            'Análisis de sangre (28/01) enviados al Dr. López',
+            'Seguimiento agendado para 12/02 a las 15:00',
+            'Recordatorio añadido a tu calendario',
+            'Preparación para la consulta lista'
+          ]},
+          { type: 'bot', text: '¿Necesitas algo más?' }
+        ]
+      }
+    ];
+
+    // Typing Animation
+    async function typeMessage(text, speed = 30) {
+      const chars = text.split('');
+      let result = '';
+      for (const char of chars) {
+        result += char;
+        await new Promise(resolve => setTimeout(resolve, speed));
+      }
+      return result;
+    }
+
+    // Render Chat Message
+    function createChatMessage(message, isAI = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `chat-message ${message.type}`;
+
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${message.type === 'user' ? 'user' : (isAI ? 'ai' : 'traditional')}`;
+
+      if (message.checkmarks) {
+        bubble.innerHTML = `<div>${message.text}</div>`;
+        const checksDiv = document.createElement('div');
+        checksDiv.className = 'chat-checkmark';
+        message.checkmarks.forEach(check => {
+          const checkItem = document.createElement('div');
+          checkItem.innerHTML = `✓ ${check}`;
+          checksDiv.appendChild(checkItem);
+        });
+        bubble.appendChild(checksDiv);
+      } else {
+        bubble.textContent = message.text;
+      }
+
+      messageDiv.appendChild(bubble);
+      return messageDiv;
+    }
   </script>
 </body>
 
