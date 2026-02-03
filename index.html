@@ -1280,6 +1280,144 @@
       messageDiv.appendChild(bubble);
       return messageDiv;
     }
+
+    // Chatbot Carousel Controller
+    class ChatbotCarousel {
+      constructor() {
+        this.currentScenario = 0;
+        this.isPlaying = false;
+        this.autoplayInterval = null;
+        this.traditionalContainer = document.getElementById('chat-traditional');
+        this.aiContainer = document.getElementById('chat-ai');
+        this.dots = document.querySelectorAll('.carousel-dot');
+        this.observer = null;
+      }
+
+      init() {
+        // Setup dot click handlers
+        this.dots.forEach((dot, index) => {
+          dot.addEventListener('click', () => {
+            this.goToScenario(index);
+          });
+        });
+
+        // Setup Intersection Observer
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+              this.startAutoplay();
+            } else {
+              this.stopAutoplay();
+            }
+          });
+        }, { threshold: 0.5 });
+
+        const chatbotSection = document.getElementById('chatbot');
+        if (chatbotSection) {
+          this.observer.observe(chatbotSection);
+        }
+
+        // Pause on hover
+        const section = document.getElementById('chatbot');
+        section.addEventListener('mouseenter', () => this.pauseAutoplay());
+        section.addEventListener('mouseleave', () => this.resumeAutoplay());
+      }
+
+      async goToScenario(index) {
+        if (this.isPlaying) return;
+
+        this.currentScenario = index;
+        this.updateDots();
+        await this.playScenario(chatbotScenarios[index]);
+      }
+
+      async playScenario(scenario) {
+        this.isPlaying = true;
+
+        // Clear chats
+        this.traditionalContainer.innerHTML = '';
+        this.aiContainer.innerHTML = '';
+
+        // Play traditional chat
+        const traditionalPromise = this.playMessages(scenario.traditional, this.traditionalContainer, false);
+
+        // Play AI chat simultaneously
+        const aiPromise = this.playMessages(scenario.ai, this.aiContainer, true);
+
+        await Promise.all([traditionalPromise, aiPromise]);
+
+        this.isPlaying = false;
+      }
+
+      async playMessages(messages, container, isAI) {
+        for (const message of messages) {
+          // Show typing indicator
+          if (message.type === 'bot') {
+            const typing = this.createTypingIndicator();
+            container.appendChild(typing);
+            await new Promise(resolve => setTimeout(resolve, 800));
+            typing.remove();
+          }
+
+          // Add message
+          const messageEl = createChatMessage(message, isAI);
+          container.appendChild(messageEl);
+
+          // Scroll to bottom
+          container.scrollTop = container.scrollHeight;
+
+          // Wait before next message
+          await new Promise(resolve => setTimeout(resolve, message.type === 'user' ? 1000 : 1500));
+        }
+      }
+
+      createTypingIndicator() {
+        const typing = document.createElement('div');
+        typing.className = 'typing-indicator';
+        typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+        return typing;
+      }
+
+      updateDots() {
+        this.dots.forEach((dot, index) => {
+          dot.classList.toggle('active', index === this.currentScenario);
+        });
+      }
+
+      startAutoplay() {
+        if (this.autoplayInterval) return;
+
+        // Play first scenario immediately
+        this.goToScenario(0);
+
+        // Then autoplay every 6 seconds
+        this.autoplayInterval = setInterval(() => {
+          if (!this.isPlaying) {
+            this.currentScenario = (this.currentScenario + 1) % chatbotScenarios.length;
+            this.goToScenario(this.currentScenario);
+          }
+        }, 6000);
+      }
+
+      stopAutoplay() {
+        if (this.autoplayInterval) {
+          clearInterval(this.autoplayInterval);
+          this.autoplayInterval = null;
+        }
+      }
+
+      pauseAutoplay() {
+        this.stopAutoplay();
+      }
+
+      resumeAutoplay() {
+        this.startAutoplay();
+      }
+    }
+
+    // Initialize chatbot carousel
+    const chatbotCarousel = new ChatbotCarousel();
+    chatbotCarousel.init();
   </script>
 </body>
 
