@@ -468,7 +468,201 @@
         <!-- Parallax Container -->
         <div id="kenos-parallax" class="relative h-[600px] md:h-[700px]"
              style="perspective: 1200px; perspective-origin: center;">
-          <!-- Windows will be added in next step -->
+          <!-- Window 1: Dashboard (depth 0.3) -->
+          <div class="kenos-window" data-depth="0.3" style="width: 500px; top: 50px; left: 50px;">
+            <!-- Chrome -->
+            <div class="window-chrome">
+              <div class="window-dot" style="background: #FF5F57;"></div>
+              <div class="window-dot" style="background: #FFBD2E;"></div>
+              <div class="window-dot" style="background: #28CA42;"></div>
+              <span class="text-gray-500 text-xs ml-4">kenos.app/dashboard</span>
+            </div>
+
+            <!-- Content -->
+            <div class="window-content">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                  <span class="text-primary font-bold text-sm">K</span>
+                </div>
+                <span class="text-white font-semibold">Dashboard Principal</span>
+              </div>
+
+              <!-- Stats Grid -->
+              <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="bg-void p-4 rounded-lg">
+                  <div class="text-gray-500 text-xs mb-1">Pacientes Activos</div>
+                  <div class="text-white text-2xl font-bold">247</div>
+                  <div class="text-green-500 text-xs">+12% vs ayer</div>
+                </div>
+                <div class="bg-void p-4 rounded-lg">
+                  <div class="text-gray-500 text-xs mb-1">Citas Hoy</div>
+                  <div class="text-white text-2xl font-bold">18</div>
+                  <div class="text-gray-500 text-xs">6 completadas</div>
+                </div>
+                <div class="bg-void p-4 rounded-lg">
+                  <div class="text-gray-500 text-xs mb-1">Alertas</div>
+                  <div class="text-white text-2xl font-bold">3</div>
+                  <div class="text-yellow-500 text-xs">Revisar</div>
+                </div>
+              </div>
+
+              <!-- Simple chart placeholder -->
+              <div class="bg-void p-4 rounded-lg">
+                <div class="text-gray-400 text-xs mb-2">Actividad Semanal</div>
+                <div class="flex items-end gap-2 h-20">
+                  <div class="bg-primary/30 w-full rounded-t" style="height: 40%;"></div>
+                  <div class="bg-primary/50 w-full rounded-t" style="height: 65%;"></div>
+                  <div class="bg-primary/40 w-full rounded-t" style="height: 50%;"></div>
+                  <div class="bg-primary/70 w-full rounded-t" style="height: 85%;"></div>
+                  <div class="bg-primary w-full rounded-t" style="height: 100%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Window 2: Pacientes (depth 0.5) -->
+          <div class="kenos-window" data-depth="0.5" style="width: 480px; top: 120px; left: 600px;">
+            <div class="window-chrome">
+              <div class="window-dot" style="background: #FF5F57;"></div>
+              <div class="window-dot" style="background: #FFBD2E;"></div>
+              <div class="window-dot" style="background: #28CA42;"></div>
+              <span class="text-gray-500 text-xs ml-4">kenos.app/pacientes</span>
+            </div>
+
+            <div class="window-content">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                  <span class="text-primary font-bold text-sm">K</span>
+                </div>
+                <span class="text-white font-semibold">Gestión de Pacientes</span>
+              </div>
+
+              <!-- Patient list -->
+              <div class="space-y-3">
+                <div class="bg-void p-3 rounded-lg flex items-center justify-between">
+                  <div>
+                    <div class="text-white text-sm font-medium">María González</div>
+                    <div class="text-gray-500 text-xs">ID: #4521 • Última visita: Hoy</div>
+                  </div>
+                  <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                </div>
+                <div class="bg-void p-3 rounded-lg flex items-center justify-between">
+                  <div>
+                    <div class="text-white text-sm font-medium">Carlos Ramírez</div>
+                    <div class="text-gray-500 text-xs">ID: #4518 • Última visita: 28/01</div>
+                  </div>
+                  <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                </div>
+                <div class="bg-void p-3 rounded-lg flex items-center justify-between">
+                  <div>
+                    <div class="text-white text-sm font-medium">Ana Martínez</div>
+                    <div class="text-gray-500 text-xs">ID: #4502 • Última visita: 25/01</div>
+                  </div>
+                  <div class="w-2 h-2 rounded-full bg-gray-500"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Window 3: Vitales (depth 0.7) -->
+          <div class="kenos-window" data-depth="0.7" style="width: 460px; top: 250px; left: 100px;">
+            <div class="window-chrome">
+              <div class="window-dot" style="background: #FF5F57;"></div>
+              <div class="window-dot" style="background: #FFBD2E;"></div>
+              <div class="window-dot" style="background: #28CA42;"></div>
+              <span class="text-gray-500 text-xs ml-4">kenos.app/vitales</span>
+            </div>
+
+            <div class="window-content">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                  <span class="text-primary font-bold text-sm">K</span>
+                </div>
+                <span class="text-white font-semibold">Monitor de Vitales</span>
+              </div>
+
+              <div class="space-y-4">
+                <div class="bg-void p-4 rounded-lg">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-gray-400 text-sm">Frecuencia Cardíaca</span>
+                    <span class="text-primary text-lg font-bold">72 bpm</span>
+                  </div>
+                  <div class="h-12 flex items-end gap-1">
+                    <div class="bg-primary/20 w-1 rounded-t" style="height: 40%;"></div>
+                    <div class="bg-primary/30 w-1 rounded-t" style="height: 60%;"></div>
+                    <div class="bg-primary/40 w-1 rounded-t" style="height: 45%;"></div>
+                    <div class="bg-primary/50 w-1 rounded-t" style="height: 70%;"></div>
+                    <div class="bg-primary/60 w-1 rounded-t" style="height: 55%;"></div>
+                    <div class="bg-primary/70 w-1 rounded-t" style="height: 65%;"></div>
+                    <div class="bg-primary w-1 rounded-t" style="height: 50%;"></div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="bg-void p-3 rounded-lg">
+                    <div class="text-gray-400 text-xs">Presión</div>
+                    <div class="text-white font-semibold">120/80</div>
+                  </div>
+                  <div class="bg-void p-3 rounded-lg">
+                    <div class="text-gray-400 text-xs">SpO2</div>
+                    <div class="text-white font-semibold">98%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Window 4: IA Analytics (depth 0.9) -->
+          <div class="kenos-window" data-depth="0.9" style="width: 500px; top: 300px; left: 620px;">
+            <div class="window-chrome">
+              <div class="window-dot" style="background: #FF5F57;"></div>
+              <div class="window-dot" style="background: #FFBD2E;"></div>
+              <div class="window-dot" style="background: #28CA42;"></div>
+              <span class="text-gray-500 text-xs ml-4">kenos.app/ia-analytics</span>
+            </div>
+
+            <div class="window-content">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                  <span class="text-primary font-bold text-sm">K</span>
+                </div>
+                <span class="text-white font-semibold">Predicciones IA</span>
+              </div>
+
+              <div class="space-y-4">
+                <div class="bg-void p-4 rounded-lg border-l-2 border-primary">
+                  <div class="flex items-start gap-3">
+                    <div class="text-2xl">⚠️</div>
+                    <div>
+                      <div class="text-white text-sm font-medium mb-1">Alerta Temprana</div>
+                      <div class="text-gray-400 text-xs mb-2">
+                        Patrón detectado en paciente #4521 sugiere atención preventiva
+                      </div>
+                      <div class="text-primary text-xs">Confianza: 87%</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-void p-4 rounded-lg">
+                  <div class="text-gray-400 text-xs mb-2">Insights Automáticos</div>
+                  <div class="space-y-2 text-xs">
+                    <div class="flex items-center gap-2 text-gray-300">
+                      <div class="w-1 h-1 bg-primary rounded-full"></div>
+                      <span>15% aumento en citas preventivas vs mes anterior</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-300">
+                      <div class="w-1 h-1 bg-primary rounded-full"></div>
+                      <span>Tiempo de consulta promedio: -12 min (mejorado)</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-300">
+                      <div class="w-1 h-1 bg-primary rounded-full"></div>
+                      <span>3 pacientes requieren seguimiento esta semana</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
