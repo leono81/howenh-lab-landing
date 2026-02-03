@@ -208,6 +208,61 @@
       fill: #ffb200;
       filter: drop-shadow(0 0 4px rgba(255, 178, 0, 0.8));
     }
+
+    /* Kenos Parallax Windows */
+    .kenos-window {
+      position: absolute;
+      background: #18181B;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease, z-index 0s;
+      transform-style: preserve-3d;
+    }
+
+    .kenos-window:hover {
+      transform: scale(1.02) !important;
+      z-index: 100 !important;
+      box-shadow: 0 30px 80px rgba(255, 178, 0, 0.3);
+    }
+
+    .window-chrome {
+      background: #0A0A0B;
+      border-radius: 12px 12px 0 0;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #2A2A2E;
+    }
+
+    .window-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .window-content {
+      padding: 20px;
+      background: #18181B;
+      border-radius: 0 0 12px 12px;
+      min-height: 300px;
+    }
+
+    .kenos-window[data-depth="0.3"] {
+      z-index: 10;
+    }
+
+    .kenos-window[data-depth="0.5"] {
+      z-index: 20;
+    }
+
+    .kenos-window[data-depth="0.7"] {
+      z-index: 30;
+    }
+
+    .kenos-window[data-depth="0.9"] {
+      z-index: 40;
+    }
   </style>
 </head>
 
@@ -397,73 +452,23 @@
       </div>
     </section>
 
-    <!-- Kenos Bento Grid -->
-    <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="kenos">
-      <div class="flex flex-col gap-4 mb-12">
-        <h2 class="text-white text-3xl md:text-5xl font-bold tracking-tight">Kenos Medical SaaS</h2>
-        <p class="text-gray-400 max-w-2xl text-lg">Secure, architectural, and glassmorphic medical software suite built
-          for the future of healthcare.</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[minmax(180px,auto)]">
-        <!-- Main Feature - Spans 2 cols, 2 rows -->
-        <div
-          class="md:col-span-2 md:row-span-2 glass-panel rounded-2xl p-8 flex flex-col justify-between group relative overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 z-0"></div>
-          <div class="relative z-10">
-            <div class="size-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary mb-6">
-              <span class="material-symbols-outlined text-3xl">medical_services</span>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-2">Kenos Core OS</h3>
-            <p class="text-gray-400">The central operating system for medical data. Integrating patient records with
-              real-time diagnostics.</p>
-          </div>
-          <div class="relative z-10 mt-8">
-            <button class="text-sm font-bold text-primary flex items-center gap-2 group-hover:gap-3 transition-all">
-              Request Demo <span class="material-symbols-outlined text-base">arrow_forward</span>
-            </button>
-          </div>
+    <!-- Kenos Section with Parallax -->
+    <section id="kenos" class="py-24 px-6 md:px-12 bg-void relative overflow-hidden">
+      <div class="max-w-7xl mx-auto">
+        <!-- Title -->
+        <div class="text-center mb-16">
+          <h2 class="text-white text-4xl md:text-5xl font-bold tracking-tight mb-4">
+            Kenos Medical SaaS
+          </h2>
+          <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+            Plataforma integral para el futuro de la salud digital
+          </p>
         </div>
-        <!-- Feature 2 -->
-        <div
-          class="md:col-span-1 glass-panel rounded-2xl p-6 flex flex-col gap-4 group hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-white text-3xl">lock_person</span>
-          <div>
-            <h3 class="text-lg font-bold text-white">HIPAA Secure</h3>
-            <p class="text-sm text-gray-500 mt-1">End-to-end encryption for all sensitive patient data at rest and in
-              transit.</p>
-          </div>
-        </div>
-        <!-- Feature 3 -->
-        <div
-          class="md:col-span-1 glass-panel rounded-2xl p-6 flex flex-col gap-4 group hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-white text-3xl">ecg_heart</span>
-          <div>
-            <h3 class="text-lg font-bold text-white">Live Vitals</h3>
-            <p class="text-sm text-gray-500 mt-1">Real-time telemetry integration with standard medical hardware.</p>
-          </div>
-        </div>
-        <!-- Feature 4 - Wide -->
-        <div
-          class="md:col-span-2 glass-panel rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center group relative overflow-hidden">
-          <div class="flex-1 z-10">
-            <h3 class="text-xl font-bold text-white mb-2">Predictive Analytics</h3>
-            <p class="text-gray-400 text-sm">AI-driven insights that forecast patient outcomes based on historical data
-              patterns.</p>
-          </div>
-          <div
-            class="w-full md:w-1/2 h-24 rounded-lg bg-black/40 border border-white/5 flex items-center justify-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-primary/5"></div>
-            <!-- Fake Chart -->
-            <div class="flex items-end gap-1 h-12 px-4">
-              <div class="w-2 bg-primary/40 h-[40%] rounded-t-sm"></div>
-              <div class="w-2 bg-primary/60 h-[70%] rounded-t-sm"></div>
-              <div class="w-2 bg-primary/30 h-[30%] rounded-t-sm"></div>
-              <div class="w-2 bg-primary/80 h-[90%] rounded-t-sm"></div>
-              <div class="w-2 bg-primary/50 h-[50%] rounded-t-sm"></div>
-              <div class="w-2 bg-primary/40 h-[60%] rounded-t-sm"></div>
-              <div class="w-2 bg-primary h-[85%] rounded-t-sm shadow-[0_0_10px_#ffb200]"></div>
-            </div>
-          </div>
+
+        <!-- Parallax Container -->
+        <div id="kenos-parallax" class="relative h-[600px] md:h-[700px]"
+             style="perspective: 1200px; perspective-origin: center;">
+          <!-- Windows will be added in next step -->
         </div>
       </div>
     </section>
