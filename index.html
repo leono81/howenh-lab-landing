@@ -15,6 +15,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- GSAP for professional animations -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"></script>
   <script>
     tailwind.config = {
       darkMode: "class",
@@ -173,40 +176,41 @@
       scroll-behavior: smooth;
     }
 
-    /* Workflow animation states */
-    .workflow-node {
-      transition: all 0.4s ease;
+    /* Workflow animation - styles managed by GSAP */
+    #workflow-svg {
+      overflow: visible;
     }
 
-    .workflow-node.completed {
-      fill: #9CA3AF;
+    /* Smooth transitions for fill changes */
+    .process-node circle,
+    .process-node text {
+      transition: fill 0.3s ease;
     }
 
-    .workflow-node.powered {
-      fill: #ffb200;
-      filter: drop-shadow(0 0 8px rgba(255, 178, 0, 0.6));
+    /* Ensure SVG text is crisp */
+    #workflow-svg text {
+      user-select: none;
     }
 
-    .workflow-connection {
-      stroke-dasharray: 5, 5;
-      animation: dash 20s linear infinite;
+    /* Title outline → filled effect */
+    .title-outline {
+      color: transparent;
+      -webkit-text-stroke: 2px #ffb200;
+      background: linear-gradient(to right, #ffb200 50%, transparent 50%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      background-size: 200% 100%;
+      background-position: 100% 0;
+      transition: background-position 1s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    @keyframes dash {
-      to {
-        stroke-dashoffset: -1000;
-      }
+    .title-outline.filled {
+      background-position: 0% 0;
     }
 
-    .workflow-particle {
-      r: 3;
-      fill: #9CA3AF;
-      opacity: 0.8;
-    }
-
-    .workflow-particle.fast {
-      fill: #ffb200;
-      filter: drop-shadow(0 0 4px rgba(255, 178, 0, 0.8));
+    /* Data particles glow */
+    .data-particle {
+      filter: drop-shadow(0 0 3px rgba(255, 178, 0, 0.8));
     }
 
     /* Kenos Parallax Windows */
@@ -369,9 +373,26 @@
 
     /* Mobile Responsive Fixes */
     @media (max-width: 768px) {
-      /* Workflow SVG smaller */
+      /* Workflow SVG smaller and adjust viewBox */
       #workflow-animation {
-        height: 400px;
+        height: 500px;
+      }
+
+      #workflow-svg {
+        viewBox: 0 0 1200 800;
+      }
+
+      /* Scale down nodes for mobile */
+      .process-node circle {
+        r: 40;
+      }
+
+      .capability-node circle {
+        r: 35;
+      }
+
+      #ai-node .ai-core {
+        r: 45;
       }
 
       /* Kenos windows stack */
@@ -531,75 +552,187 @@
     <!-- Workflow Section -->
     <section id="workflow" class="relative z-10 py-24 px-6 md:px-12 bg-void">
       <div class="max-w-7xl mx-auto">
-        <!-- Title -->
+        <!-- Title with outline → filled effect -->
         <div class="text-center mb-16">
           <h2 class="text-white text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Automatización <span class="text-primary">Inteligente</span>
+            <span class="title-outline">Automatización</span> <span class="text-primary">Inteligente</span>
           </h2>
           <p class="text-gray-400 text-lg max-w-2xl mx-auto">
-            Observa cómo la IA transforma flujos complejos en procesos optimizados
+            Observa cómo la IA transforma e ilumina flujos complejos en procesos optimizados
           </p>
         </div>
 
         <!-- Workflow Animation Container -->
-        <div id="workflow-animation" class="relative w-full h-[500px] flex items-center justify-center">
-          <svg id="workflow-svg" class="w-full h-full" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg">
-            <!-- Normal Flow Nodes (5) -->
-            <g id="normal-flow">
-              <!-- Input -->
-              <circle class="workflow-node" id="node-input" cx="100" cy="250" r="25" fill="#6B7280" />
-              <text x="100" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Input</text>
+        <div id="workflow-animation" class="relative w-full h-[600px] flex items-center justify-center">
+          <svg id="workflow-svg" class="w-full h-full" viewBox="0 0 1000 550" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <!-- Definitions for gradients and filters -->
+            <defs>
+              <!-- Background dot grid pattern -->
+              <pattern id="dot-grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                <circle cx="25" cy="25" r="1.5" fill="#ffb200"/>
+              </pattern>
 
-              <!-- Procesamiento -->
-              <circle class="workflow-node" id="node-process" cx="300" cy="250" r="25" fill="#6B7280" />
-              <text x="300" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Proceso</text>
+              <!-- Atmospheric glow gradient -->
+              <radialGradient id="atmospheric-glow" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="#ffb200" stop-opacity="0.2"/>
+                <stop offset="40%" stop-color="#ffb200" stop-opacity="0.08"/>
+                <stop offset="100%" stop-color="#ffb200" stop-opacity="0"/>
+              </radialGradient>
 
-              <!-- Validación -->
-              <circle class="workflow-node" id="node-validate" cx="500" cy="250" r="25" fill="#6B7280" />
-              <text x="500" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Validación</text>
+              <!-- Glow filter for AI node -->
+              <filter id="ai-glow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+                <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0.7 0 0 0  0 0 0 0 0  0 0 0 1 0" result="glow" />
+                <feMerge>
+                  <feMergeNode in="glow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
 
-              <!-- Staging -->
-              <circle class="workflow-node" id="node-staging" cx="700" cy="250" r="25" fill="#6B7280" />
-              <text x="700" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Staging</text>
+              <!-- Subtle glow for illuminated nodes -->
+              <filter id="node-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+                <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0.7 0 0 0  0 0 0 0 0  0 0 0 0.6 0" result="glow" />
+                <feMerge>
+                  <feMergeNode in="glow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
 
-              <!-- Output -->
-              <circle class="workflow-node" id="node-output" cx="900" cy="250" r="25" fill="#6B7280" />
-              <text x="900" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Output</text>
+              <!-- Gradient for AI node -->
+              <radialGradient id="ai-gradient" cx="30%" cy="30%">
+                <stop offset="0%" stop-color="#ffc933" />
+                <stop offset="100%" stop-color="#ffb200" />
+              </radialGradient>
+
+              <!-- Gradient for illuminated nodes -->
+              <radialGradient id="illuminated-gradient" cx="30%" cy="30%">
+                <stop offset="0%" stop-color="#ffc933" />
+                <stop offset="100%" stop-color="#e6a000" />
+              </radialGradient>
+            </defs>
+
+            <!-- LAYER 1: Background grid (subtle golden constellation) -->
+            <g id="background-grid" opacity="0.06">
+              <rect width="100%" height="100%" fill="url(#dot-grid)"/>
             </g>
 
-            <!-- Connections between normal nodes -->
-            <g id="normal-connections" stroke="#6B7280" stroke-width="2" fill="none">
-              <line class="workflow-connection" x1="125" y1="250" x2="275" y2="250" />
-              <line class="workflow-connection" x1="325" y1="250" x2="475" y2="250" />
-              <line class="workflow-connection" x1="525" y1="250" x2="675" y2="250" />
-              <line class="workflow-connection" x1="725" y1="250" x2="875" y2="250" />
+            <!-- LAYER 1b: Atmospheric glow (appears with AI node) -->
+            <ellipse id="ai-atmosphere" cx="450" cy="300" rx="220" ry="180" fill="url(#atmospheric-glow)" opacity="0"/>
+
+            <!-- PROCESS NODES - Equidistant at positions: 150, 350, 550, 750 (200px spacing) -->
+            <g id="process-nodes">
+              <!-- Entrada - Position 150 -->
+              <g id="node-entrada" class="process-node">
+                <circle id="circle-entrada" cx="150" cy="120" r="55" fill="#3F3F46" stroke="#52525B" stroke-width="2" />
+                <text id="text-entrada" x="150" y="125" text-anchor="middle" fill="#A1A1AA" font-size="15" font-weight="600" font-family="Space Grotesk, sans-serif">Entrada</text>
+                <text id="label-entrada" x="150" y="190" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Recepción</text>
+              </g>
+
+              <!-- Documentos - Position 350 -->
+              <g id="node-documentos" class="process-node">
+                <circle id="circle-documentos" cx="350" cy="120" r="55" fill="#3F3F46" stroke="#52525B" stroke-width="2" />
+                <text id="text-documentos" x="350" y="118" text-anchor="middle" fill="#A1A1AA" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Documentos</text>
+                <text id="label-documentos" x="350" y="190" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Gestión</text>
+              </g>
+
+              <!-- Controles - Position 550 -->
+              <g id="node-controles" class="process-node">
+                <circle id="circle-controles" cx="550" cy="120" r="55" fill="#3F3F46" stroke="#52525B" stroke-width="2" />
+                <text id="text-controles" x="550" y="125" text-anchor="middle" fill="#A1A1AA" font-size="15" font-weight="600" font-family="Space Grotesk, sans-serif">Controles</text>
+                <text id="label-controles" x="550" y="190" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Verificación</text>
+              </g>
+
+              <!-- Métricas - Position 750 -->
+              <g id="node-metricas" class="process-node">
+                <circle id="circle-metricas" cx="750" cy="120" r="55" fill="#3F3F46" stroke="#52525B" stroke-width="2" />
+                <text id="text-metricas" x="750" y="125" text-anchor="middle" fill="#A1A1AA" font-size="15" font-weight="600" font-family="Space Grotesk, sans-serif">Métricas</text>
+                <text id="label-metricas" x="750" y="190" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Medición</text>
+              </g>
             </g>
 
-            <!-- AI Node (appears at 3s) -->
+            <!-- Connections between process nodes -->
+            <g id="process-connections" stroke="#52525B" stroke-width="2" fill="none">
+              <line id="conn-1-2" x1="205" y1="120" x2="295" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+              <line id="conn-2-3" x1="405" y1="120" x2="495" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+              <line id="conn-3-4" x1="605" y1="120" x2="695" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+            </g>
+
+            <!-- AI Node - Centered at x=450 (midpoint between 350 and 550) -->
             <g id="ai-node" opacity="0">
-              <circle id="node-ai" cx="600" cy="120" r="40" fill="#ffb200"
-                filter="drop-shadow(0 0 12px rgba(255, 178, 0, 0.8))" />
-              <text x="600" y="130" text-anchor="middle" fill="#0A0A0B" font-size="16" font-weight="bold">IA</text>
-              <text x="600" y="80" text-anchor="middle" fill="#ffb200" font-size="12">AI Core</text>
+              <!-- Outer pulsing rings -->
+              <circle id="ai-ring-3" cx="450" cy="300" r="85" fill="none" stroke="#ffb200" stroke-width="1" opacity="0" />
+              <circle id="ai-ring-2" cx="450" cy="300" r="75" fill="none" stroke="#ffb200" stroke-width="1" opacity="0" />
+              <circle id="ai-ring-1" cx="450" cy="300" r="65" fill="none" stroke="#ffb200" stroke-width="2" opacity="0" />
+
+              <!-- Main AI circle with glow -->
+              <circle id="ai-core" cx="450" cy="300" r="55" fill="url(#ai-gradient)" filter="url(#ai-glow)" />
+
+              <!-- AI Text -->
+              <text x="450" y="310" text-anchor="middle" fill="#1a1a1a" font-size="28" font-weight="bold" font-family="Space Grotesk, sans-serif">IA</text>
+              <text id="ai-label" x="450" y="240" text-anchor="middle" fill="#ffb200" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif" letter-spacing="2" opacity="0">CORE ENGINE</text>
             </g>
 
-            <!-- Powered Nodes (appear at 6s) -->
-            <g id="powered-nodes" opacity="0">
-              <!-- Analytics -->
-              <circle class="workflow-node" id="node-analytics" cx="450" cy="400" r="20" fill="#ffb200" />
-              <text x="450" y="435" text-anchor="middle" fill="#ffb200" font-size="11">Analytics</text>
+            <!-- AI Connections to process nodes (curved paths) -->
+            <g id="ai-connections" opacity="0">
+              <path id="ai-conn-entrada" d="M 410 260 Q 280 180, 180 150" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path id="ai-conn-documentos" d="M 420 250 Q 380 180, 350 160" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path id="ai-conn-controles" d="M 480 250 Q 520 180, 550 160" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path id="ai-conn-metricas" d="M 490 260 Q 620 180, 720 150" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            </g>
 
-              <!-- Predicción -->
-              <circle class="workflow-node" id="node-prediction" cx="600" cy="400" r="20" fill="#ffb200" />
-              <text x="600" y="435" text-anchor="middle" fill="#ffb200" font-size="11">Predicción</text>
+            <!-- New AI-powered capabilities -->
+            <g id="ai-capabilities" opacity="0">
+              <!-- Analítica -->
+              <g id="node-analitica">
+                <circle cx="280" cy="460" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
+                <text x="280" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Analítica</text>
+                <text x="280" y="520" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Insights IA</text>
+              </g>
 
               <!-- Optimización -->
-              <circle class="workflow-node" id="node-optimize" cx="750" cy="400" r="20" fill="#ffb200" />
-              <text x="750" y="435" text-anchor="middle" fill="#ffb200" font-size="11">Optimización</text>
+              <g id="node-optimizacion">
+                <circle cx="450" cy="480" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
+                <text x="450" y="478" text-anchor="middle" fill="#1a1a1a" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Optimización</text>
+                <text x="450" y="540" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Auto-mejora</text>
+              </g>
 
-              <!-- Insights -->
-              <circle class="workflow-node" id="node-insights" cx="900" cy="400" r="20" fill="#ffb200" />
-              <text x="900" y="435" text-anchor="middle" fill="#ffb200" font-size="11">Insights</text>
+              <!-- Predicción -->
+              <g id="node-prediccion">
+                <circle cx="620" cy="460" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
+                <text x="620" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Predicción</text>
+                <text x="620" y="520" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Forecasting</text>
+              </g>
+            </g>
+
+            <!-- Connections from AI to capabilities -->
+            <g id="capability-connections" opacity="0">
+              <path id="cap-conn-analitica" d="M 410 340 Q 340 400, 300 430" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path id="cap-conn-optimizacion" d="M 450 355 L 450 435" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path id="cap-conn-prediccion" d="M 490 340 Q 560 400, 600 430" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
+            </g>
+
+            <!-- LAYER 2: Data particles flowing through connections -->
+            <g id="data-particles">
+              <!-- Particles for ai-conn-entrada -->
+              <circle class="data-particle particle-entrada" r="4" fill="#ffb200" opacity="0"/>
+              <circle class="data-particle particle-entrada" r="3" fill="#ffc933" opacity="0"/>
+              <circle class="data-particle particle-entrada" r="2.5" fill="#ffe066" opacity="0"/>
+
+              <!-- Particles for ai-conn-documentos -->
+              <circle class="data-particle particle-documentos" r="4" fill="#ffb200" opacity="0"/>
+              <circle class="data-particle particle-documentos" r="3" fill="#ffc933" opacity="0"/>
+              <circle class="data-particle particle-documentos" r="2.5" fill="#ffe066" opacity="0"/>
+
+              <!-- Particles for ai-conn-controles -->
+              <circle class="data-particle particle-controles" r="4" fill="#ffb200" opacity="0"/>
+              <circle class="data-particle particle-controles" r="3" fill="#ffc933" opacity="0"/>
+              <circle class="data-particle particle-controles" r="2.5" fill="#ffe066" opacity="0"/>
+
+              <!-- Particles for ai-conn-metricas -->
+              <circle class="data-particle particle-metricas" r="4" fill="#ffb200" opacity="0"/>
+              <circle class="data-particle particle-metricas" r="3" fill="#ffc933" opacity="0"/>
+              <circle class="data-particle particle-metricas" r="2.5" fill="#ffe066" opacity="0"/>
             </g>
           </svg>
         </div>
@@ -1058,25 +1191,39 @@
         `;
     document.head.appendChild(style);
 
-    // Workflow Animation Controller
+    // Title outline → filled effect (scroll-triggered)
+    const titleOutline = document.querySelector('.title-outline');
+    if (titleOutline) {
+      const titleObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
+            entry.target.classList.add('filled');
+          }
+        });
+      }, { threshold: 0.3 });
+      titleObserver.observe(titleOutline);
+    }
+
+    // Workflow Animation Controller with GSAP - Professional & Slow
     class WorkflowAnimation {
       constructor() {
-        this.phase = 0;
+        this.timeline = null;
         this.isRunning = false;
         this.observer = null;
+        this.pulseAnimations = [];
       }
 
       init() {
         // Setup Intersection Observer
         this.observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
-            if (entry.isIntersecting && entry.intersectionRatio >= 0.8) {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.4) {
               this.start();
             } else {
               this.stop();
             }
           });
-        }, { threshold: 0.8 });
+        }, { threshold: 0.4 });
 
         const workflowSection = document.getElementById('workflow-animation');
         if (workflowSection) {
@@ -1087,88 +1234,336 @@
       start() {
         if (this.isRunning) return;
         this.isRunning = true;
-        this.runLoop();
+        this.createTimeline();
       }
 
       stop() {
+        if (this.timeline) {
+          this.timeline.kill();
+        }
+        // Kill pulse animations
+        this.pulseAnimations.forEach(anim => anim.kill());
+        this.pulseAnimations = [];
+        // Kill particle animations
+        if (this.particleAnimations) {
+          this.particleAnimations.forEach(anim => anim.kill());
+          this.particleAnimations = [];
+        }
         this.isRunning = false;
-        this.phase = 0;
         this.reset();
       }
 
       reset() {
-        // Reset all nodes to initial state
-        document.querySelectorAll('.workflow-node').forEach(node => {
-          node.classList.remove('completed', 'powered');
+        // Reset all elements to initial state
+        gsap.set('#ai-atmosphere', { opacity: 0 });
+        gsap.set('#ai-node', { opacity: 0 });
+        gsap.set('#ai-core', { scale: 0, transformOrigin: 'center' });
+        gsap.set('#ai-label', { opacity: 0 });
+        gsap.set(['#ai-ring-1', '#ai-ring-2', '#ai-ring-3'], { opacity: 0, scale: 1 });
+        gsap.set('#ai-connections', { opacity: 0 });
+        gsap.set('#ai-capabilities', { opacity: 0 });
+        gsap.set('#capability-connections', { opacity: 0 });
+        gsap.set('#data-particles circle', { opacity: 0 });
+
+        // Reset process nodes to gray
+        const nodes = ['entrada', 'documentos', 'controles', 'metricas'];
+        nodes.forEach(name => {
+          gsap.set(`#circle-${name}`, { fill: '#3F3F46', stroke: '#52525B', filter: 'none' });
+          gsap.set(`#text-${name}`, { fill: '#A1A1AA' });
+          gsap.set(`#label-${name}`, { fill: '#71717A' });
         });
-        document.getElementById('ai-node').style.opacity = '0';
-        document.getElementById('powered-nodes').style.opacity = '0';
+
+        // Reset connections
+        gsap.set('#process-connections line', { stroke: '#52525B' });
       }
 
-      async runLoop() {
-        while (this.isRunning) {
-          await this.animatePhase1(); // 0-3s: Complete normal nodes
-          if (!this.isRunning) break;
+      illuminateNode(name, delay = 0) {
+        const tl = gsap.timeline({ delay });
 
-          await this.animatePhase2(); // 3-4s: AI appears
-          if (!this.isRunning) break;
+        tl.to(`#circle-${name}`, {
+          fill: 'url(#illuminated-gradient)',
+          stroke: '#ffb200',
+          duration: 0.8,
+          ease: 'power2.inOut'
+        })
+        .to(`#text-${name}`, {
+          fill: '#1a1a1a',
+          duration: 0.6,
+          ease: 'power2.inOut'
+        }, '-=0.6')
+        .to(`#label-${name}`, {
+          fill: '#ffb200',
+          duration: 0.6,
+          ease: 'power2.inOut'
+        }, '-=0.6');
 
-          await this.animatePhase3(); // 4-5s: Connect to AI
-          if (!this.isRunning) break;
-
-          await this.animatePhase4(); // 5-6s: Transform to gold
-          if (!this.isRunning) break;
-
-          await this.animatePhase5(); // 6-8s: Show powered nodes
-          if (!this.isRunning) break;
-
-          await this.wait(2000); // Pause before restart
-          this.reset();
-        }
+        return tl;
       }
 
-      async animatePhase1() {
-        // Complete nodes sequentially (600ms each)
-        const nodes = ['node-input', 'node-process', 'node-validate', 'node-staging', 'node-output'];
-        for (const nodeId of nodes) {
-          document.getElementById(nodeId).classList.add('completed');
-          await this.wait(600);
-        }
-      }
+      createTimeline() {
+        this.reset();
 
-      async animatePhase2() {
-        // AI node appears
-        const aiNode = document.getElementById('ai-node');
-        aiNode.style.transition = 'opacity 1s ease, transform 1s ease';
-        aiNode.style.opacity = '1';
-        aiNode.style.transform = 'scale(1)';
-        await this.wait(1000);
-      }
-
-      async animatePhase3() {
-        // Connections appear (visual only, no actual lines for simplicity)
-        await this.wait(1000);
-      }
-
-      async animatePhase4() {
-        // Transform all nodes to gold
-        document.querySelectorAll('#normal-flow .workflow-node').forEach(node => {
-          node.classList.remove('completed');
-          node.classList.add('powered');
+        // Create master timeline with SLOWER timing
+        this.timeline = gsap.timeline({
+          repeat: -1,
+          repeatDelay: 4, // Longer pause before restart
+          onRepeat: () => {
+            if (!this.isRunning) {
+              this.timeline.kill();
+            }
+            this.reset();
+          }
         });
-        await this.wait(1000);
+
+        // ============================================
+        // PHASE 1: Process nodes already visible (gray)
+        // Just a brief pause to let user see the gray state
+        // ============================================
+        this.timeline.addLabel('start', 0);
+        this.timeline.to({}, { duration: 1.5 }); // Pause to show gray nodes
+
+        // ============================================
+        // PHASE 2: AI Node appears with "solar birth" effect
+        // Duration: ~3 seconds
+        // ============================================
+        this.timeline.addLabel('ai-appears', '+=0');
+
+        // First show the atmospheric glow (builds anticipation)
+        this.timeline.to('#ai-atmosphere', {
+          opacity: 1,
+          duration: 1.2,
+          ease: 'power2.out'
+        });
+
+        // Then show the AI node container
+        this.timeline.to('#ai-node', {
+          opacity: 1,
+          duration: 0.1
+        }, '-=0.8');
+
+        // Animate the core with elastic effect
+        this.timeline.to('#ai-core', {
+          scale: 1,
+          duration: 1.8,
+          ease: 'elastic.out(1, 0.4)',
+          transformOrigin: 'center'
+        }, '-=0.1');
+
+        // Show the label
+        this.timeline.to('#ai-label', {
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power2.out'
+        }, '-=1');
+
+        // Start pulsing rings
+        this.timeline.call(() => {
+          this.startPulsingRings();
+        }, null, '-=0.5');
+
+        // Pause to admire the AI
+        this.timeline.to({}, { duration: 1 });
+
+        // ============================================
+        // PHASE 3: Connections draw from AI to processes
+        // Duration: ~2.5 seconds
+        // ============================================
+        this.timeline.addLabel('connections', '+=0');
+
+        // Show connections container
+        this.timeline.to('#ai-connections', {
+          opacity: 1,
+          duration: 0.3
+        });
+
+        // Animate each connection with stroke-dashoffset (draw effect)
+        const connections = ['ai-conn-entrada', 'ai-conn-documentos', 'ai-conn-controles', 'ai-conn-metricas'];
+        connections.forEach((connId, index) => {
+          const path = document.getElementById(connId);
+          if (path) {
+            const length = path.getTotalLength ? path.getTotalLength() : 200;
+            gsap.set(`#${connId}`, {
+              strokeDasharray: length,
+              strokeDashoffset: length
+            });
+
+            this.timeline.to(`#${connId}`, {
+              strokeDashoffset: 0,
+              duration: 1,
+              ease: 'power2.inOut'
+            }, index === 0 ? '+=0' : '-=0.7');
+          }
+        });
+
+        // Start data particles flowing through connections
+        this.timeline.call(() => {
+          this.startDataParticles();
+        }, null, '+=0.2');
+
+        // ============================================
+        // PHASE 4: Illuminate process nodes sequentially
+        // Duration: ~3 seconds
+        // ============================================
+        this.timeline.addLabel('illuminate', '+=0.3');
+
+        const nodes = ['entrada', 'documentos', 'controles', 'metricas'];
+        nodes.forEach((name, index) => {
+          // Illuminate node
+          this.timeline.to(`#circle-${name}`, {
+            fill: 'url(#illuminated-gradient)',
+            stroke: '#ffb200',
+            filter: 'url(#node-glow)',
+            duration: 1,
+            ease: 'power2.inOut'
+          }, index === 0 ? '+=0' : '-=0.5');
+
+          this.timeline.to(`#text-${name}`, {
+            fill: '#1a1a1a',
+            duration: 0.8,
+            ease: 'power2.inOut'
+          }, '-=0.8');
+
+          this.timeline.to(`#label-${name}`, {
+            fill: '#ffb200',
+            duration: 0.8,
+            ease: 'power2.inOut'
+          }, '-=0.8');
+        });
+
+        // Also illuminate the connections between nodes
+        this.timeline.to('#process-connections line', {
+          stroke: '#ffb200',
+          opacity: 0.8,
+          duration: 0.8,
+          ease: 'power2.inOut'
+        }, '-=1');
+
+        // Pause to see illuminated state
+        this.timeline.to({}, { duration: 1 });
+
+        // ============================================
+        // PHASE 5: New capabilities emerge from AI
+        // Duration: ~3 seconds
+        // ============================================
+        this.timeline.addLabel('capabilities', '+=0');
+
+        // Show connection lines first
+        this.timeline.to('#capability-connections', {
+          opacity: 1,
+          duration: 0.5
+        });
+
+        // Animate capability connection paths
+        const capConnections = ['cap-conn-analitica', 'cap-conn-optimizacion', 'cap-conn-prediccion'];
+        capConnections.forEach((connId, index) => {
+          const path = document.getElementById(connId);
+          if (path) {
+            const length = path.getTotalLength ? path.getTotalLength() : 100;
+            gsap.set(`#${connId}`, {
+              strokeDasharray: length,
+              strokeDashoffset: length
+            });
+
+            this.timeline.to(`#${connId}`, {
+              strokeDashoffset: 0,
+              duration: 0.8,
+              ease: 'power2.out'
+            }, index === 0 ? '+=0' : '-=0.5');
+          }
+        });
+
+        // Show capabilities container
+        this.timeline.to('#ai-capabilities', {
+          opacity: 1,
+          duration: 0.3
+        }, '-=0.5');
+
+        // Animate each capability node with bounce
+        const capabilities = ['node-analitica', 'node-optimizacion', 'node-prediccion'];
+        capabilities.forEach((nodeId, index) => {
+          this.timeline.from(`#${nodeId} circle`, {
+            scale: 0,
+            transformOrigin: 'center',
+            duration: 1,
+            ease: 'elastic.out(1, 0.5)'
+          }, index === 0 ? '-=0.3' : '-=0.7');
+
+          this.timeline.from(`#${nodeId} text`, {
+            opacity: 0,
+            duration: 0.5
+          }, '-=0.8');
+        });
+
+        // Final pause to admire the complete animation
+        this.timeline.to({}, { duration: 2 });
       }
 
-      async animatePhase5() {
-        // Show powered nodes
-        const poweredNodes = document.getElementById('powered-nodes');
-        poweredNodes.style.transition = 'opacity 2s ease';
-        poweredNodes.style.opacity = '1';
-        await this.wait(2000);
+      startPulsingRings() {
+        // Kill existing pulse animations
+        this.pulseAnimations.forEach(anim => anim.kill());
+        this.pulseAnimations = [];
+
+        // Create infinite pulsing rings
+        const rings = ['#ai-ring-1', '#ai-ring-2', '#ai-ring-3'];
+        rings.forEach((ring, index) => {
+          const anim = gsap.timeline({ repeat: -1, delay: index * 0.4 });
+          anim.set(ring, { opacity: 0.6, scale: 1 });
+          anim.to(ring, {
+            opacity: 0,
+            scale: 1.5,
+            duration: 2,
+            ease: 'power2.out',
+            transformOrigin: 'center'
+          });
+          this.pulseAnimations.push(anim);
+        });
       }
 
-      wait(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+      startDataParticles() {
+        // Register the MotionPath plugin
+        gsap.registerPlugin(MotionPathPlugin);
+
+        // Kill existing particle animations
+        if (!this.particleAnimations) this.particleAnimations = [];
+        this.particleAnimations.forEach(anim => anim.kill());
+        this.particleAnimations = [];
+
+        // Define particle groups for each connection
+        const particleConfigs = [
+          { selector: '.particle-entrada', path: '#ai-conn-entrada' },
+          { selector: '.particle-documentos', path: '#ai-conn-documentos' },
+          { selector: '.particle-controles', path: '#ai-conn-controles' },
+          { selector: '.particle-metricas', path: '#ai-conn-metricas' }
+        ];
+
+        particleConfigs.forEach(config => {
+          const particles = document.querySelectorAll(config.selector);
+          const path = document.querySelector(config.path);
+
+          if (!path || particles.length === 0) return;
+
+          particles.forEach((particle, index) => {
+            // Show particle
+            gsap.set(particle, { opacity: 0.9 });
+
+            // Create looping motion along path
+            const anim = gsap.to(particle, {
+              motionPath: {
+                path: config.path,
+                align: config.path,
+                alignOrigin: [0.5, 0.5],
+                start: 0,
+                end: 1
+              },
+              duration: 1.8 + (index * 0.2), // Slightly different speeds
+              repeat: -1,
+              ease: 'none',
+              delay: index * 0.6 // Stagger start times
+            });
+
+            this.particleAnimations.push(anim);
+          });
+        });
       }
     }
 
