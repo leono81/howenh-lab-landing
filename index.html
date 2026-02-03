@@ -637,6 +637,124 @@
             }
         `;
     document.head.appendChild(style);
+
+    // Workflow Animation Controller
+    class WorkflowAnimation {
+      constructor() {
+        this.phase = 0;
+        this.isRunning = false;
+        this.observer = null;
+      }
+
+      init() {
+        // Setup Intersection Observer
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.8) {
+              this.start();
+            } else {
+              this.stop();
+            }
+          });
+        }, { threshold: 0.8 });
+
+        const workflowSection = document.getElementById('workflow-animation');
+        if (workflowSection) {
+          this.observer.observe(workflowSection);
+        }
+      }
+
+      start() {
+        if (this.isRunning) return;
+        this.isRunning = true;
+        this.runLoop();
+      }
+
+      stop() {
+        this.isRunning = false;
+        this.phase = 0;
+        this.reset();
+      }
+
+      reset() {
+        // Reset all nodes to initial state
+        document.querySelectorAll('.workflow-node').forEach(node => {
+          node.classList.remove('completed', 'powered');
+        });
+        document.getElementById('ai-node').style.opacity = '0';
+        document.getElementById('powered-nodes').style.opacity = '0';
+      }
+
+      async runLoop() {
+        while (this.isRunning) {
+          await this.animatePhase1(); // 0-3s: Complete normal nodes
+          if (!this.isRunning) break;
+
+          await this.animatePhase2(); // 3-4s: AI appears
+          if (!this.isRunning) break;
+
+          await this.animatePhase3(); // 4-5s: Connect to AI
+          if (!this.isRunning) break;
+
+          await this.animatePhase4(); // 5-6s: Transform to gold
+          if (!this.isRunning) break;
+
+          await this.animatePhase5(); // 6-8s: Show powered nodes
+          if (!this.isRunning) break;
+
+          await this.wait(2000); // Pause before restart
+          this.reset();
+        }
+      }
+
+      async animatePhase1() {
+        // Complete nodes sequentially (600ms each)
+        const nodes = ['node-input', 'node-process', 'node-validate', 'node-staging', 'node-output'];
+        for (const nodeId of nodes) {
+          document.getElementById(nodeId).classList.add('completed');
+          await this.wait(600);
+        }
+      }
+
+      async animatePhase2() {
+        // AI node appears
+        const aiNode = document.getElementById('ai-node');
+        aiNode.style.transition = 'opacity 1s ease, transform 1s ease';
+        aiNode.style.opacity = '1';
+        aiNode.style.transform = 'scale(1)';
+        await this.wait(1000);
+      }
+
+      async animatePhase3() {
+        // Connections appear (visual only, no actual lines for simplicity)
+        await this.wait(1000);
+      }
+
+      async animatePhase4() {
+        // Transform all nodes to gold
+        document.querySelectorAll('#normal-flow .workflow-node').forEach(node => {
+          node.classList.remove('completed');
+          node.classList.add('powered');
+        });
+        await this.wait(1000);
+      }
+
+      async animatePhase5() {
+        // Show powered nodes
+        const poweredNodes = document.getElementById('powered-nodes');
+        poweredNodes.style.transition = 'opacity 2s ease';
+        poweredNodes.style.opacity = '1';
+        await this.wait(2000);
+      }
+
+      wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+    }
+
+    // Initialize on page load
+    const workflowAnim = new WorkflowAnimation();
+    workflowAnim.init();
   </script>
 </body>
 
