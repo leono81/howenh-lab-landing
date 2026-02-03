@@ -335,7 +335,63 @@
         <!-- Workflow Animation Container -->
         <div id="workflow-animation" class="relative w-full h-[500px] flex items-center justify-center">
           <svg id="workflow-svg" class="w-full h-full" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg">
-            <!-- Nodes and connections will be added in next task -->
+            <!-- Normal Flow Nodes (5) -->
+            <g id="normal-flow">
+              <!-- Input -->
+              <circle class="workflow-node" id="node-input" cx="100" cy="250" r="25" fill="#6B7280" />
+              <text x="100" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Input</text>
+
+              <!-- Procesamiento -->
+              <circle class="workflow-node" id="node-process" cx="300" cy="250" r="25" fill="#6B7280" />
+              <text x="300" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Proceso</text>
+
+              <!-- Validación -->
+              <circle class="workflow-node" id="node-validate" cx="500" cy="250" r="25" fill="#6B7280" />
+              <text x="500" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Validación</text>
+
+              <!-- Staging -->
+              <circle class="workflow-node" id="node-staging" cx="700" cy="250" r="25" fill="#6B7280" />
+              <text x="700" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Staging</text>
+
+              <!-- Output -->
+              <circle class="workflow-node" id="node-output" cx="900" cy="250" r="25" fill="#6B7280" />
+              <text x="900" y="290" text-anchor="middle" fill="#9CA3AF" font-size="12">Output</text>
+            </g>
+
+            <!-- Connections between normal nodes -->
+            <g id="normal-connections" stroke="#6B7280" stroke-width="2" fill="none">
+              <line class="workflow-connection" x1="125" y1="250" x2="275" y2="250" />
+              <line class="workflow-connection" x1="325" y1="250" x2="475" y2="250" />
+              <line class="workflow-connection" x1="525" y1="250" x2="675" y2="250" />
+              <line class="workflow-connection" x1="725" y1="250" x2="875" y2="250" />
+            </g>
+
+            <!-- AI Node (appears at 3s) -->
+            <g id="ai-node" opacity="0">
+              <circle id="node-ai" cx="600" cy="120" r="40" fill="#ffb200"
+                filter="drop-shadow(0 0 12px rgba(255, 178, 0, 0.8))" />
+              <text x="600" y="130" text-anchor="middle" fill="#0A0A0B" font-size="16" font-weight="bold">IA</text>
+              <text x="600" y="80" text-anchor="middle" fill="#ffb200" font-size="12">AI Core</text>
+            </g>
+
+            <!-- Powered Nodes (appear at 6s) -->
+            <g id="powered-nodes" opacity="0">
+              <!-- Analytics -->
+              <circle class="workflow-node" id="node-analytics" cx="450" cy="400" r="20" fill="#ffb200" />
+              <text x="450" y="435" text-anchor="middle" fill="#ffb200" font-size="11">Analytics</text>
+
+              <!-- Predicción -->
+              <circle class="workflow-node" id="node-prediction" cx="600" cy="400" r="20" fill="#ffb200" />
+              <text x="600" y="435" text-anchor="middle" fill="#ffb200" font-size="11">Predicción</text>
+
+              <!-- Optimización -->
+              <circle class="workflow-node" id="node-optimize" cx="750" cy="400" r="20" fill="#ffb200" />
+              <text x="750" y="435" text-anchor="middle" fill="#ffb200" font-size="11">Optimización</text>
+
+              <!-- Insights -->
+              <circle class="workflow-node" id="node-insights" cx="900" cy="400" r="20" fill="#ffb200" />
+              <text x="900" y="435" text-anchor="middle" fill="#ffb200" font-size="11">Insights</text>
+            </g>
           </svg>
         </div>
       </div>
