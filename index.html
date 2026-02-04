@@ -164,8 +164,15 @@
     }
 
     @keyframes cursor-blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
     }
 
     /* Subtle glow pulse on the word while typing */
@@ -248,6 +255,7 @@
       0% {
         stroke-dashoffset: 0;
       }
+
       100% {
         stroke-dashoffset: -28;
       }
@@ -337,32 +345,20 @@
     /* Initial stack state */
     .kenos-card {
       transform:
-        translateX(var(--stack-x))
-        translateY(var(--stack-y))
-        rotateY(-5deg)
-        rotateX(2deg);
+        translateX(var(--stack-x)) translateY(var(--stack-y)) rotateY(-5deg) rotateX(2deg);
     }
 
     /* Fan out on container hover */
     .kenos-stack:hover .kenos-card {
       transform:
-        translateX(var(--fan-x))
-        translateY(0)
-        rotateY(0deg)
-        rotateX(0deg)
-        rotate(var(--fan-rotate));
+        translateX(var(--fan-x)) translateY(0) rotateY(0deg) rotateX(0deg) rotate(var(--fan-rotate));
       opacity: 0.85;
     }
 
     /* Individual card hover - bring to front */
     .kenos-stack:hover .kenos-card:hover {
       transform:
-        translateX(var(--fan-x))
-        translateY(-20px)
-        rotateY(0deg)
-        rotateX(0deg)
-        rotate(0deg)
-        scale(1.08);
+        translateX(var(--fan-x)) translateY(-20px) rotateY(0deg) rotateX(0deg) rotate(0deg) scale(1.08);
       z-index: 100 !important;
       opacity: 1;
       box-shadow:
@@ -438,12 +434,10 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.03) 50%,
-        transparent 100%
-      );
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.03) 50%,
+          transparent 100%);
       transition: left 0.6s ease;
       pointer-events: none;
     }
@@ -534,7 +528,9 @@
     }
 
     @keyframes messageAppear {
-      to { opacity: 1; }
+      to {
+        opacity: 1;
+      }
     }
 
     .chat-message.user {
@@ -603,8 +599,16 @@
     }
 
     @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-8px); }
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+      }
+
+      30% {
+        transform: translateY(-8px);
+      }
     }
 
     /* Carousel Dots */
@@ -654,6 +658,182 @@
         transition-duration: 0.01ms !important;
       }
     }
+
+    /* ===== Space Station Section ===== */
+
+    /* Globe Container */
+    .globe-container {
+      position: relative;
+    }
+
+    /* Radar Loading Animation */
+    .radar-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+    }
+
+    .radar-ring {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255, 178, 0, 0.2);
+      border-radius: 50%;
+    }
+
+    .radar-ring-2 {
+      inset: 30px;
+    }
+
+    .radar-sweep {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(255, 178, 0, 0.3) 30deg,
+        transparent 60deg
+      );
+      animation: radar-spin 2s linear infinite;
+    }
+
+    .radar-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background: #ffb200;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(255, 178, 0, 0.6);
+    }
+
+    @keyframes radar-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Space Section Background */
+    .space-section {
+      background: linear-gradient(180deg,
+        #0b0f18 0%,
+        #0d1220 20%,
+        #0f1525 50%,
+        #0a1628 100%
+      );
+      position: relative;
+    }
+
+    /* Glow atmosférico azulado */
+    .space-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at 50% 40%, rgba(30, 64, 120, 0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* Animated Stars */
+    .stars-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--duration) ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+
+    .star.small {
+      width: 1px;
+      height: 1px;
+      opacity: 0.4;
+    }
+
+    .star.medium {
+      width: 2px;
+      height: 2px;
+      opacity: 0.6;
+    }
+
+    .star.large {
+      width: 3px;
+      height: 3px;
+      opacity: 0.8;
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--base-opacity); transform: scale(1); }
+      50% { opacity: calc(var(--base-opacity) * 0.3); transform: scale(0.8); }
+    }
+
+    /* Shooting star - cola DETRÁS del movimiento */
+    .shooting-star {
+      position: absolute;
+      width: 80px;
+      height: 2px;
+      /* Gradiente: transparente (cola atrás) → blanco brillante (cabeza adelante) */
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), rgba(255,255,255,1));
+      border-radius: 0 2px 2px 0;
+      /* Rotación para que apunte en dirección del movimiento (abajo-derecha = 135°) */
+      transform: rotate(35deg);
+      animation: shoot 12s ease-in-out infinite;
+      opacity: 0;
+      box-shadow: 0 0 6px rgba(255,255,255,0.8);
+    }
+
+    @keyframes shoot {
+      0% {
+        transform: rotate(35deg) translateX(0);
+        opacity: 0;
+      }
+      2% { opacity: 1; }
+      12% {
+        transform: rotate(35deg) translateX(400px);
+        opacity: 0;
+      }
+      100% { opacity: 0; }
+    }
+
+    /* Tech card hover */
+    .tech-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .tech-card:hover {
+      background: rgba(255, 178, 0, 0.05);
+      border-color: rgba(255, 178, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Atmospheric glow behind globe */
+    .globe-glow {
+      position: absolute;
+      width: 120%;
+      height: 120%;
+      top: -10%;
+      left: -10%;
+      background: radial-gradient(circle, rgba(255,178,0,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
   </style>
 </head>
 
@@ -701,6 +881,7 @@
       <div class="hidden md:flex items-center gap-8 animate-fade delay-500">
         <a href="#solutions" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Soluciones</a>
         <a href="#kenos" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Kenos SaaS</a>
+        <a href="#space-station" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Space</a>
         <a href="#about" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Nosotros</a>
       </div>
 
@@ -722,7 +903,8 @@
       <div class="max-w-4xl">
         <h1 class="hero-title text-white text-glow text-right">
           <span class="block animate-reveal delay-1000"><span class="text-primary">Redefiniendo</span>
-            <span id="typewriter-container" class="typewriter-word typing"><span id="typewriter-text"></span><span class="typewriter-cursor"></span></span></span>
+            <span id="typewriter-container" class="typewriter-word typing"><span id="typewriter-text"></span><span
+                class="typewriter-cursor"></span></span></span>
           <span class="block animate-reveal delay-1500">con <span class="text-primary">IA Aplicada</span>.</span>
         </h1>
       </div>
@@ -779,25 +961,27 @@
 
         <!-- Workflow Animation Container -->
         <div id="workflow-animation" class="relative w-full h-[600px] flex items-center justify-center">
-          <svg id="workflow-svg" class="w-full h-full" viewBox="0 0 1000 550" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <svg id="workflow-svg" class="w-full h-full" viewBox="0 0 1000 550" preserveAspectRatio="xMidYMid meet"
+            xmlns="http://www.w3.org/2000/svg">
             <!-- Definitions for gradients and filters -->
             <defs>
               <!-- Background dot grid pattern -->
               <pattern id="dot-grid" width="50" height="50" patternUnits="userSpaceOnUse">
-                <circle cx="25" cy="25" r="1.5" fill="#ffb200"/>
+                <circle cx="25" cy="25" r="1.5" fill="#ffb200" />
               </pattern>
 
               <!-- Atmospheric glow gradient -->
               <radialGradient id="atmospheric-glow" cx="50%" cy="50%">
-                <stop offset="0%" stop-color="#ffb200" stop-opacity="0.2"/>
-                <stop offset="40%" stop-color="#ffb200" stop-opacity="0.08"/>
-                <stop offset="100%" stop-color="#ffb200" stop-opacity="0"/>
+                <stop offset="0%" stop-color="#ffb200" stop-opacity="0.2" />
+                <stop offset="40%" stop-color="#ffb200" stop-opacity="0.08" />
+                <stop offset="100%" stop-color="#ffb200" stop-opacity="0" />
               </radialGradient>
 
               <!-- Glow filter for AI node -->
               <filter id="ai-glow" x="-100%" y="-100%" width="300%" height="300%">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-                <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0.7 0 0 0  0 0 0 0 0  0 0 0 1 0" result="glow" />
+                <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0.7 0 0 0  0 0 0 0 0  0 0 0 1 0"
+                  result="glow" />
                 <feMerge>
                   <feMergeNode in="glow" />
                   <feMergeNode in="SourceGraphic" />
@@ -807,7 +991,8 @@
               <!-- Subtle glow for illuminated nodes -->
               <filter id="node-glow" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
-                <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0.7 0 0 0  0 0 0 0 0  0 0 0 0.6 0" result="glow" />
+                <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0.7 0 0 0  0 0 0 0 0  0 0 0 0.6 0"
+                  result="glow" />
                 <feMerge>
                   <feMergeNode in="glow" />
                   <feMergeNode in="SourceGraphic" />
@@ -872,40 +1057,25 @@
 
               <!-- Wave distortion filter for background grid -->
               <filter id="wave-distortion" x="-10%" y="-10%" width="120%" height="120%">
-                <feTurbulence
-                  type="fractalNoise"
-                  baseFrequency="0.015 0.003"
-                  numOctaves="2"
-                  seed="1"
+                <feTurbulence type="fractalNoise" baseFrequency="0.015 0.003" numOctaves="2" seed="1"
                   result="turbulence">
-                  <animate
-                    attributeName="baseFrequency"
-                    dur="20s"
-                    values="0.015 0.003;0.02 0.005;0.015 0.003"
+                  <animate attributeName="baseFrequency" dur="20s" values="0.015 0.003;0.02 0.005;0.015 0.003"
                     repeatCount="indefinite" />
                 </feTurbulence>
-                <feDisplacementMap
-                  in="SourceGraphic"
-                  in2="turbulence"
-                  scale="12"
-                  xChannelSelector="R"
+                <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="12" xChannelSelector="R"
                   yChannelSelector="G">
-                  <animate
-                    attributeName="scale"
-                    dur="8s"
-                    values="8;15;8"
-                    repeatCount="indefinite" />
+                  <animate attributeName="scale" dur="8s" values="8;15;8" repeatCount="indefinite" />
                 </feDisplacementMap>
               </filter>
             </defs>
 
             <!-- LAYER 1: Background grid (golden constellation with wave animation) -->
             <g id="background-grid" opacity="0.12">
-              <rect width="100%" height="100%" fill="url(#dot-grid)"/>
+              <rect width="100%" height="100%" fill="url(#dot-grid)" />
             </g>
 
             <!-- LAYER 1b: Atmospheric glow (appears with AI node) -->
-            <ellipse id="ai-atmosphere" cx="500" cy="300" rx="220" ry="180" fill="url(#atmospheric-glow)" opacity="0"/>
+            <ellipse id="ai-atmosphere" cx="500" cy="300" rx="220" ry="180" fill="url(#atmospheric-glow)" opacity="0" />
 
             <!-- PROCESS NODES - ORBES CRISTALINOS -->
             <g id="process-nodes">
@@ -916,69 +1086,93 @@
                 <!-- Círculo principal del orbe -->
                 <circle id="circle-entrada" cx="200" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
                 <!-- Reflejo highlight superior -->
-                <ellipse class="orbe-highlight" cx="188" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
+                <ellipse class="orbe-highlight" cx="188" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)"
+                  opacity="0.4" />
                 <!-- Texto del nodo -->
-                <text id="text-entrada" x="200" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Entrada</text>
+                <text id="text-entrada" x="200" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14"
+                  font-weight="600" font-family="Space Grotesk, sans-serif">Entrada</text>
                 <!-- Label debajo -->
-                <text id="label-entrada" x="200" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Recepción</text>
+                <text id="label-entrada" x="200" y="195" text-anchor="middle" fill="#71717A" font-size="11"
+                  font-family="Noto Sans, sans-serif">Recepción</text>
               </g>
 
               <!-- Documentos - Position 400 -->
               <g id="node-documentos" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
                 <ellipse class="orbe-floor-shadow" cx="400" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
                 <circle id="circle-documentos" cx="400" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
-                <ellipse class="orbe-highlight" cx="388" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
-                <text id="text-documentos" x="400" y="125" text-anchor="middle" fill="#A1A1AA" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Documentos</text>
-                <text id="label-documentos" x="400" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Gestión</text>
+                <ellipse class="orbe-highlight" cx="388" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)"
+                  opacity="0.4" />
+                <text id="text-documentos" x="400" y="125" text-anchor="middle" fill="#A1A1AA" font-size="12"
+                  font-weight="600" font-family="Space Grotesk, sans-serif">Documentos</text>
+                <text id="label-documentos" x="400" y="195" text-anchor="middle" fill="#71717A" font-size="11"
+                  font-family="Noto Sans, sans-serif">Gestión</text>
               </g>
 
               <!-- Controles - Position 600 -->
               <g id="node-controles" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
                 <ellipse class="orbe-floor-shadow" cx="600" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
                 <circle id="circle-controles" cx="600" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
-                <ellipse class="orbe-highlight" cx="588" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
-                <text id="text-controles" x="600" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Controles</text>
-                <text id="label-controles" x="600" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Verificación</text>
+                <ellipse class="orbe-highlight" cx="588" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)"
+                  opacity="0.4" />
+                <text id="text-controles" x="600" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14"
+                  font-weight="600" font-family="Space Grotesk, sans-serif">Controles</text>
+                <text id="label-controles" x="600" y="195" text-anchor="middle" fill="#71717A" font-size="11"
+                  font-family="Noto Sans, sans-serif">Verificación</text>
               </g>
 
               <!-- Métricas - Position 800 -->
               <g id="node-metricas" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
                 <ellipse class="orbe-floor-shadow" cx="800" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
                 <circle id="circle-metricas" cx="800" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
-                <ellipse class="orbe-highlight" cx="788" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
-                <text id="text-metricas" x="800" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Métricas</text>
-                <text id="label-metricas" x="800" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Medición</text>
+                <ellipse class="orbe-highlight" cx="788" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)"
+                  opacity="0.4" />
+                <text id="text-metricas" x="800" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14"
+                  font-weight="600" font-family="Space Grotesk, sans-serif">Métricas</text>
+                <text id="label-metricas" x="800" y="195" text-anchor="middle" fill="#71717A" font-size="11"
+                  font-family="Noto Sans, sans-serif">Medición</text>
               </g>
             </g>
 
             <!-- Connections between process nodes (animated dashes) -->
             <g id="process-connections" stroke="#52525B" stroke-width="2" fill="none">
-              <line id="conn-1-2" class="animated-dash" x1="255" y1="120" x2="345" y2="120" stroke-dasharray="8,6" opacity="0.6" />
-              <line id="conn-2-3" class="animated-dash" x1="455" y1="120" x2="545" y2="120" stroke-dasharray="8,6" opacity="0.6" />
-              <line id="conn-3-4" class="animated-dash" x1="655" y1="120" x2="745" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+              <line id="conn-1-2" class="animated-dash" x1="255" y1="120" x2="345" y2="120" stroke-dasharray="8,6"
+                opacity="0.6" />
+              <line id="conn-2-3" class="animated-dash" x1="455" y1="120" x2="545" y2="120" stroke-dasharray="8,6"
+                opacity="0.6" />
+              <line id="conn-3-4" class="animated-dash" x1="655" y1="120" x2="745" y2="120" stroke-dasharray="8,6"
+                opacity="0.6" />
             </g>
 
             <!-- AI Node - Centered at x=500 (midpoint between 400 and 600) -->
             <g id="ai-node" opacity="0">
               <!-- Outer pulsing rings -->
-              <circle id="ai-ring-3" cx="500" cy="300" r="85" fill="none" stroke="#ffb200" stroke-width="1" opacity="0" />
-              <circle id="ai-ring-2" cx="500" cy="300" r="75" fill="none" stroke="#ffb200" stroke-width="1" opacity="0" />
-              <circle id="ai-ring-1" cx="500" cy="300" r="65" fill="none" stroke="#ffb200" stroke-width="2" opacity="0" />
+              <circle id="ai-ring-3" cx="500" cy="300" r="85" fill="none" stroke="#ffb200" stroke-width="1"
+                opacity="0" />
+              <circle id="ai-ring-2" cx="500" cy="300" r="75" fill="none" stroke="#ffb200" stroke-width="1"
+                opacity="0" />
+              <circle id="ai-ring-1" cx="500" cy="300" r="65" fill="none" stroke="#ffb200" stroke-width="2"
+                opacity="0" />
 
               <!-- Main AI circle with glow -->
               <circle id="ai-core" cx="500" cy="300" r="55" fill="url(#ai-gradient)" filter="url(#ai-glow)" />
 
               <!-- AI Text -->
-              <text x="500" y="310" text-anchor="middle" fill="#1a1a1a" font-size="28" font-weight="bold" font-family="Space Grotesk, sans-serif">IA</text>
-              <text id="ai-label" x="500" y="240" text-anchor="middle" fill="#ffb200" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif" letter-spacing="2" opacity="0">CORE ENGINE</text>
+              <text x="500" y="310" text-anchor="middle" fill="#1a1a1a" font-size="28" font-weight="bold"
+                font-family="Space Grotesk, sans-serif">IA</text>
+              <text id="ai-label" x="500" y="240" text-anchor="middle" fill="#ffb200" font-size="12" font-weight="600"
+                font-family="Space Grotesk, sans-serif" letter-spacing="2" opacity="0">CORE ENGINE</text>
             </g>
 
             <!-- AI Connections to process nodes (curved paths) -->
             <g id="ai-connections" opacity="0">
-              <path id="ai-conn-entrada" d="M 460 260 Q 330 180, 230 150" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
-              <path id="ai-conn-documentos" d="M 470 250 Q 430 180, 400 160" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
-              <path id="ai-conn-controles" d="M 530 250 Q 570 180, 600 160" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
-              <path id="ai-conn-metricas" d="M 540 260 Q 670 180, 770 150" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path id="ai-conn-entrada" d="M 460 260 Q 330 180, 230 150" stroke="#ffb200" stroke-width="2.5"
+                fill="none" stroke-linecap="round" />
+              <path id="ai-conn-documentos" d="M 470 250 Q 430 180, 400 160" stroke="#ffb200" stroke-width="2.5"
+                fill="none" stroke-linecap="round" />
+              <path id="ai-conn-controles" d="M 530 250 Q 570 180, 600 160" stroke="#ffb200" stroke-width="2.5"
+                fill="none" stroke-linecap="round" />
+              <path id="ai-conn-metricas" d="M 540 260 Q 670 180, 770 150" stroke="#ffb200" stroke-width="2.5"
+                fill="none" stroke-linecap="round" />
             </g>
 
             <!-- New AI-powered capabilities -->
@@ -986,58 +1180,77 @@
               <!-- Analítica -->
               <g id="node-analitica">
                 <circle cx="330" cy="460" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
-                <text x="330" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Analítica</text>
-                <text x="330" y="520" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Insights IA</text>
+                <text x="330" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600"
+                  font-family="Space Grotesk, sans-serif">Analítica</text>
+                <text x="330" y="520" text-anchor="middle" fill="#ffb200" font-size="10"
+                  font-family="Noto Sans, sans-serif">Insights IA</text>
               </g>
 
               <!-- Optimización -->
               <g id="node-optimizacion">
                 <circle cx="500" cy="480" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
-                <text x="500" y="485" text-anchor="middle" fill="#1a1a1a" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Optimización</text>
-                <text x="500" y="540" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Auto-mejora</text>
+                <text x="500" y="485" text-anchor="middle" fill="#1a1a1a" font-size="12" font-weight="600"
+                  font-family="Space Grotesk, sans-serif">Optimización</text>
+                <text x="500" y="540" text-anchor="middle" fill="#ffb200" font-size="10"
+                  font-family="Noto Sans, sans-serif">Auto-mejora</text>
               </g>
 
               <!-- Predicción -->
               <g id="node-prediccion">
                 <circle cx="670" cy="460" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
-                <text x="670" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Predicción</text>
-                <text x="670" y="520" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Forecasting</text>
+                <text x="670" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600"
+                  font-family="Space Grotesk, sans-serif">Predicción</text>
+                <text x="670" y="520" text-anchor="middle" fill="#ffb200" font-size="10"
+                  font-family="Noto Sans, sans-serif">Forecasting</text>
               </g>
             </g>
 
             <!-- Connections from AI to capabilities -->
             <g id="capability-connections" opacity="0">
-              <path id="cap-conn-analitica" d="M 460 340 Q 390 400, 350 430" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
-              <path id="cap-conn-optimizacion" d="M 500 355 L 500 435" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
-              <path id="cap-conn-prediccion" d="M 540 340 Q 610 400, 650 430" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path id="cap-conn-analitica" d="M 460 340 Q 390 400, 350 430" stroke="#ffb200" stroke-width="2"
+                fill="none" stroke-linecap="round" />
+              <path id="cap-conn-optimizacion" d="M 500 355 L 500 435" stroke="#ffb200" stroke-width="2" fill="none"
+                stroke-linecap="round" />
+              <path id="cap-conn-prediccion" d="M 540 340 Q 610 400, 650 430" stroke="#ffb200" stroke-width="2"
+                fill="none" stroke-linecap="round" />
             </g>
 
             <!-- LAYER 2: Data particles flowing through connections -->
             <g id="data-particles">
               <!-- Particles for ai-conn-entrada -->
-              <circle class="data-particle particle-entrada" r="4" fill="#ffb200" opacity="0"/>
-              <circle class="data-particle particle-entrada" r="3" fill="#ffc933" opacity="0"/>
-              <circle class="data-particle particle-entrada" r="2.5" fill="#ffe066" opacity="0"/>
+              <circle class="data-particle particle-entrada" r="4" fill="#ffb200" opacity="0" />
+              <circle class="data-particle particle-entrada" r="3" fill="#ffc933" opacity="0" />
+              <circle class="data-particle particle-entrada" r="2.5" fill="#ffe066" opacity="0" />
 
               <!-- Particles for ai-conn-documentos -->
-              <circle class="data-particle particle-documentos" r="4" fill="#ffb200" opacity="0"/>
-              <circle class="data-particle particle-documentos" r="3" fill="#ffc933" opacity="0"/>
-              <circle class="data-particle particle-documentos" r="2.5" fill="#ffe066" opacity="0"/>
+              <circle class="data-particle particle-documentos" r="4" fill="#ffb200" opacity="0" />
+              <circle class="data-particle particle-documentos" r="3" fill="#ffc933" opacity="0" />
+              <circle class="data-particle particle-documentos" r="2.5" fill="#ffe066" opacity="0" />
 
               <!-- Particles for ai-conn-controles -->
-              <circle class="data-particle particle-controles" r="4" fill="#ffb200" opacity="0"/>
-              <circle class="data-particle particle-controles" r="3" fill="#ffc933" opacity="0"/>
-              <circle class="data-particle particle-controles" r="2.5" fill="#ffe066" opacity="0"/>
+              <circle class="data-particle particle-controles" r="4" fill="#ffb200" opacity="0" />
+              <circle class="data-particle particle-controles" r="3" fill="#ffc933" opacity="0" />
+              <circle class="data-particle particle-controles" r="2.5" fill="#ffe066" opacity="0" />
 
               <!-- Particles for ai-conn-metricas -->
-              <circle class="data-particle particle-metricas" r="4" fill="#ffb200" opacity="0"/>
-              <circle class="data-particle particle-metricas" r="3" fill="#ffc933" opacity="0"/>
-              <circle class="data-particle particle-metricas" r="2.5" fill="#ffe066" opacity="0"/>
+              <circle class="data-particle particle-metricas" r="4" fill="#ffb200" opacity="0" />
+              <circle class="data-particle particle-metricas" r="3" fill="#ffc933" opacity="0" />
+              <circle class="data-particle particle-metricas" r="2.5" fill="#ffe066" opacity="0" />
             </g>
           </svg>
         </div>
       </div>
     </section>
+
+    <!-- Transición Workflow → Chatbot (void → surface) -->
+    <div class="h-32 md:h-48 relative z-10" style="background: linear-gradient(180deg,
+      #0A0A0B 0%,
+      #0C0C0E 20%,
+      #0F0F11 40%,
+      #121214 60%,
+      #151517 80%,
+      #18181B 100%
+    );"></div>
 
     <!-- Chatbot Comparison Section -->
     <section id="chatbot" class="section-content py-24 px-6 md:px-12 bg-surface relative">
@@ -1084,7 +1297,7 @@
                   <span class="text-xl">🤖</span>
                 </div>
                 <div>
-                  <div class="text-white font-semibold">Kenos AI Chat</div>
+                  <div class="text-white font-semibold">Howenh Labs IA Chat</div>
                   <div class="text-primary text-xs">Inteligencia real</div>
                 </div>
               </div>
@@ -1105,6 +1318,16 @@
         </div>
       </div>
     </section>
+
+    <!-- Transición Chatbot → Kenos (surface → void) -->
+    <div class="h-32 md:h-48 relative z-10" style="background: linear-gradient(180deg,
+      #18181B 0%,
+      #151517 20%,
+      #121214 40%,
+      #0F0F11 60%,
+      #0C0C0E 80%,
+      #0A0A0B 100%
+    );"></div>
 
     <!-- Kenos Section - Card Stack Fan Out -->
     <section id="kenos" class="section-fullscreen py-12 px-6 md:px-12 bg-void relative overflow-hidden">
@@ -1160,12 +1383,18 @@
                 <div class="bg-void/80 p-4 rounded-xl">
                   <div class="text-gray-500 text-[10px] uppercase tracking-wider mb-3">Actividad Semanal</div>
                   <div class="flex items-end gap-2 h-24">
-                    <div class="bg-primary/20 flex-1 rounded-t transition-all hover:bg-primary/40" style="height: 35%;"></div>
-                    <div class="bg-primary/30 flex-1 rounded-t transition-all hover:bg-primary/50" style="height: 55%;"></div>
-                    <div class="bg-primary/40 flex-1 rounded-t transition-all hover:bg-primary/60" style="height: 45%;"></div>
-                    <div class="bg-primary/50 flex-1 rounded-t transition-all hover:bg-primary/70" style="height: 70%;"></div>
-                    <div class="bg-primary/60 flex-1 rounded-t transition-all hover:bg-primary/80" style="height: 60%;"></div>
-                    <div class="bg-primary/80 flex-1 rounded-t transition-all hover:bg-primary" style="height: 85%;"></div>
+                    <div class="bg-primary/20 flex-1 rounded-t transition-all hover:bg-primary/40" style="height: 35%;">
+                    </div>
+                    <div class="bg-primary/30 flex-1 rounded-t transition-all hover:bg-primary/50" style="height: 55%;">
+                    </div>
+                    <div class="bg-primary/40 flex-1 rounded-t transition-all hover:bg-primary/60" style="height: 45%;">
+                    </div>
+                    <div class="bg-primary/50 flex-1 rounded-t transition-all hover:bg-primary/70" style="height: 70%;">
+                    </div>
+                    <div class="bg-primary/60 flex-1 rounded-t transition-all hover:bg-primary/80" style="height: 60%;">
+                    </div>
+                    <div class="bg-primary/80 flex-1 rounded-t transition-all hover:bg-primary" style="height: 85%;">
+                    </div>
                     <div class="bg-primary flex-1 rounded-t" style="height: 100%;"></div>
                   </div>
                 </div>
@@ -1185,9 +1414,12 @@
               </div>
               <div class="kenos-card-body">
                 <div class="space-y-3">
-                  <div class="bg-void/80 p-4 rounded-xl flex items-center justify-between group hover:bg-void transition-colors">
+                  <div
+                    class="bg-void/80 p-4 rounded-xl flex items-center justify-between group hover:bg-void transition-colors">
                     <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">MG</div>
+                      <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">
+                        MG</div>
                       <div>
                         <div class="text-white text-sm font-medium">María González</div>
                         <div class="text-gray-500 text-xs">#4521 • Última visita: Hoy</div>
@@ -1195,9 +1427,12 @@
                     </div>
                     <div class="w-2.5 h-2.5 rounded-full bg-green-500 ring-4 ring-green-500/20"></div>
                   </div>
-                  <div class="bg-void/80 p-4 rounded-xl flex items-center justify-between group hover:bg-void transition-colors">
+                  <div
+                    class="bg-void/80 p-4 rounded-xl flex items-center justify-between group hover:bg-void transition-colors">
                     <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">CR</div>
+                      <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
+                        CR</div>
                       <div>
                         <div class="text-white text-sm font-medium">Carlos Ramírez</div>
                         <div class="text-gray-500 text-xs">#4518 • Última visita: 28/01</div>
@@ -1205,9 +1440,12 @@
                     </div>
                     <div class="w-2.5 h-2.5 rounded-full bg-yellow-500 ring-4 ring-yellow-500/20"></div>
                   </div>
-                  <div class="bg-void/80 p-4 rounded-xl flex items-center justify-between group hover:bg-void transition-colors">
+                  <div
+                    class="bg-void/80 p-4 rounded-xl flex items-center justify-between group hover:bg-void transition-colors">
                     <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold text-sm">AM</div>
+                      <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold text-sm">
+                        AM</div>
                       <div>
                         <div class="text-white text-sm font-medium">Ana Martínez</div>
                         <div class="text-gray-500 text-xs">#4502 • Última visita: 25/01</div>
@@ -1239,12 +1477,10 @@
                   <!-- ECG-like visualization -->
                   <div class="h-16 flex items-center">
                     <svg class="w-full h-full" viewBox="0 0 200 40" preserveAspectRatio="none">
-                      <path d="M0,20 L20,20 L25,20 L30,10 L35,30 L40,5 L45,35 L50,20 L55,20 L75,20 L80,20 L85,10 L90,30 L95,5 L100,35 L105,20 L110,20 L130,20 L135,20 L140,10 L145,30 L150,5 L155,35 L160,20 L165,20 L200,20"
-                            fill="none"
-                            stroke="#ffb200"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"/>
+                      <path
+                        d="M0,20 L20,20 L25,20 L30,10 L35,30 L40,5 L45,35 L50,20 L55,20 L75,20 L80,20 L85,10 L90,30 L95,5 L100,35 L105,20 L110,20 L130,20 L135,20 L140,10 L145,30 L150,5 L155,35 L160,20 L165,20 L200,20"
+                        fill="none" stroke="#ffb200" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
                     </svg>
                   </div>
                 </div>
@@ -1276,7 +1512,8 @@
               </div>
               <div class="kenos-card-body">
                 <!-- Alert Card -->
-                <div class="bg-gradient-to-r from-primary/10 to-transparent p-4 rounded-xl border-l-2 border-primary mb-4">
+                <div
+                  class="bg-gradient-to-r from-primary/10 to-transparent p-4 rounded-xl border-l-2 border-primary mb-4">
                   <div class="flex items-start gap-3">
                     <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                       <span class="material-symbols-outlined text-primary text-lg">warning</span>
@@ -1325,6 +1562,219 @@
           <div class="w-2 h-1 rounded-full bg-gray-700"></div>
           <div class="w-2 h-1 rounded-full bg-gray-700"></div>
           <div class="w-2 h-1 rounded-full bg-gray-700"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transición gradual entre Kenos y Space -->
+    <div class="h-48 md:h-72 relative z-10" style="background: linear-gradient(180deg,
+      #0a0a0a 0%,
+      #0a0a0b 15%,
+      #0a0b0d 30%,
+      #0a0c10 45%,
+      #0a0d13 60%,
+      #0b0e16 75%,
+      #0b0f18 100%
+    );"></div>
+
+    <!-- Space Station Section -->
+    <section id="space-station" class="section-fullscreen space-section relative z-10 py-20 px-6 md:px-12 overflow-hidden">
+
+      <!-- Animated Stars Background -->
+      <div class="stars-container">
+        <!-- Small stars - Layer 1 (top) -->
+        <div class="star small" style="top: 3%; left: 8%; --delay: 0s; --duration: 3s; --base-opacity: 0.4;"></div>
+        <div class="star small" style="top: 5%; left: 18%; --delay: 0.5s; --duration: 4s; --base-opacity: 0.3;"></div>
+        <div class="star small" style="top: 2%; left: 32%; --delay: 1s; --duration: 3.5s; --base-opacity: 0.5;"></div>
+        <div class="star small" style="top: 7%; left: 42%; --delay: 0.3s; --duration: 4.5s; --base-opacity: 0.4;"></div>
+        <div class="star small" style="top: 4%; left: 58%; --delay: 1.5s; --duration: 3s; --base-opacity: 0.3;"></div>
+        <div class="star small" style="top: 6%; left: 72%; --delay: 0.8s; --duration: 5s; --base-opacity: 0.4;"></div>
+        <div class="star small" style="top: 3%; left: 85%; --delay: 2s; --duration: 4s; --base-opacity: 0.5;"></div>
+        <div class="star small" style="top: 8%; left: 95%; --delay: 0.2s; --duration: 3.5s; --base-opacity: 0.3;"></div>
+
+        <!-- Small stars - Layer 2 -->
+        <div class="star small" style="top: 12%; left: 5%; --delay: 1.2s; --duration: 4.5s; --base-opacity: 0.4;"></div>
+        <div class="star small" style="top: 15%; left: 22%; --delay: 0.7s; --duration: 3s; --base-opacity: 0.5;"></div>
+        <div class="star small" style="top: 11%; left: 38%; --delay: 1.8s; --duration: 4s; --base-opacity: 0.3;"></div>
+        <div class="star small" style="top: 18%; left: 52%; --delay: 0.4s; --duration: 5s; --base-opacity: 0.4;"></div>
+        <div class="star small" style="top: 14%; left: 68%; --delay: 2.2s; --duration: 3.5s; --base-opacity: 0.5;"></div>
+        <div class="star small" style="top: 16%; left: 82%; --delay: 0.9s; --duration: 4.5s; --base-opacity: 0.3;"></div>
+        <div class="star small" style="top: 19%; left: 92%; --delay: 1.4s; --duration: 3s; --base-opacity: 0.4;"></div>
+
+        <!-- Small stars - Layer 3 -->
+        <div class="star small" style="top: 24%; left: 12%; --delay: 0.6s; --duration: 4s; --base-opacity: 0.5;"></div>
+        <div class="star small" style="top: 22%; left: 28%; --delay: 1.9s; --duration: 3.5s; --base-opacity: 0.3;"></div>
+        <div class="star small" style="top: 26%; left: 45%; --delay: 0.3s; --duration: 5s; --base-opacity: 0.4;"></div>
+        <div class="star small" style="top: 28%; left: 62%; --delay: 2.5s; --duration: 4s; --base-opacity: 0.5;"></div>
+        <div class="star small" style="top: 23%; left: 78%; --delay: 1.1s; --duration: 3s; --base-opacity: 0.3;"></div>
+        <div class="star small" style="top: 27%; left: 88%; --delay: 0.8s; --duration: 4.5s; --base-opacity: 0.4;"></div>
+
+        <!-- Small stars - Layer 4 (middle-bottom) -->
+        <div class="star small" style="top: 35%; left: 6%; --delay: 1.7s; --duration: 3.5s; --base-opacity: 0.3;"></div>
+        <div class="star small" style="top: 38%; left: 18%; --delay: 0.2s; --duration: 4s; --base-opacity: 0.4;"></div>
+        <div class="star small" style="top: 42%; left: 35%; --delay: 2.1s; --duration: 5s; --base-opacity: 0.5;"></div>
+        <div class="star small" style="top: 36%; left: 55%; --delay: 0.5s; --duration: 3s; --base-opacity: 0.3;"></div>
+        <div class="star small" style="top: 40%; left: 75%; --delay: 1.3s; --duration: 4.5s; --base-opacity: 0.4;"></div>
+        <div class="star small" style="top: 44%; left: 92%; --delay: 0.9s; --duration: 3.5s; --base-opacity: 0.5;"></div>
+
+        <!-- Medium stars -->
+        <div class="star medium" style="top: 6%; left: 15%; --delay: 0.4s; --duration: 5s; --base-opacity: 0.6;"></div>
+        <div class="star medium" style="top: 4%; left: 48%; --delay: 1.1s; --duration: 4s; --base-opacity: 0.5;"></div>
+        <div class="star medium" style="top: 9%; left: 78%; --delay: 0.6s; --duration: 5.5s; --base-opacity: 0.6;"></div>
+        <div class="star medium" style="top: 17%; left: 8%; --delay: 1.8s; --duration: 4.5s; --base-opacity: 0.5;"></div>
+        <div class="star medium" style="top: 13%; left: 60%; --delay: 0.9s; --duration: 5s; --base-opacity: 0.6;"></div>
+        <div class="star medium" style="top: 21%; left: 35%; --delay: 2.3s; --duration: 4s; --base-opacity: 0.5;"></div>
+        <div class="star medium" style="top: 25%; left: 88%; --delay: 0.7s; --duration: 5.5s; --base-opacity: 0.6;"></div>
+        <div class="star medium" style="top: 32%; left: 25%; --delay: 1.5s; --duration: 4.5s; --base-opacity: 0.5;"></div>
+        <div class="star medium" style="top: 38%; left: 65%; --delay: 2.0s; --duration: 5s; --base-opacity: 0.6;"></div>
+        <div class="star medium" style="top: 45%; left: 10%; --delay: 0.3s; --duration: 4s; --base-opacity: 0.5;"></div>
+
+        <!-- Large stars (brighter) -->
+        <div class="star large" style="top: 5%; left: 25%; --delay: 0.3s; --duration: 6s; --base-opacity: 0.8;"></div>
+        <div class="star large" style="top: 8%; left: 65%; --delay: 1.5s; --duration: 5s; --base-opacity: 0.7;"></div>
+        <div class="star large" style="top: 16%; left: 45%; --delay: 2.2s; --duration: 5.5s; --base-opacity: 0.8;"></div>
+        <div class="star large" style="top: 20%; left: 90%; --delay: 0.8s; --duration: 6s; --base-opacity: 0.7;"></div>
+        <div class="star large" style="top: 30%; left: 15%; --delay: 1.9s; --duration: 5s; --base-opacity: 0.8;"></div>
+        <div class="star large" style="top: 35%; left: 80%; --delay: 0.5s; --duration: 5.5s; --base-opacity: 0.7;"></div>
+        <div class="star large" style="top: 42%; left: 50%; --delay: 2.6s; --duration: 6s; --base-opacity: 0.8;"></div>
+
+        <!-- Shooting stars -->
+        <div class="shooting-star" style="top: 8%; left: 15%; animation-delay: 2s;"></div>
+        <div class="shooting-star" style="top: 20%; left: 55%; animation-delay: 8s;"></div>
+        <div class="shooting-star" style="top: 35%; left: 30%; animation-delay: 15s;"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto h-full flex flex-col justify-center">
+
+        <!-- Header -->
+        <div class="text-center mb-12 animate-on-scroll">
+          <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+            Escuchando el <span class="text-primary">Espacio</span>
+          </h2>
+          <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+            Recibiendo telemetría satelital desde el fin del mundo
+          </p>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center">
+
+          <!-- Globe Container (3 cols) -->
+          <div class="lg:col-span-3 flex justify-center items-center">
+            <div class="globe-container relative w-full max-w-[500px] aspect-square" id="globe-container">
+              <!-- Atmospheric glow -->
+              <div class="globe-glow"></div>
+
+              <!-- Loading State (Radar) -->
+              <div id="globe-loading" class="absolute inset-0 flex flex-col items-center justify-center">
+                <div class="radar-container">
+                  <div class="radar-ring"></div>
+                  <div class="radar-ring radar-ring-2"></div>
+                  <div class="radar-sweep"></div>
+                  <div class="radar-center"></div>
+                </div>
+                <p class="text-gray-400 text-sm mt-6 animate-pulse">Buscando satélites...</p>
+              </div>
+
+              <!-- Globe.gl Container (hidden until loaded) -->
+              <div id="globe-gl" class="w-full h-full opacity-0 transition-opacity duration-500"></div>
+
+              <!-- Station label overlay -->
+              <div class="absolute bottom-4 left-1/2 -translate-x-1/2 glass-panel px-4 py-2 rounded-full text-xs text-gray-400 flex items-center gap-2 opacity-0 transition-opacity duration-300" id="globe-label">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                <span>Tierra del Fuego · -54.8°S</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info Panels (2 cols) -->
+          <div class="lg:col-span-2 space-y-6">
+
+            <!-- Satellite Selector Panel -->
+            <div class="glass-panel rounded-2xl p-6 animate-on-scroll">
+              <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary text-xl">satellite_alt</span>
+                </div>
+                <h3 class="text-white font-semibold text-lg">Satélites</h3>
+              </div>
+
+              <div class="space-y-3" id="satellite-list">
+                <!-- FossaSat - Dorado -->
+                <div class="flex items-center gap-3 p-2">
+                  <span class="w-3 h-3 rounded-full animate-pulse" style="background-color: #ffb200; box-shadow: 0 0 8px #ffb200;"></span>
+                  <div>
+                    <div class="text-white text-sm font-medium">FossaSat-2E</div>
+                    <div class="text-gray-500 text-xs">436.7 MHz · Sun-sync 97°</div>
+                  </div>
+                </div>
+                <!-- Norbi - Naranja -->
+                <div class="flex items-center gap-3 p-2">
+                  <span class="w-3 h-3 rounded-full animate-pulse" style="background-color: #ff6b00; box-shadow: 0 0 8px #ff6b00;"></span>
+                  <div>
+                    <div class="text-white text-sm font-medium">Norbi</div>
+                    <div class="text-gray-500 text-xs">436.7 MHz · Polar 97.9°</div>
+                  </div>
+                </div>
+                <!-- SiriusSat - Cyan -->
+                <div class="flex items-center gap-3 p-2">
+                  <span class="w-3 h-3 rounded-full animate-pulse" style="background-color: #00d4ff; box-shadow: 0 0 8px #00d4ff;"></span>
+                  <div>
+                    <div class="text-white text-sm font-medium">SiriusSat-1</div>
+                    <div class="text-gray-500 text-xs">435.6 MHz · Sun-sync 98°</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hardware Panel -->
+            <div class="glass-panel rounded-2xl p-6 animate-on-scroll">
+              <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary text-xl">memory</span>
+                </div>
+                <h3 class="text-white font-semibold text-lg">Hardware</h3>
+              </div>
+
+              <div class="grid grid-cols-3 gap-3">
+                <div class="tech-card text-center">
+                  <span class="material-symbols-outlined text-primary text-2xl mb-2">developer_board</span>
+                  <div class="text-white text-sm font-medium">LilyGO T3</div>
+                  <div class="text-gray-500 text-xs">v1.6.1</div>
+                </div>
+                <div class="tech-card text-center">
+                  <span class="material-symbols-outlined text-primary text-2xl mb-2">radio</span>
+                  <div class="text-white text-sm font-medium">LoRa</div>
+                  <div class="text-gray-500 text-xs">433 MHz</div>
+                </div>
+                <div class="tech-card text-center">
+                  <span class="material-symbols-outlined text-primary text-2xl mb-2">cell_tower</span>
+                  <div class="text-white text-sm font-medium">Antena</div>
+                  <div class="text-gray-500 text-xs">QFH</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <a href="https://tinygs.com/station/Howenh@f6jHgPJphLY_hUgj" target="_blank" rel="noopener noreferrer"
+               class="group flex items-center justify-between glass-panel rounded-xl p-4 hover:border-primary/30 transition-all">
+              <div>
+                <div class="text-white font-medium">Ver estación en vivo</div>
+                <div class="text-gray-500 text-sm">tinygs.com/station/Howenh</div>
+              </div>
+              <span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">
+                arrow_forward
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Bottom Tagline -->
+        <div class="text-center mt-12 animate-on-scroll">
+          <p class="text-gray-500 text-sm md:text-base max-w-2xl mx-auto">
+            Una de las estaciones terrestres más australes de la red global TinyGS,
+            contribuyendo datos desde la <span class="text-primary">latitud 54°S</span> donde pocos pueden escuchar.
+          </p>
         </div>
       </div>
     </section>
@@ -1533,24 +1983,24 @@
           duration: 0.8,
           ease: 'power2.inOut'
         })
-        // Mostrar sombra del piso
-        .to(`#node-${name} .orbe-floor-shadow`, {
-          opacity: 0.25,
-          duration: 0.6,
-          ease: 'power2.inOut'
-        }, '-=0.6')
-        // Texto oscuro sobre el orbe dorado
-        .to(`#text-${name}`, {
-          fill: '#1a1a1a',
-          duration: 0.6,
-          ease: 'power2.inOut'
-        }, '-=0.6')
-        // Label dorado
-        .to(`#label-${name}`, {
-          fill: '#ffb200',
-          duration: 0.6,
-          ease: 'power2.inOut'
-        }, '-=0.6');
+          // Mostrar sombra del piso
+          .to(`#node-${name} .orbe-floor-shadow`, {
+            opacity: 0.25,
+            duration: 0.6,
+            ease: 'power2.inOut'
+          }, '-=0.6')
+          // Texto oscuro sobre el orbe dorado
+          .to(`#text-${name}`, {
+            fill: '#1a1a1a',
+            duration: 0.6,
+            ease: 'power2.inOut'
+          }, '-=0.6')
+          // Label dorado
+          .to(`#label-${name}`, {
+            fill: '#ffb200',
+            duration: 0.6,
+            ease: 'power2.inOut'
+          }, '-=0.6');
 
         return tl;
       }
@@ -1867,11 +2317,13 @@
           { type: 'user', text: 'Necesito agendar una cita' },
           { type: 'bot', text: '¡Claro! Veo que prefieres las mañanas. ¿Te viene bien el miércoles a las 10am con la Dra. González?' },
           { type: 'user', text: 'Perfecto' },
-          { type: 'bot', text: 'Excelente. Confirmo:', checkmarks: [
-            'Cita agendada para 05/02 10:00',
-            'Recordatorio enviado a tu email',
-            'Preparación pre-consulta lista'
-          ]}
+          {
+            type: 'bot', text: 'Excelente. Confirmo:', checkmarks: [
+              'Cita agendada para 05/02 10:00',
+              'Recordatorio enviado a tu email',
+              'Preparación pre-consulta lista'
+            ]
+          }
         ]
       },
       {
@@ -1884,11 +2336,13 @@
           { type: 'user', text: 'Me duele la cabeza desde hace 3 días' },
           { type: 'bot', text: 'Entiendo tu preocupación. Veo en tu historial que tuviste migrañas en 2024. ¿Este dolor es similar? ¿Viene acompañado de sensibilidad a la luz?' },
           { type: 'user', text: 'Sí, es similar' },
-          { type: 'bot', text: 'Basándome en tu historial y síntomas:', checkmarks: [
-            'Recomiendo consulta con neurología',
-            'He enviado tus síntomas al Dr. Ramírez',
-            'Mientras tanto, evita pantallas brillantes'
-          ]}
+          {
+            type: 'bot', text: 'Basándome en tu historial y síntomas:', checkmarks: [
+              'Recomiendo consulta con neurología',
+              'He enviado tus síntomas al Dr. Ramírez',
+              'Mientras tanto, evita pantallas brillantes'
+            ]
+          }
         ]
       },
       {
@@ -1899,12 +2353,14 @@
         ],
         ai: [
           { type: 'user', text: 'Necesito enviar mis últimos análisis al especialista y agendar seguimiento' },
-          { type: 'bot', text: 'Perfecto, déjame ayudarte:', checkmarks: [
-            'Análisis de sangre (28/01) enviados al Dr. López',
-            'Seguimiento agendado para 12/02 a las 15:00',
-            'Recordatorio añadido a tu calendario',
-            'Preparación para la consulta lista'
-          ]},
+          {
+            type: 'bot', text: 'Perfecto, déjame ayudarte:', checkmarks: [
+              'Análisis de sangre (28/01) enviados al Dr. López',
+              'Seguimiento agendado para 12/02 a las 15:00',
+              'Recordatorio añadido a tu calendario',
+              'Preparación para la consulta lista'
+            ]
+          },
           { type: 'bot', text: '¿Necesitas algo más?' }
         ]
       }
@@ -2151,6 +2607,226 @@
       'la educación'
     ]);
     heroTypewriter.init();
+
+    // ===== Space Station Section =====
+
+    // Station coordinates (Tierra del Fuego)
+    const STATION_LAT = -54.8;
+    const STATION_LNG = -68.3;
+
+    // Convert degrees to radians
+    const toRad = deg => deg * Math.PI / 180;
+    const toDeg = rad => rad * 180 / Math.PI;
+    const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+
+    // Generate orbital path that passes through a specific point
+    function generateOrbitThroughPoint(inclination, passLat, passLng, altitude = 0.08, numPoints = 360) {
+      const incRad = toRad(inclination);
+      const passLatRad = toRad(passLat);
+      const passLngRad = toRad(passLng);
+
+      // Calculate argument of latitude where satellite is at passLat
+      const sinU = Math.sin(passLatRad) / Math.sin(incRad);
+      const u = Math.asin(clamp(sinU, -1, 1));
+
+      // Calculate RAAN to place orbit at correct longitude
+      const lngOffset = Math.atan2(Math.cos(incRad) * Math.sin(u), Math.cos(u));
+      const raanRad = passLngRad - lngOffset;
+
+      return Array.from({ length: numPoints + 1 }, (_, i) => {
+        const angle = (i / numPoints) * 2 * Math.PI;
+
+        // Circle in equatorial plane
+        const x0 = Math.cos(angle);
+        const y0 = Math.sin(angle);
+
+        // Rotate by inclination (X axis)
+        const y1 = y0 * Math.cos(incRad);
+        const z1 = y0 * Math.sin(incRad);
+
+        // Rotate by RAAN (Z axis)
+        const x2 = x0 * Math.cos(raanRad) - y1 * Math.sin(raanRad);
+        const y2 = x0 * Math.sin(raanRad) + y1 * Math.cos(raanRad);
+
+        return {
+          lat: toDeg(Math.asin(clamp(z1, -1, 1))),
+          lng: toDeg(Math.atan2(y2, x2)),
+          alt: altitude
+        };
+      });
+    }
+
+    // TinyGS Satellites - all orbits pass through Tierra del Fuego
+    const satellites = {
+      fossasat: {
+        name: 'FossaSat-2E',
+        color: '#ffb200',
+        orbit: generateOrbitThroughPoint(97, STATION_LAT, STATION_LNG, 0.08)
+      },
+      norbi: {
+        name: 'Norbi',
+        color: '#ff6b00',
+        orbit: generateOrbitThroughPoint(97.9, STATION_LAT, STATION_LNG + 30, 0.09)
+      },
+      siriussat: {
+        name: 'SiriusSat-1',
+        color: '#00d4ff',
+        orbit: generateOrbitThroughPoint(98, STATION_LAT, STATION_LNG - 25, 0.10)
+      }
+    };
+
+    let globe = null;
+
+    // Load external script dynamically
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        if (window.Globe) {
+          resolve();
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    // Globe.gl initialization with lazy loading
+    async function initGlobeGL() {
+      const container = document.getElementById('globe-gl');
+      const loading = document.getElementById('globe-loading');
+      const label = document.getElementById('globe-label');
+
+      if (!container) return;
+
+      try {
+        await loadScript('https://unpkg.com/globe.gl');
+
+        const size = container.offsetWidth || 500;
+
+        globe = window.Globe()
+          .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+          .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+          .backgroundImageUrl('')
+          .backgroundColor('rgba(0,0,0,0)')
+          .width(size)
+          .height(size)
+          .atmosphereColor('#ffb200')
+          .atmosphereAltitude(0.15)
+          .pointsData([{ lat: STATION_LAT, lng: STATION_LNG, size: 1.5, color: '#ffb200', name: 'Howenh TinyGS' }])
+          .pointAltitude(0.01)
+          .pointColor('color')
+          .pointRadius('size')
+          .pointsMerge(true)
+          .pathsData([])
+          .pathPoints('coords')
+          .pathPointLat(p => p.lat)
+          .pathPointLng(p => p.lng)
+          .pathPointAlt(p => p.alt)
+          .pathColor('color')
+          .pathStroke(2)
+          .pathDashLength(0.02)
+          .pathDashGap(0.01)
+          .pathDashAnimateTime(60000)
+          (container);
+
+        globe.pointOfView({ lat: -40, lng: -60, altitude: 2.5 }, 0);
+
+        const controls = globe.controls();
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.3;
+        controls.enableZoom = false;
+
+        if (loading) loading.style.display = 'none';
+        container.style.opacity = '1';
+
+        setTimeout(() => {
+          if (label) label.style.opacity = '1';
+        }, 500);
+
+        showAllOrbits();
+        animateSatellites();
+
+      } catch (error) {
+        console.error('Error loading Globe.gl:', error);
+        if (loading) {
+          loading.innerHTML = '<p class="text-red-400 text-sm">Error cargando el globo</p>';
+        }
+      }
+    }
+
+    // Show all satellite orbits
+    function showAllOrbits() {
+      if (!globe) return;
+
+      const allPaths = Object.values(satellites).map(sat => ({
+        coords: sat.orbit,
+        color: sat.color
+      }));
+
+      globe.pathsData(allPaths);
+    }
+
+    // Satellite positions in orbit (staggered start)
+    const satPositions = { fossasat: 0, norbi: 120, siriussat: 240 };
+
+    // Animate satellites along their orbits
+    function animateSatellites() {
+      if (!globe) return;
+
+      function updatePositions() {
+        const points = [
+          { lat: STATION_LAT, lng: STATION_LNG, size: 1.8, color: '#ffb200', name: 'Howenh TinyGS', alt: 0.01 }
+        ];
+
+        Object.entries(satellites).forEach(([key, sat]) => {
+          const pos = sat.orbit[satPositions[key]];
+          points.push({
+            lat: pos.lat,
+            lng: pos.lng,
+            alt: pos.alt,
+            size: 1.0,
+            color: sat.color,
+            name: sat.name
+          });
+          satPositions[key] = (satPositions[key] + 1) % sat.orbit.length;
+        });
+
+        globe.pointsData(points);
+        globe.pointAltitude(d => d.alt || 0.01);
+      }
+
+      setInterval(updatePositions, 100);
+      updatePositions();
+    }
+
+    // Initialize space station with lazy loading
+    function initSpaceStation() {
+      const spaceSection = document.getElementById('space-station');
+      if (!spaceSection) return;
+
+      let globeLoaded = false;
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !globeLoaded) {
+            globeLoaded = true;
+            setTimeout(initGlobeGL, 500);
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.1 });
+
+      observer.observe(spaceSection);
+    }
+
+    // Run when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSpaceStation);
+    } else {
+      initSpaceStation();
+    }
   </script>
 </body>
 

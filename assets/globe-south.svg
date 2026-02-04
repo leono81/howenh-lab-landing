@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <!-- Gradiente para el globo -->
+    <radialGradient id="globeGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a0a0a"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </radialGradient>
+    <!-- Brillo sutil -->
+    <radialGradient id="globeShine" cx="30%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.03)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <!-- Gradiente para órbitas -->
+    <linearGradient id="orbitGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="rgba(255,178,0,0)"/>
+      <stop offset="50%" stop-color="rgba(255,178,0,0.4)"/>
+      <stop offset="100%" stop-color="rgba(255,178,0,0)"/>
+    </linearGradient>
+    <!-- Glow para el punto de Tierra del Fuego -->
+    <filter id="stationGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Pulso animado -->
+    <filter id="pulseGlow" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fondo del globo -->
+  <circle cx="200" cy="200" r="180" fill="url(#globeGradient)" stroke="rgba(255,178,0,0.15)" stroke-width="1"/>
+  <circle cx="200" cy="200" r="180" fill="url(#globeShine)"/>
+
+  <!-- Grilla de meridianos (líneas verticales curvas) - vista polar sur -->
+  <g stroke="rgba(255,255,255,0.04)" stroke-width="0.5" fill="none">
+    <!-- Meridianos cada 30 grados -->
+    <ellipse cx="200" cy="200" rx="180" ry="45" transform="rotate(0 200 200)"/>
+    <ellipse cx="200" cy="200" rx="180" ry="45" transform="rotate(30 200 200)"/>
+    <ellipse cx="200" cy="200" rx="180" ry="45" transform="rotate(60 200 200)"/>
+    <ellipse cx="200" cy="200" rx="180" ry="45" transform="rotate(90 200 200)"/>
+    <ellipse cx="200" cy="200" rx="180" ry="45" transform="rotate(120 200 200)"/>
+    <ellipse cx="200" cy="200" rx="180" ry="45" transform="rotate(150 200 200)"/>
+  </g>
+
+  <!-- Paralelos (círculos concéntricos desde el polo sur) -->
+  <g stroke="rgba(255,255,255,0.04)" stroke-width="0.5" fill="none">
+    <!-- Ecuador (borde) ya está como el círculo principal -->
+    <!-- Paralelos sur: -30, -45, -60, -75 grados -->
+    <circle cx="200" cy="200" r="150"/> <!-- ~30°S -->
+    <circle cx="200" cy="200" r="120"/> <!-- ~45°S -->
+    <circle cx="200" cy="200" r="85"/>  <!-- ~60°S -->
+    <circle cx="200" cy="200" r="45"/>  <!-- ~75°S -->
+    <!-- Círculo Polar Antártico aproximado -->
+    <circle cx="200" cy="200" r="65" stroke="rgba(255,255,255,0.06)"/>
+  </g>
+
+  <!-- Antártida (centro de la vista polar) -->
+  <path d="M200 200
+           C160 180, 130 190, 125 210
+           C115 240, 135 270, 160 275
+           C175 280, 190 275, 200 280
+           C215 278, 235 285, 255 275
+           C280 265, 295 235, 285 210
+           C278 190, 250 175, 200 200Z"
+        fill="#1a1a1a" stroke="rgba(255,178,0,0.1)" stroke-width="0.8"/>
+  <!-- Península Antártica (hacia Tierra del Fuego) -->
+  <path d="M160 275 C155 290, 145 305, 140 315 C138 320, 142 322, 148 318 C155 310, 165 295, 168 280"
+        fill="#1a1a1a" stroke="rgba(255,178,0,0.1)" stroke-width="0.8"/>
+
+  <!-- Sudamérica (vista desde el sur, parte inferior visible) -->
+  <path d="M95 55
+           C100 70, 105 90, 100 110
+           C95 130, 85 150, 80 175
+           C78 190, 82 210, 90 230
+           C98 250, 108 270, 115 285
+           C120 295, 128 310, 130 325
+           C132 335, 128 345, 122 355
+           L118 360
+           C115 362, 112 358, 115 352
+           C120 340, 125 325, 120 310
+           C115 295, 105 275, 95 255
+           C85 235, 75 210, 72 185
+           C70 160, 75 130, 85 105
+           C90 85, 88 65, 95 55Z"
+        fill="#1a1a1a" stroke="rgba(255,178,0,0.1)" stroke-width="0.8"/>
+  <!-- Tierra del Fuego (isla separada) -->
+  <path d="M122 355 C128 352, 138 350, 145 355 C150 360, 148 368, 140 370 C132 372, 120 368, 118 362 C117 358, 119 356, 122 355Z"
+        fill="#1a1a1a" stroke="rgba(255,178,0,0.12)" stroke-width="1"/>
+
+  <!-- África (sur, lado derecho) -->
+  <path d="M305 45
+           C315 60, 328 85, 335 115
+           C342 145, 345 180, 340 210
+           C335 240, 320 265, 300 280
+           C290 288, 280 290, 275 285
+           C270 275, 278 260, 285 240
+           C295 215, 302 185, 300 155
+           C298 125, 290 95, 285 70
+           C282 55, 290 45, 305 45Z"
+        fill="#1a1a1a" stroke="rgba(255,178,0,0.1)" stroke-width="0.8"/>
+
+  <!-- Australia -->
+  <path d="M340 140
+           C355 145, 370 160, 375 180
+           C378 195, 372 215, 360 230
+           C350 242, 332 250, 315 248
+           C300 246, 290 235, 295 220
+           C298 205, 315 195, 325 180
+           C332 168, 330 150, 340 140Z"
+        fill="#1a1a1a" stroke="rgba(255,178,0,0.1)" stroke-width="0.8"/>
+  <!-- Tasmania -->
+  <path d="M350 250 C358 252, 365 260, 362 268 C359 275, 350 275, 345 270 C340 265, 343 255, 350 250Z"
+        fill="#1a1a1a" stroke="rgba(255,178,0,0.1)" stroke-width="0.8"/>
+
+  <!-- Nueva Zelanda -->
+  <path d="M375 220 C380 225, 382 235, 378 245 C375 252, 368 250, 370 242 C372 235, 370 225, 375 220Z"
+        fill="#1a1a1a" stroke="rgba(255,178,0,0.1)" stroke-width="0.8"/>
+  <path d="M378 255 C382 258, 383 268, 379 275 C376 280, 372 278, 374 272 C376 266, 375 258, 378 255Z"
+        fill="#1a1a1a" stroke="rgba(255,178,0,0.1)" stroke-width="0.8"/>
+
+  <!-- Órbitas de satélites LEO -->
+  <g fill="none" stroke-width="1">
+    <!-- Órbita 1 - inclinada -->
+    <ellipse cx="200" cy="200" rx="195" ry="70" transform="rotate(-25 200 200)"
+             stroke="url(#orbitGradient)" opacity="0.6"/>
+    <!-- Órbita 2 - inclinada opuesta -->
+    <ellipse cx="200" cy="200" rx="192" ry="65" transform="rotate(40 200 200)"
+             stroke="url(#orbitGradient)" opacity="0.5"/>
+    <!-- Órbita 3 - casi polar -->
+    <ellipse cx="200" cy="200" rx="190" ry="55" transform="rotate(-70 200 200)"
+             stroke="url(#orbitGradient)" opacity="0.4"/>
+    <!-- Órbita 4 - ecuatorial desde perspectiva sur -->
+    <ellipse cx="200" cy="200" rx="188" ry="35" transform="rotate(10 200 200)"
+             stroke="url(#orbitGradient)" opacity="0.3"/>
+  </g>
+
+  <!-- Satélites en órbita (pequeños puntos) -->
+  <g fill="#ffb200">
+    <circle cx="85" cy="145" r="2" opacity="0.8"/>
+    <circle cx="340" cy="260" r="2" opacity="0.7"/>
+    <circle cx="250" cy="55" r="2" opacity="0.6"/>
+    <circle cx="120" cy="320" r="1.5" opacity="0.5"/>
+  </g>
+
+  <!-- Punto de la estación en Tierra del Fuego -->
+  <!-- Posición aproximada: -54.8°S, -68°W proyectado -->
+  <g filter="url(#stationGlow)">
+    <circle cx="130" cy="358" r="4" fill="#ffb200"/>
+  </g>
+  <!-- Anillo de pulso -->
+  <circle cx="130" cy="358" r="8" fill="none" stroke="#ffb200" stroke-width="1" opacity="0.4">
+    <animate attributeName="r" values="4;14;4" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Segundo anillo de pulso (desfasado) -->
+  <circle cx="130" cy="358" r="8" fill="none" stroke="#ffb200" stroke-width="0.5" opacity="0.3">
+    <animate attributeName="r" values="4;18;4" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+    <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+  </circle>
+
+  <!-- Líneas de conexión desde Tierra del Fuego hacia satélites (uplinks) -->
+  <g stroke="#ffb200" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.3">
+    <line x1="130" y1="358" x2="85" y2="145"/>
+    <line x1="130" y1="358" x2="120" y2="320"/>
+  </g>
+
+  <!-- Borde exterior sutil del globo -->
+  <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(255,178,0,0.08)" stroke-width="2"/>
+</svg>
