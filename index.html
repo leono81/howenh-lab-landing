@@ -117,10 +117,6 @@
       animation-delay: 0.5s;
     }
 
-    .delay-700 {
-      animation-delay: 0.7s;
-    }
-
     .delay-1000 {
       animation-delay: 1s;
     }
@@ -149,9 +145,32 @@
       font-weight: 500;
     }
 
-    /* Navbar floating animation */
-    .navbar-floating {
-      transition: all 0.4s ease;
+    /* Typewriter effect for rotating words */
+    .typewriter-word {
+      display: inline-block;
+      position: relative;
+      min-width: 1ch;
+    }
+
+    .typewriter-cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1.1em;
+      background: #ffb200;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: cursor-blink 0.7s step-end infinite;
+      box-shadow: 0 0 8px rgba(255, 178, 0, 0.6), 0 0 16px rgba(255, 178, 0, 0.3);
+    }
+
+    @keyframes cursor-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Subtle glow pulse on the word while typing */
+    .typewriter-word.typing {
+      text-shadow: 0 0 20px rgba(255, 178, 0, 0.4);
     }
 
     /* Scroll indicator */
@@ -189,10 +208,6 @@
     /* Content sections (flexible height) */
     .section-content {
       min-height: 70vh;
-    }
-
-    .section-content-lg {
-      min-height: 80vh;
     }
 
     /* Workflow animation - styles managed by GSAP */
@@ -255,59 +270,263 @@
       filter: url(#wave-distortion);
     }
 
-    /* Kenos Parallax Windows */
-    .kenos-window {
-      position: absolute;
-      background: #18181B;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-      transition: transform 0.3s ease, z-index 0s;
+    /* Kenos Card Stack - Fan Out Effect */
+    .kenos-stack-container {
+      perspective: 1200px;
+      perspective-origin: center center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 500px;
+      padding: 60px 20px;
+    }
+
+    .kenos-stack {
+      position: relative;
+      width: 420px;
+      height: 380px;
       transform-style: preserve-3d;
     }
 
-    .kenos-window:hover {
-      transform: scale(1.02) !important;
-      z-index: 100 !important;
-      box-shadow: 0 30px 80px rgba(255, 178, 0, 0.3);
+    .kenos-card {
+      position: absolute;
+      width: 420px;
+      height: 380px;
+      background: linear-gradient(145deg, #1f1f23 0%, #18181B 50%, #141417 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 10px 20px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-style: preserve-3d;
+      cursor: pointer;
+      overflow: hidden;
     }
 
-    .window-chrome {
-      background: #0A0A0B;
-      border-radius: 12px 12px 0 0;
-      padding: 12px;
+    /* Stack positioning (back to front) */
+    .kenos-card:nth-child(1) {
+      --stack-x: -120px;
+      --stack-y: -75px;
+      --fan-x: -480px;
+      --fan-rotate: -12deg;
+      z-index: 1;
+    }
+
+    .kenos-card:nth-child(2) {
+      --stack-x: -80px;
+      --stack-y: -50px;
+      --fan-x: -160px;
+      --fan-rotate: -4deg;
+      z-index: 2;
+    }
+
+    .kenos-card:nth-child(3) {
+      --stack-x: -40px;
+      --stack-y: -25px;
+      --fan-x: 160px;
+      --fan-rotate: 4deg;
+      z-index: 3;
+    }
+
+    .kenos-card:nth-child(4) {
+      --stack-x: 0px;
+      --stack-y: 0px;
+      --fan-x: 480px;
+      --fan-rotate: 12deg;
+      z-index: 4;
+    }
+
+    /* Initial stack state */
+    .kenos-card {
+      transform:
+        translateX(var(--stack-x))
+        translateY(var(--stack-y))
+        rotateY(-5deg)
+        rotateX(2deg);
+    }
+
+    /* Fan out on container hover */
+    .kenos-stack:hover .kenos-card {
+      transform:
+        translateX(var(--fan-x))
+        translateY(0)
+        rotateY(0deg)
+        rotateX(0deg)
+        rotate(var(--fan-rotate));
+      opacity: 0.85;
+    }
+
+    /* Individual card hover - bring to front */
+    .kenos-stack:hover .kenos-card:hover {
+      transform:
+        translateX(var(--fan-x))
+        translateY(-20px)
+        rotateY(0deg)
+        rotateX(0deg)
+        rotate(0deg)
+        scale(1.08);
+      z-index: 100 !important;
+      opacity: 1;
+      box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.6),
+        0 20px 40px rgba(255, 178, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 178, 0, 0.3);
+    }
+
+    /* Card inner structure */
+    .kenos-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       display: flex;
       align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid #2A2A2E;
+      gap: 14px;
     }
 
-    .window-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
+    .kenos-card-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, rgba(255, 178, 0, 0.2) 0%, rgba(255, 178, 0, 0.05) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 178, 0, 0.2);
     }
 
-    .window-content {
-      padding: 20px;
-      background: #18181B;
-      border-radius: 0 0 12px 12px;
-      min-height: 300px;
+    .kenos-card-icon span {
+      color: #ffb200;
+      font-size: 22px;
     }
 
-    .kenos-window[data-depth="0.3"] {
-      z-index: 10;
+    .kenos-card-title {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
     }
 
-    .kenos-window[data-depth="0.5"] {
-      z-index: 20;
+    .kenos-card-subtitle {
+      color: #71717A;
+      font-size: 12px;
+      margin-top: 2px;
     }
 
-    .kenos-window[data-depth="0.7"] {
-      z-index: 30;
+    .kenos-card-body {
+      padding: 20px 24px;
+      height: calc(100% - 85px);
+      overflow: hidden;
     }
 
-    .kenos-window[data-depth="0.9"] {
-      z-index: 40;
+    /* Card number indicator */
+    .kenos-card::before {
+      content: attr(data-card-number);
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      font-size: 64px;
+      font-weight: 700;
+      color: rgba(255, 178, 0, 0.06);
+      line-height: 1;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Shine effect on hover */
+    .kenos-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.03) 50%,
+        transparent 100%
+      );
+      transition: left 0.6s ease;
+      pointer-events: none;
+    }
+
+    .kenos-stack:hover .kenos-card:hover::after {
+      left: 100%;
+    }
+
+    /* Mobile: Horizontal carousel */
+    @media (max-width: 1200px) {
+      .kenos-stack-container {
+        padding: 40px 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+      }
+
+      .kenos-stack {
+        display: flex;
+        gap: 20px;
+        width: auto;
+        height: auto;
+        padding: 20px 40px;
+      }
+
+      .kenos-card {
+        position: relative;
+        flex-shrink: 0;
+        width: 340px;
+        height: 360px;
+        scroll-snap-align: center;
+        transform: none !important;
+        opacity: 1 !important;
+        --stack-x: 0;
+        --stack-y: 0;
+        --fan-x: 0;
+        --fan-rotate: 0deg;
+      }
+
+      .kenos-card:nth-child(1),
+      .kenos-card:nth-child(2),
+      .kenos-card:nth-child(3),
+      .kenos-card:nth-child(4) {
+        z-index: 1;
+      }
+
+      .kenos-stack:hover .kenos-card,
+      .kenos-stack:hover .kenos-card:hover {
+        transform: none !important;
+      }
+
+      .kenos-card:hover {
+        transform: translateY(-10px) !important;
+        box-shadow:
+          0 30px 60px rgba(0, 0, 0, 0.5),
+          0 15px 30px rgba(255, 178, 0, 0.1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .kenos-card {
+        width: 300px;
+        height: 340px;
+      }
+
+      .kenos-card-header {
+        padding: 16px 20px;
+      }
+
+      .kenos-card-body {
+        padding: 16px 20px;
+      }
+
+      .kenos-card::before {
+        font-size: 48px;
+        right: 20px;
+      }
     }
 
     /* Chatbot Messages */
@@ -415,47 +634,10 @@
 
     /* Mobile Responsive Fixes */
     @media (max-width: 768px) {
-      /* Workflow SVG smaller and adjust viewBox */
       #workflow-animation {
         height: 500px;
       }
 
-      #workflow-svg {
-        viewBox: 0 0 1200 800;
-      }
-
-      /* Scale down nodes for mobile */
-      .process-node circle {
-        r: 40;
-      }
-
-      .capability-node circle {
-        r: 35;
-      }
-
-      #ai-node .ai-core {
-        r: 45;
-      }
-
-      /* Kenos windows stack */
-      .kenos-window {
-        position: relative !important;
-        width: 100% !important;
-        max-width: 400px;
-        margin: 0 auto 20px !important;
-        top: auto !important;
-        left: auto !important;
-        transform: none !important;
-      }
-
-      #kenos-parallax {
-        height: auto !important;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      /* Chatbot single column */
       #chatbot .grid {
         grid-template-columns: 1fr;
       }
@@ -467,10 +649,6 @@
 
     /* Accessibility: Reduced Motion */
     @media (prefers-reduced-motion: reduce) {
-      .workflow-connection {
-        animation: none;
-      }
-
       .typing-dot {
         animation: none;
       }
@@ -547,10 +725,9 @@
     <div class="flex-1 flex items-center justify-end pr-16 md:pr-24">
       <div class="max-w-4xl">
         <h1 class="hero-title text-white text-glow text-right">
-          <span class="block animate-reveal delay-1000"><span class="text-primary">Redefiniendo</span> los
-            límites</span>
-          <span class="block animate-reveal delay-1500">de la eficiencia operativa</span>
-          <span class="block animate-reveal delay-2000">con <span class="text-primary">IA Aplicada</span>.</span>
+          <span class="block animate-reveal delay-1000"><span class="text-primary">Redefiniendo</span>
+            <span id="typewriter-container" class="typewriter-word typing"><span id="typewriter-text"></span><span class="typewriter-cursor"></span></span></span>
+          <span class="block animate-reveal delay-1500">con <span class="text-primary">IA Aplicada</span>.</span>
         </h1>
       </div>
     </div>
@@ -732,111 +909,111 @@
             </g>
 
             <!-- LAYER 1b: Atmospheric glow (appears with AI node) -->
-            <ellipse id="ai-atmosphere" cx="450" cy="300" rx="220" ry="180" fill="url(#atmospheric-glow)" opacity="0"/>
+            <ellipse id="ai-atmosphere" cx="500" cy="300" rx="220" ry="180" fill="url(#atmospheric-glow)" opacity="0"/>
 
             <!-- PROCESS NODES - ORBES CRISTALINOS -->
             <g id="process-nodes">
-              <!-- Entrada - Position 150 -->
+              <!-- Entrada - Position 200 -->
               <g id="node-entrada" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
                 <!-- Sombra elíptica del orbe -->
-                <ellipse class="orbe-floor-shadow" cx="150" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
+                <ellipse class="orbe-floor-shadow" cx="200" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
                 <!-- Círculo principal del orbe -->
-                <circle id="circle-entrada" cx="150" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
+                <circle id="circle-entrada" cx="200" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
                 <!-- Reflejo highlight superior -->
-                <ellipse class="orbe-highlight" cx="138" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
+                <ellipse class="orbe-highlight" cx="188" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
                 <!-- Texto del nodo -->
-                <text id="text-entrada" x="150" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Entrada</text>
+                <text id="text-entrada" x="200" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Entrada</text>
                 <!-- Label debajo -->
-                <text id="label-entrada" x="150" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Recepción</text>
+                <text id="label-entrada" x="200" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Recepción</text>
               </g>
 
-              <!-- Documentos - Position 350 -->
+              <!-- Documentos - Position 400 -->
               <g id="node-documentos" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
-                <ellipse class="orbe-floor-shadow" cx="350" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
-                <circle id="circle-documentos" cx="350" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
-                <ellipse class="orbe-highlight" cx="338" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
-                <text id="text-documentos" x="350" y="125" text-anchor="middle" fill="#A1A1AA" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Documentos</text>
-                <text id="label-documentos" x="350" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Gestión</text>
+                <ellipse class="orbe-floor-shadow" cx="400" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
+                <circle id="circle-documentos" cx="400" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
+                <ellipse class="orbe-highlight" cx="388" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
+                <text id="text-documentos" x="400" y="125" text-anchor="middle" fill="#A1A1AA" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Documentos</text>
+                <text id="label-documentos" x="400" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Gestión</text>
               </g>
 
-              <!-- Controles - Position 550 -->
+              <!-- Controles - Position 600 -->
               <g id="node-controles" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
-                <ellipse class="orbe-floor-shadow" cx="550" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
-                <circle id="circle-controles" cx="550" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
-                <ellipse class="orbe-highlight" cx="538" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
-                <text id="text-controles" x="550" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Controles</text>
-                <text id="label-controles" x="550" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Verificación</text>
+                <ellipse class="orbe-floor-shadow" cx="600" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
+                <circle id="circle-controles" cx="600" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
+                <ellipse class="orbe-highlight" cx="588" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
+                <text id="text-controles" x="600" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Controles</text>
+                <text id="label-controles" x="600" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Verificación</text>
               </g>
 
-              <!-- Métricas - Position 750 -->
+              <!-- Métricas - Position 800 -->
               <g id="node-metricas" class="process-node orbe-node" filter="url(#orbe-shadow-inactive)">
-                <ellipse class="orbe-floor-shadow" cx="750" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
-                <circle id="circle-metricas" cx="750" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
-                <ellipse class="orbe-highlight" cx="738" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
-                <text id="text-metricas" x="750" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Métricas</text>
-                <text id="label-metricas" x="750" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Medición</text>
+                <ellipse class="orbe-floor-shadow" cx="800" cy="175" rx="40" ry="10" fill="#ffb200" opacity="0" />
+                <circle id="circle-metricas" cx="800" cy="120" r="50" fill="url(#orbe-gradient-inactive)" />
+                <ellipse class="orbe-highlight" cx="788" cy="100" rx="22" ry="14" fill="url(#orbe-highlight)" opacity="0.4" />
+                <text id="text-metricas" x="800" y="125" text-anchor="middle" fill="#A1A1AA" font-size="14" font-weight="600" font-family="Space Grotesk, sans-serif">Métricas</text>
+                <text id="label-metricas" x="800" y="195" text-anchor="middle" fill="#71717A" font-size="11" font-family="Noto Sans, sans-serif">Medición</text>
               </g>
             </g>
 
             <!-- Connections between process nodes (animated dashes) -->
             <g id="process-connections" stroke="#52525B" stroke-width="2" fill="none">
-              <line id="conn-1-2" class="animated-dash" x1="205" y1="120" x2="295" y2="120" stroke-dasharray="8,6" opacity="0.6" />
-              <line id="conn-2-3" class="animated-dash" x1="405" y1="120" x2="495" y2="120" stroke-dasharray="8,6" opacity="0.6" />
-              <line id="conn-3-4" class="animated-dash" x1="605" y1="120" x2="695" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+              <line id="conn-1-2" class="animated-dash" x1="255" y1="120" x2="345" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+              <line id="conn-2-3" class="animated-dash" x1="455" y1="120" x2="545" y2="120" stroke-dasharray="8,6" opacity="0.6" />
+              <line id="conn-3-4" class="animated-dash" x1="655" y1="120" x2="745" y2="120" stroke-dasharray="8,6" opacity="0.6" />
             </g>
 
-            <!-- AI Node - Centered at x=450 (midpoint between 350 and 550) -->
+            <!-- AI Node - Centered at x=500 (midpoint between 400 and 600) -->
             <g id="ai-node" opacity="0">
               <!-- Outer pulsing rings -->
-              <circle id="ai-ring-3" cx="450" cy="300" r="85" fill="none" stroke="#ffb200" stroke-width="1" opacity="0" />
-              <circle id="ai-ring-2" cx="450" cy="300" r="75" fill="none" stroke="#ffb200" stroke-width="1" opacity="0" />
-              <circle id="ai-ring-1" cx="450" cy="300" r="65" fill="none" stroke="#ffb200" stroke-width="2" opacity="0" />
+              <circle id="ai-ring-3" cx="500" cy="300" r="85" fill="none" stroke="#ffb200" stroke-width="1" opacity="0" />
+              <circle id="ai-ring-2" cx="500" cy="300" r="75" fill="none" stroke="#ffb200" stroke-width="1" opacity="0" />
+              <circle id="ai-ring-1" cx="500" cy="300" r="65" fill="none" stroke="#ffb200" stroke-width="2" opacity="0" />
 
               <!-- Main AI circle with glow -->
-              <circle id="ai-core" cx="450" cy="300" r="55" fill="url(#ai-gradient)" filter="url(#ai-glow)" />
+              <circle id="ai-core" cx="500" cy="300" r="55" fill="url(#ai-gradient)" filter="url(#ai-glow)" />
 
               <!-- AI Text -->
-              <text x="450" y="310" text-anchor="middle" fill="#1a1a1a" font-size="28" font-weight="bold" font-family="Space Grotesk, sans-serif">IA</text>
-              <text id="ai-label" x="450" y="240" text-anchor="middle" fill="#ffb200" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif" letter-spacing="2" opacity="0">CORE ENGINE</text>
+              <text x="500" y="310" text-anchor="middle" fill="#1a1a1a" font-size="28" font-weight="bold" font-family="Space Grotesk, sans-serif">IA</text>
+              <text id="ai-label" x="500" y="240" text-anchor="middle" fill="#ffb200" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif" letter-spacing="2" opacity="0">CORE ENGINE</text>
             </g>
 
             <!-- AI Connections to process nodes (curved paths) -->
             <g id="ai-connections" opacity="0">
-              <path id="ai-conn-entrada" d="M 410 260 Q 280 180, 180 150" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
-              <path id="ai-conn-documentos" d="M 420 250 Q 380 180, 350 160" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
-              <path id="ai-conn-controles" d="M 480 250 Q 520 180, 550 160" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
-              <path id="ai-conn-metricas" d="M 490 260 Q 620 180, 720 150" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path id="ai-conn-entrada" d="M 460 260 Q 330 180, 230 150" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path id="ai-conn-documentos" d="M 470 250 Q 430 180, 400 160" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path id="ai-conn-controles" d="M 530 250 Q 570 180, 600 160" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path id="ai-conn-metricas" d="M 540 260 Q 670 180, 770 150" stroke="#ffb200" stroke-width="2.5" fill="none" stroke-linecap="round" />
             </g>
 
             <!-- New AI-powered capabilities -->
             <g id="ai-capabilities" opacity="0">
               <!-- Analítica -->
               <g id="node-analitica">
-                <circle cx="280" cy="460" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
-                <text x="280" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Analítica</text>
-                <text x="280" y="520" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Insights IA</text>
+                <circle cx="330" cy="460" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
+                <text x="330" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Analítica</text>
+                <text x="330" y="520" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Insights IA</text>
               </g>
 
               <!-- Optimización -->
               <g id="node-optimizacion">
-                <circle cx="450" cy="480" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
-                <text x="450" y="485" text-anchor="middle" fill="#1a1a1a" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Optimización</text>
-                <text x="450" y="540" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Auto-mejora</text>
+                <circle cx="500" cy="480" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
+                <text x="500" y="485" text-anchor="middle" fill="#1a1a1a" font-size="12" font-weight="600" font-family="Space Grotesk, sans-serif">Optimización</text>
+                <text x="500" y="540" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Auto-mejora</text>
               </g>
 
               <!-- Predicción -->
               <g id="node-prediccion">
-                <circle cx="620" cy="460" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
-                <text x="620" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Predicción</text>
-                <text x="620" y="520" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Forecasting</text>
+                <circle cx="670" cy="460" r="45" fill="url(#ai-gradient)" filter="url(#node-glow)" />
+                <text x="670" y="465" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif">Predicción</text>
+                <text x="670" y="520" text-anchor="middle" fill="#ffb200" font-size="10" font-family="Noto Sans, sans-serif">Forecasting</text>
               </g>
             </g>
 
             <!-- Connections from AI to capabilities -->
             <g id="capability-connections" opacity="0">
-              <path id="cap-conn-analitica" d="M 410 340 Q 340 400, 300 430" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
-              <path id="cap-conn-optimizacion" d="M 450 355 L 450 435" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
-              <path id="cap-conn-prediccion" d="M 490 340 Q 560 400, 600 430" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path id="cap-conn-analitica" d="M 460 340 Q 390 400, 350 430" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path id="cap-conn-optimizacion" d="M 500 355 L 500 435" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path id="cap-conn-prediccion" d="M 540 340 Q 610 400, 650 430" stroke="#ffb200" stroke-width="2" fill="none" stroke-linecap="round" />
             </g>
 
             <!-- LAYER 2: Data particles flowing through connections -->
@@ -862,221 +1039,6 @@
               <circle class="data-particle particle-metricas" r="2.5" fill="#ffe066" opacity="0"/>
             </g>
           </svg>
-        </div>
-      </div>
-    </section>
-
-    <!-- Kenos Section with Parallax -->
-    <section id="kenos" class="section-fullscreen py-12 px-6 md:px-12 bg-void relative overflow-hidden">
-      <div class="max-w-7xl mx-auto">
-        <!-- Title -->
-        <div class="text-center mb-16">
-          <h2 class="text-white text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Kenos Medical SaaS
-          </h2>
-          <p class="text-gray-400 text-lg max-w-2xl mx-auto">
-            Plataforma integral para el futuro de la salud digital
-          </p>
-        </div>
-
-        <!-- Parallax Container -->
-        <div id="kenos-parallax" class="relative h-[600px] md:h-[700px]"
-             style="perspective: 1200px; perspective-origin: center;">
-          <!-- Window 1: Dashboard (depth 0.3) -->
-          <div class="kenos-window" data-depth="0.3" style="width: 500px; top: 50px; left: 50px;">
-            <!-- Chrome -->
-            <div class="window-chrome">
-              <div class="window-dot" style="background: #FF5F57;"></div>
-              <div class="window-dot" style="background: #FFBD2E;"></div>
-              <div class="window-dot" style="background: #28CA42;"></div>
-              <span class="text-gray-500 text-xs ml-4">kenos.app/dashboard</span>
-            </div>
-
-            <!-- Content -->
-            <div class="window-content">
-              <div class="flex items-center gap-3 mb-6">
-                <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
-                  <span class="text-primary font-bold text-sm">K</span>
-                </div>
-                <span class="text-white font-semibold">Dashboard Principal</span>
-              </div>
-
-              <!-- Stats Grid -->
-              <div class="grid grid-cols-3 gap-4 mb-6">
-                <div class="bg-void p-4 rounded-lg">
-                  <div class="text-gray-500 text-xs mb-1">Pacientes Activos</div>
-                  <div class="text-white text-2xl font-bold">247</div>
-                  <div class="text-green-500 text-xs">+12% vs ayer</div>
-                </div>
-                <div class="bg-void p-4 rounded-lg">
-                  <div class="text-gray-500 text-xs mb-1">Citas Hoy</div>
-                  <div class="text-white text-2xl font-bold">18</div>
-                  <div class="text-gray-500 text-xs">6 completadas</div>
-                </div>
-                <div class="bg-void p-4 rounded-lg">
-                  <div class="text-gray-500 text-xs mb-1">Alertas</div>
-                  <div class="text-white text-2xl font-bold">3</div>
-                  <div class="text-yellow-500 text-xs">Revisar</div>
-                </div>
-              </div>
-
-              <!-- Simple chart placeholder -->
-              <div class="bg-void p-4 rounded-lg">
-                <div class="text-gray-400 text-xs mb-2">Actividad Semanal</div>
-                <div class="flex items-end gap-2 h-20">
-                  <div class="bg-primary/30 w-full rounded-t" style="height: 40%;"></div>
-                  <div class="bg-primary/50 w-full rounded-t" style="height: 65%;"></div>
-                  <div class="bg-primary/40 w-full rounded-t" style="height: 50%;"></div>
-                  <div class="bg-primary/70 w-full rounded-t" style="height: 85%;"></div>
-                  <div class="bg-primary w-full rounded-t" style="height: 100%;"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Window 2: Pacientes (depth 0.5) -->
-          <div class="kenos-window" data-depth="0.5" style="width: 480px; top: 120px; left: 600px;">
-            <div class="window-chrome">
-              <div class="window-dot" style="background: #FF5F57;"></div>
-              <div class="window-dot" style="background: #FFBD2E;"></div>
-              <div class="window-dot" style="background: #28CA42;"></div>
-              <span class="text-gray-500 text-xs ml-4">kenos.app/pacientes</span>
-            </div>
-
-            <div class="window-content">
-              <div class="flex items-center gap-3 mb-6">
-                <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
-                  <span class="text-primary font-bold text-sm">K</span>
-                </div>
-                <span class="text-white font-semibold">Gestión de Pacientes</span>
-              </div>
-
-              <!-- Patient list -->
-              <div class="space-y-3">
-                <div class="bg-void p-3 rounded-lg flex items-center justify-between">
-                  <div>
-                    <div class="text-white text-sm font-medium">María González</div>
-                    <div class="text-gray-500 text-xs">ID: #4521 • Última visita: Hoy</div>
-                  </div>
-                  <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                </div>
-                <div class="bg-void p-3 rounded-lg flex items-center justify-between">
-                  <div>
-                    <div class="text-white text-sm font-medium">Carlos Ramírez</div>
-                    <div class="text-gray-500 text-xs">ID: #4518 • Última visita: 28/01</div>
-                  </div>
-                  <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                </div>
-                <div class="bg-void p-3 rounded-lg flex items-center justify-between">
-                  <div>
-                    <div class="text-white text-sm font-medium">Ana Martínez</div>
-                    <div class="text-gray-500 text-xs">ID: #4502 • Última visita: 25/01</div>
-                  </div>
-                  <div class="w-2 h-2 rounded-full bg-gray-500"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Window 3: Vitales (depth 0.7) -->
-          <div class="kenos-window" data-depth="0.7" style="width: 460px; top: 250px; left: 100px;">
-            <div class="window-chrome">
-              <div class="window-dot" style="background: #FF5F57;"></div>
-              <div class="window-dot" style="background: #FFBD2E;"></div>
-              <div class="window-dot" style="background: #28CA42;"></div>
-              <span class="text-gray-500 text-xs ml-4">kenos.app/vitales</span>
-            </div>
-
-            <div class="window-content">
-              <div class="flex items-center gap-3 mb-6">
-                <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
-                  <span class="text-primary font-bold text-sm">K</span>
-                </div>
-                <span class="text-white font-semibold">Monitor de Vitales</span>
-              </div>
-
-              <div class="space-y-4">
-                <div class="bg-void p-4 rounded-lg">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-gray-400 text-sm">Frecuencia Cardíaca</span>
-                    <span class="text-primary text-lg font-bold">72 bpm</span>
-                  </div>
-                  <div class="h-12 flex items-end gap-1">
-                    <div class="bg-primary/20 w-1 rounded-t" style="height: 40%;"></div>
-                    <div class="bg-primary/30 w-1 rounded-t" style="height: 60%;"></div>
-                    <div class="bg-primary/40 w-1 rounded-t" style="height: 45%;"></div>
-                    <div class="bg-primary/50 w-1 rounded-t" style="height: 70%;"></div>
-                    <div class="bg-primary/60 w-1 rounded-t" style="height: 55%;"></div>
-                    <div class="bg-primary/70 w-1 rounded-t" style="height: 65%;"></div>
-                    <div class="bg-primary w-1 rounded-t" style="height: 50%;"></div>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="bg-void p-3 rounded-lg">
-                    <div class="text-gray-400 text-xs">Presión</div>
-                    <div class="text-white font-semibold">120/80</div>
-                  </div>
-                  <div class="bg-void p-3 rounded-lg">
-                    <div class="text-gray-400 text-xs">SpO2</div>
-                    <div class="text-white font-semibold">98%</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Window 4: IA Analytics (depth 0.9) -->
-          <div class="kenos-window" data-depth="0.9" style="width: 500px; top: 300px; left: 620px;">
-            <div class="window-chrome">
-              <div class="window-dot" style="background: #FF5F57;"></div>
-              <div class="window-dot" style="background: #FFBD2E;"></div>
-              <div class="window-dot" style="background: #28CA42;"></div>
-              <span class="text-gray-500 text-xs ml-4">kenos.app/ia-analytics</span>
-            </div>
-
-            <div class="window-content">
-              <div class="flex items-center gap-3 mb-6">
-                <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
-                  <span class="text-primary font-bold text-sm">K</span>
-                </div>
-                <span class="text-white font-semibold">Predicciones IA</span>
-              </div>
-
-              <div class="space-y-4">
-                <div class="bg-void p-4 rounded-lg border-l-2 border-primary">
-                  <div class="flex items-start gap-3">
-                    <div class="text-2xl">⚠️</div>
-                    <div>
-                      <div class="text-white text-sm font-medium mb-1">Alerta Temprana</div>
-                      <div class="text-gray-400 text-xs mb-2">
-                        Patrón detectado en paciente #4521 sugiere atención preventiva
-                      </div>
-                      <div class="text-primary text-xs">Confianza: 87%</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="bg-void p-4 rounded-lg">
-                  <div class="text-gray-400 text-xs mb-2">Insights Automáticos</div>
-                  <div class="space-y-2 text-xs">
-                    <div class="flex items-center gap-2 text-gray-300">
-                      <div class="w-1 h-1 bg-primary rounded-full"></div>
-                      <span>15% aumento en citas preventivas vs mes anterior</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-gray-300">
-                      <div class="w-1 h-1 bg-primary rounded-full"></div>
-                      <span>Tiempo de consulta promedio: -12 min (mejorado)</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-gray-300">
-                      <div class="w-1 h-1 bg-primary rounded-full"></div>
-                      <span>3 pacientes requieren seguimiento esta semana</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -1148,58 +1110,225 @@
       </div>
     </section>
 
-    <!-- AI Agents Section -->
-    <section id="about" class="section-content-lg py-20 bg-surface border-y border-white/5 relative overflow-hidden">
-      <div class="max-w-6xl mx-auto px-6 md:px-12 relative z-10">
-        <div class="grid md:grid-cols-2 gap-12 items-center">
-          <div class="order-2 md:order-1">
-            <div class="glass-panel p-2 rounded-xl border border-primary/20 shadow-[0_0_50px_rgba(255,178,0,0.05)]">
-              <div
-                class="bg-black/80 rounded-lg aspect-video w-full relative overflow-hidden flex items-center justify-center">
-                <div class="absolute inset-0 flex items-center justify-center opacity-60">
-                  <svg class="w-full h-full" style="animation: spin 60s linear infinite;" viewBox="0 0 200 200">
-                    <circle cx="100" cy="100" fill="none" r="80" stroke="#333" stroke-width="1"></circle>
-                    <circle cx="100" cy="100" fill="none" r="60" stroke="#333" stroke-width="1"></circle>
-                    <circle class="stroke-primary/30" cx="100" cy="100" fill="none" r="40" stroke-width="1"></circle>
-                  </svg>
+    <!-- Kenos Section - Card Stack Fan Out -->
+    <section id="kenos" class="section-fullscreen py-12 px-6 md:px-12 bg-void relative overflow-hidden">
+      <div class="max-w-7xl mx-auto">
+        <!-- Title -->
+        <div class="text-center mb-8">
+          <h2 class="text-white text-4xl md:text-5xl font-bold tracking-tight mb-4">
+            Kenos <span class="text-primary">Medical</span> SaaS
+          </h2>
+          <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+            Plataforma integral para el futuro de la salud digital
+          </p>
+          <p class="text-gray-500 text-sm mt-4 hidden lg:block">
+            <span class="text-primary">↔</span> Hover sobre las tarjetas para explorar
+          </p>
+        </div>
+
+        <!-- Card Stack Container -->
+        <div class="kenos-stack-container">
+          <div class="kenos-stack">
+
+            <!-- Card 1: Dashboard -->
+            <div class="kenos-card" data-card-number="01">
+              <div class="kenos-card-header">
+                <div class="kenos-card-icon">
+                  <span class="material-symbols-outlined">dashboard</span>
                 </div>
-                <div class="text-center z-10">
-                  <span class="material-symbols-outlined text-5xl text-primary mb-2 animate-pulse">neurology</span>
-                  <p class="text-xs font-mono text-primary/70">NEURAL_LINK_ESTABLISHED</p>
+                <div>
+                  <div class="kenos-card-title">Dashboard Principal</div>
+                  <div class="kenos-card-subtitle">Vista general del sistema</div>
+                </div>
+              </div>
+              <div class="kenos-card-body">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                  <div class="bg-void/80 p-3 rounded-xl">
+                    <div class="text-gray-500 text-[10px] uppercase tracking-wider mb-1">Pacientes</div>
+                    <div class="text-white text-xl font-bold">247</div>
+                    <div class="text-green-500 text-[10px]">+12%</div>
+                  </div>
+                  <div class="bg-void/80 p-3 rounded-xl">
+                    <div class="text-gray-500 text-[10px] uppercase tracking-wider mb-1">Citas Hoy</div>
+                    <div class="text-white text-xl font-bold">18</div>
+                    <div class="text-gray-500 text-[10px]">6 done</div>
+                  </div>
+                  <div class="bg-void/80 p-3 rounded-xl">
+                    <div class="text-gray-500 text-[10px] uppercase tracking-wider mb-1">Alertas</div>
+                    <div class="text-white text-xl font-bold">3</div>
+                    <div class="text-yellow-500 text-[10px]">Revisar</div>
+                  </div>
+                </div>
+                <!-- Mini Chart -->
+                <div class="bg-void/80 p-4 rounded-xl">
+                  <div class="text-gray-500 text-[10px] uppercase tracking-wider mb-3">Actividad Semanal</div>
+                  <div class="flex items-end gap-2 h-24">
+                    <div class="bg-primary/20 flex-1 rounded-t transition-all hover:bg-primary/40" style="height: 35%;"></div>
+                    <div class="bg-primary/30 flex-1 rounded-t transition-all hover:bg-primary/50" style="height: 55%;"></div>
+                    <div class="bg-primary/40 flex-1 rounded-t transition-all hover:bg-primary/60" style="height: 45%;"></div>
+                    <div class="bg-primary/50 flex-1 rounded-t transition-all hover:bg-primary/70" style="height: 70%;"></div>
+                    <div class="bg-primary/60 flex-1 rounded-t transition-all hover:bg-primary/80" style="height: 60%;"></div>
+                    <div class="bg-primary/80 flex-1 rounded-t transition-all hover:bg-primary" style="height: 85%;"></div>
+                    <div class="bg-primary flex-1 rounded-t" style="height: 100%;"></div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="order-1 md:order-2 flex flex-col gap-6">
-            <div class="flex items-center gap-3">
-              <span class="px-2 py-1 rounded bg-white/10 text-white text-xs font-bold uppercase">Beta Access</span>
-              <div class="h-px bg-white/20 flex-1"></div>
+
+            <!-- Card 2: Pacientes -->
+            <div class="kenos-card" data-card-number="02">
+              <div class="kenos-card-header">
+                <div class="kenos-card-icon">
+                  <span class="material-symbols-outlined">group</span>
+                </div>
+                <div>
+                  <div class="kenos-card-title">Gestión de Pacientes</div>
+                  <div class="kenos-card-subtitle">Registro y seguimiento</div>
+                </div>
+              </div>
+              <div class="kenos-card-body">
+                <div class="space-y-3">
+                  <div class="bg-void/80 p-4 rounded-xl flex items-center justify-between group hover:bg-void transition-colors">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">MG</div>
+                      <div>
+                        <div class="text-white text-sm font-medium">María González</div>
+                        <div class="text-gray-500 text-xs">#4521 • Última visita: Hoy</div>
+                      </div>
+                    </div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-green-500 ring-4 ring-green-500/20"></div>
+                  </div>
+                  <div class="bg-void/80 p-4 rounded-xl flex items-center justify-between group hover:bg-void transition-colors">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">CR</div>
+                      <div>
+                        <div class="text-white text-sm font-medium">Carlos Ramírez</div>
+                        <div class="text-gray-500 text-xs">#4518 • Última visita: 28/01</div>
+                      </div>
+                    </div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500 ring-4 ring-yellow-500/20"></div>
+                  </div>
+                  <div class="bg-void/80 p-4 rounded-xl flex items-center justify-between group hover:bg-void transition-colors">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold text-sm">AM</div>
+                      <div>
+                        <div class="text-white text-sm font-medium">Ana Martínez</div>
+                        <div class="text-gray-500 text-xs">#4502 • Última visita: 25/01</div>
+                      </div>
+                    </div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-gray-500 ring-4 ring-gray-500/20"></div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h2 class="text-4xl md:text-5xl font-bold text-white leading-tight">Autonomous <br /><span
-                class="text-primary">AI Agents</span></h2>
-            <p class="text-gray-400 text-lg leading-relaxed">
-              Neural network visualizations and custom LLM integration. Leveraging deep learning on the edge to automate
-              complex architectural decisions.
-            </p>
-            <div class="flex flex-col gap-3 mt-4">
-              <div class="flex items-center gap-3 text-gray-300">
-                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
-                <span>Self-correcting data pipelines</span>
+
+            <!-- Card 3: Vitales -->
+            <div class="kenos-card" data-card-number="03">
+              <div class="kenos-card-header">
+                <div class="kenos-card-icon">
+                  <span class="material-symbols-outlined">monitor_heart</span>
+                </div>
+                <div>
+                  <div class="kenos-card-title">Monitor de Vitales</div>
+                  <div class="kenos-card-subtitle">Signos en tiempo real</div>
+                </div>
               </div>
-              <div class="flex items-center gap-3 text-gray-300">
-                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
-                <span>Edge-optimized inference</span>
-              </div>
-              <div class="flex items-center gap-3 text-gray-300">
-                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
-                <span>Context-aware decision trees</span>
+              <div class="kenos-card-body">
+                <div class="bg-void/80 p-4 rounded-xl mb-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-400 text-xs uppercase tracking-wider">Frecuencia Cardíaca</span>
+                    <span class="text-primary text-2xl font-bold">72 <span class="text-sm font-normal">bpm</span></span>
+                  </div>
+                  <!-- ECG-like visualization -->
+                  <div class="h-16 flex items-center">
+                    <svg class="w-full h-full" viewBox="0 0 200 40" preserveAspectRatio="none">
+                      <path d="M0,20 L20,20 L25,20 L30,10 L35,30 L40,5 L45,35 L50,20 L55,20 L75,20 L80,20 L85,10 L90,30 L95,5 L100,35 L105,20 L110,20 L130,20 L135,20 L140,10 L145,30 L150,5 L155,35 L160,20 L165,20 L200,20"
+                            fill="none"
+                            stroke="#ffb200"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="bg-void/80 p-4 rounded-xl text-center">
+                    <div class="text-gray-500 text-[10px] uppercase tracking-wider mb-1">Presión Arterial</div>
+                    <div class="text-white text-xl font-bold">120<span class="text-gray-500">/</span>80</div>
+                    <div class="text-green-500 text-[10px]">Normal</div>
+                  </div>
+                  <div class="bg-void/80 p-4 rounded-xl text-center">
+                    <div class="text-gray-500 text-[10px] uppercase tracking-wider mb-1">Saturación O₂</div>
+                    <div class="text-white text-xl font-bold">98<span class="text-primary">%</span></div>
+                    <div class="text-green-500 text-[10px]">Óptimo</div>
+                  </div>
+                </div>
               </div>
             </div>
-            <button
-              class="mt-4 flex w-fit items-center gap-2 text-white border-b border-primary pb-1 hover:text-primary transition-colors">
-              Explore Architecture <span class="material-symbols-outlined text-sm">arrow_outward</span>
-            </button>
+
+            <!-- Card 4: IA Analytics -->
+            <div class="kenos-card" data-card-number="04">
+              <div class="kenos-card-header">
+                <div class="kenos-card-icon">
+                  <span class="material-symbols-outlined">psychology</span>
+                </div>
+                <div>
+                  <div class="kenos-card-title">Predicciones IA</div>
+                  <div class="kenos-card-subtitle">Análisis inteligente</div>
+                </div>
+              </div>
+              <div class="kenos-card-body">
+                <!-- Alert Card -->
+                <div class="bg-gradient-to-r from-primary/10 to-transparent p-4 rounded-xl border-l-2 border-primary mb-4">
+                  <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <span class="material-symbols-outlined text-primary text-lg">warning</span>
+                    </div>
+                    <div>
+                      <div class="text-white text-sm font-medium mb-1">Alerta Temprana</div>
+                      <div class="text-gray-400 text-xs leading-relaxed">
+                        Patrón detectado en #4521 sugiere atención preventiva
+                      </div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div class="h-1.5 w-24 bg-void rounded-full overflow-hidden">
+                          <div class="h-full w-[87%] bg-primary rounded-full"></div>
+                        </div>
+                        <span class="text-primary text-[10px] font-semibold">87%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Insights -->
+                <div class="bg-void/80 p-4 rounded-xl">
+                  <div class="text-gray-500 text-[10px] uppercase tracking-wider mb-3">Insights Automáticos</div>
+                  <div class="space-y-3">
+                    <div class="flex items-start gap-2">
+                      <div class="w-1.5 h-1.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
+                      <span class="text-gray-300 text-xs leading-relaxed">15% aumento en citas preventivas</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                      <div class="w-1.5 h-1.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
+                      <span class="text-gray-300 text-xs leading-relaxed">Tiempo consulta: -12 min</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                      <div class="w-1.5 h-1.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
+                      <span class="text-gray-300 text-xs leading-relaxed">3 pacientes requieren seguimiento</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
+        </div>
+
+        <!-- Mobile scroll indicator -->
+        <div class="flex justify-center gap-2 mt-4 lg:hidden">
+          <div class="w-8 h-1 rounded-full bg-primary"></div>
+          <div class="w-2 h-1 rounded-full bg-gray-700"></div>
+          <div class="w-2 h-1 rounded-full bg-gray-700"></div>
+          <div class="w-2 h-1 rounded-full bg-gray-700"></div>
         </div>
       </div>
     </section>
@@ -1291,33 +1420,6 @@
   </main>
 
   <script>
-    // Pause/Play video on visibility
-    const video = document.getElementById('hero-video');
-
-    // Intersection Observer for scroll-based animations
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-reveal');
-        }
-      });
-    }, observerOptions);
-
-    // Add spin animation
-    const style = document.createElement('style');
-    style.textContent = `
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-        `;
-    document.head.appendChild(style);
-
     // Title outline → filled effect (scroll-triggered)
     const titleOutline = document.querySelector('.title-outline');
     if (titleOutline) {
@@ -1730,69 +1832,25 @@
     const workflowAnim = new WorkflowAnimation();
     workflowAnim.init();
 
-    // Kenos Parallax Controller
-    class KenosParallax {
-      constructor() {
-        this.container = document.getElementById('kenos-parallax');
-        this.windows = [];
-        this.isEnabled = window.innerWidth >= 768; // Disable on mobile
-      }
-
-      init() {
-        if (!this.container || !this.isEnabled) return;
-
-        this.windows = Array.from(this.container.querySelectorAll('.kenos-window'));
-
-        this.container.addEventListener('mousemove', (e) => {
-          this.handleMouseMove(e);
+    // Kenos Cards - Mobile scroll indicator update
+    const kenosStack = document.querySelector('.kenos-stack-container');
+    if (kenosStack && window.innerWidth < 1024) {
+      const dots = document.querySelectorAll('#kenos .flex.justify-center.gap-2 > div');
+      kenosStack.addEventListener('scroll', () => {
+        const scrollLeft = kenosStack.scrollLeft;
+        const cardWidth = 340 + 20; // card width + gap
+        const activeIndex = Math.round(scrollLeft / cardWidth);
+        dots.forEach((dot, i) => {
+          if (i === activeIndex) {
+            dot.classList.remove('w-2', 'bg-gray-700');
+            dot.classList.add('w-8', 'bg-primary');
+          } else {
+            dot.classList.remove('w-8', 'bg-primary');
+            dot.classList.add('w-2', 'bg-gray-700');
+          }
         });
-
-        // Reset on mouse leave
-        this.container.addEventListener('mouseleave', () => {
-          this.reset();
-        });
-      }
-
-      handleMouseMove(e) {
-        const rect = this.container.getBoundingClientRect();
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        // Calculate mouse position relative to center (-1 to 1)
-        const mouseX = (e.clientX - rect.left - centerX) / centerX;
-        const mouseY = (e.clientY - rect.top - centerY) / centerY;
-
-        this.windows.forEach(window => {
-          const depth = parseFloat(window.dataset.depth);
-
-          // Movement amount based on depth (closer = more movement)
-          const moveX = mouseX * depth * 30; // Max 30px movement
-          const moveY = mouseY * depth * 30;
-
-          // Rotation based on mouse position
-          const rotateY = mouseX * depth * 5; // Max 5deg rotation
-          const rotateX = -mouseY * depth * 5;
-
-          // Apply transform
-          window.style.transform = `
-            translate3d(${moveX}px, ${moveY}px, ${depth * 50}px)
-            rotateX(${rotateX}deg)
-            rotateY(${rotateY}deg)
-          `;
-        });
-      }
-
-      reset() {
-        this.windows.forEach(window => {
-          const depth = parseFloat(window.dataset.depth);
-          window.style.transform = `translate3d(0, 0, ${depth * 50}px)`;
-        });
-      }
+      });
     }
-
-    // Initialize parallax
-    const kenosParallax = new KenosParallax();
-    kenosParallax.init();
 
     // Chatbot Scenarios Data
     const chatbotScenarios = [
@@ -1848,17 +1906,6 @@
         ]
       }
     ];
-
-    // Typing Animation
-    async function typeMessage(text, speed = 30) {
-      const chars = text.split('');
-      let result = '';
-      for (const char of chars) {
-        result += char;
-        await new Promise(resolve => setTimeout(resolve, speed));
-      }
-      return result;
-    }
 
     // Render Chat Message
     function createChatMessage(message, isAI = false) {
@@ -2023,6 +2070,84 @@
     // Initialize chatbot carousel
     const chatbotCarousel = new ChatbotCarousel();
     chatbotCarousel.init();
+
+    // ============================================
+    // Hero Typewriter Effect
+    // ============================================
+    class TypewriterEffect {
+      constructor(elementId, words) {
+        this.element = document.getElementById(elementId);
+        this.container = document.getElementById('typewriter-container');
+        this.words = words;
+        this.currentWordIndex = 0;
+        this.currentText = '';
+        this.isDeleting = false;
+        this.typeSpeed = 80;       // Speed when typing
+        this.deleteSpeed = 50;     // Speed when deleting
+        this.pauseAfterWord = 2500; // Pause after completing a word
+        this.pauseBeforeDelete = 1500; // Pause before starting to delete
+      }
+
+      init() {
+        if (!this.element) return;
+        // Wait for the hero animation to complete (delay-1000 = 1s + animation time)
+        setTimeout(() => {
+          this.type();
+        }, 1800);
+      }
+
+      type() {
+        const currentWord = this.words[this.currentWordIndex];
+
+        if (this.isDeleting) {
+          // Remove one character
+          this.currentText = currentWord.substring(0, this.currentText.length - 1);
+        } else {
+          // Add one character
+          this.currentText = currentWord.substring(0, this.currentText.length + 1);
+        }
+
+        // Update the DOM
+        this.element.textContent = this.currentText;
+
+        // Add/remove typing class for glow effect
+        if (this.currentText.length > 0) {
+          this.container.classList.add('typing');
+        } else {
+          this.container.classList.remove('typing');
+        }
+
+        // Determine next action and timing
+        let nextDelay = this.isDeleting ? this.deleteSpeed : this.typeSpeed;
+
+        // Word completed
+        if (!this.isDeleting && this.currentText === currentWord) {
+          // Pause before deleting
+          nextDelay = this.pauseBeforeDelete;
+          this.isDeleting = true;
+        }
+        // Deletion completed
+        else if (this.isDeleting && this.currentText === '') {
+          this.isDeleting = false;
+          // Move to next word
+          this.currentWordIndex = (this.currentWordIndex + 1) % this.words.length;
+          // Small pause before typing next word
+          nextDelay = 400;
+        }
+
+        // Continue the loop
+        setTimeout(() => this.type(), nextDelay);
+      }
+    }
+
+    // Initialize the typewriter with rotating words (article + word)
+    const heroTypewriter = new TypewriterEffect('typewriter-text', [
+      'los límites',
+      'los procesos',
+      'las comunicaciones',
+      'la educación'
+    ]);
+    heroTypewriter.init();
   </script>
 </body>
 
