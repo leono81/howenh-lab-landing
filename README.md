@@ -33,8 +33,7 @@ Este proyecto está preparado para deploy como sitio estático en **Coolify**.
 
 ## 📍 Ubicación
 
-Desarrollado desde Ushuaia, Tierra del Fuego - El fin del mundo.
-
+Desarrollado desde Tierra del Fuego, Argentina - El fin del mundo.
 ---
 
 © 2026 Howenh Labs. All rights reserved.
