@@ -37,4 +37,4 @@ Desarrollado desde Ushuaia, Tierra del Fuego - El fin del mundo.
 
 ---
 
-© 2024 Howenh Labs. All rights reserved.
+© 2026 Howenh Labs. All rights reserved.
