@@ -226,7 +226,7 @@
       user-select: none;
     }
 
-    /* Title outline → filled effect */
+    /* Title outline → filled effect (scroll-driven) */
     .title-outline {
       color: transparent;
       -webkit-text-stroke: 2px #ffb200;
@@ -235,11 +235,7 @@
       -webkit-background-clip: text;
       background-size: 200% 100%;
       background-position: 100% 0;
-      transition: background-position 1s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .title-outline.filled {
-      background-position: 0% 0;
+      /* No transition - controlled by scroll */
     }
 
     /* Data particles glow */
@@ -1420,17 +1416,28 @@
   </main>
 
   <script>
-    // Title outline → filled effect (scroll-triggered)
+    // Title outline → filled effect (scroll-driven fill)
     const titleOutline = document.querySelector('.title-outline');
     if (titleOutline) {
-      const titleObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
-            entry.target.classList.add('filled');
-          }
-        });
-      }, { threshold: 0.3 });
-      titleObserver.observe(titleOutline);
+      const updateTitleFill = () => {
+        const rect = titleOutline.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+
+        // Start filling when element enters viewport, complete when it's 25% from top
+        const startPoint = windowHeight;
+        const endPoint = windowHeight * 0.25;
+
+        // Calculate progress (0 to 1)
+        let progress = (startPoint - rect.top) / (startPoint - endPoint);
+        progress = Math.max(0, Math.min(1, progress));
+
+        // Apply to background-position (100% = empty, 0% = filled)
+        const bgPosition = 100 - (progress * 100);
+        titleOutline.style.backgroundPosition = `${bgPosition}% 0`;
+      };
+
+      window.addEventListener('scroll', updateTitleFill, { passive: true });
+      updateTitleFill(); // Initial check
     }
 
     // Workflow Animation Controller with GSAP - Professional & Slow
@@ -1551,15 +1558,11 @@
       createTimeline() {
         this.reset();
 
-        // Create master timeline with SLOWER timing
+        // Create master timeline - runs once and stays complete
         this.timeline = gsap.timeline({
-          repeat: -1,
-          repeatDelay: 4, // Longer pause before restart
-          onRepeat: () => {
-            if (!this.isRunning) {
-              this.timeline.kill();
-            }
-            this.reset();
+          repeat: 0,
+          onComplete: () => {
+            // Animation stays in final state, pulsing continues
           }
         });
 
