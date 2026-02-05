@@ -834,6 +834,66 @@
       pointer-events: none;
     }
 
+    /* Nav glass background on scroll */
+    .nav-scrolled {
+      background: rgba(10, 10, 11, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+
+    /* Nav active link */
+    .nav-link.active {
+      color: #ffb200;
+      position: relative;
+    }
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #ffb200;
+      border-radius: 1px;
+    }
+
+    /* Section dot active state */
+    .dot-link.active .dot {
+      width: 10px;
+      height: 10px;
+      background: #ffb200;
+      box-shadow: 0 0 8px rgba(255, 178, 0, 0.4);
+    }
+
+    /* Mobile menu open state */
+    .mobile-menu-open {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+    .mobile-nav-link {
+      transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s ease;
+    }
+    .mobile-menu-open .mobile-nav-link {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .mobile-menu-open .mobile-nav-link:nth-child(1) { transition-delay: 0.05s; }
+    .mobile-menu-open .mobile-nav-link:nth-child(2) { transition-delay: 0.1s; }
+    .mobile-menu-open .mobile-nav-link:nth-child(3) { transition-delay: 0.15s; }
+    .mobile-menu-open .mobile-nav-link:nth-child(4) { transition-delay: 0.2s; }
+
+    /* Mobile nav active link */
+    .mobile-nav-link.active {
+      color: #ffb200;
+    }
+
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
   </style>
 </head>
 
@@ -849,48 +909,78 @@
   </div>
 
   <!-- Floating Navigation -->
-  <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-5">
+  <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 px-6 py-5 transition-all duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <!-- Logo -->
       <a href="#" class="flex items-center gap-2 animate-fade delay-300">
         <!-- Isotipo SVG - Mountain + Heartbeat -->
         <svg class="h-7 w-auto" viewBox="0 0 100 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2 32 
-                   C4 32, 6 30, 8 28 
-                   L14 22 
-                   L18 26 
-                   C20 28, 22 28, 24 26 
-                   L32 14 
-                   L38 8 
-                   L44 18 
-                   C46 22, 48 26, 52 30 
-                   L56 34 
-                   C58 36, 60 34, 62 30 
-                   L66 18 
-                   L70 10 
-                   L74 24 
-                   L76 28 
-                   L82 28 
+          <path d="M2 32
+                   C4 32, 6 30, 8 28
+                   L14 22
+                   L18 26
+                   C20 28, 22 28, 24 26
+                   L32 14
+                   L38 8
+                   L44 18
+                   C46 22, 48 26, 52 30
+                   L56 34
+                   C58 36, 60 34, 62 30
+                   L66 18
+                   L70 10
+                   L74 24
+                   L76 28
+                   L82 28
                    L98 28" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
             fill="none" />
         </svg>
         <span class="text-white text-lg font-semibold tracking-tight">Howenh Labs</span>
       </a>
 
-      <!-- Nav Links - Moved to right -->
+      <!-- Nav Links -->
       <div class="hidden md:flex items-center gap-8 animate-fade delay-500">
-        <a href="#solutions" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Soluciones</a>
-        <a href="#kenos" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Kenos SaaS</a>
-        <a href="#space-station" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Space</a>
-        <a href="#about" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Nosotros</a>
+        <a href="#workflow" class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200" data-section="workflow">Workflow</a>
+        <a href="#chatbot" class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200" data-section="chatbot">AI Chat</a>
+        <a href="#kenos" class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200" data-section="kenos">Kenos SaaS</a>
+        <a href="#space-station" class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200" data-section="space-station">Space</a>
       </div>
 
-      <!-- Mobile Menu -->
-      <button class="md:hidden text-white">
-        <span class="material-symbols-outlined">menu</span>
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-btn" class="md:hidden text-white z-[60] relative" aria-label="Abrir menú">
+        <span class="material-symbols-outlined transition-transform duration-300">menu</span>
       </button>
     </div>
   </nav>
+
+  <!-- Mobile Menu Panel -->
+  <div id="mobile-menu" class="fixed inset-0 z-[55] bg-void/95 backdrop-blur-lg flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="flex flex-col items-center gap-8">
+      <a href="#workflow" class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0" data-section="workflow">Workflow</a>
+      <a href="#chatbot" class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0" data-section="chatbot">AI Chat</a>
+      <a href="#kenos" class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0" data-section="kenos">Kenos SaaS</a>
+      <a href="#space-station" class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0" data-section="space-station">Space</a>
+    </div>
+  </div>
+
+  <!-- Section Dots Navigation -->
+  <div id="section-dots" class="hidden md:flex fixed right-6 top-1/2 -translate-y-1/2 z-40 flex-col gap-4">
+    <a href="#workflow" class="dot-link group relative flex items-center justify-end" data-section="workflow">
+      <span class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Workflow</span>
+      <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
+    </a>
+    <a href="#chatbot" class="dot-link group relative flex items-center justify-end" data-section="chatbot">
+      <span class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">AI Chat</span>
+      <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
+    </a>
+    <a href="#kenos" class="dot-link group relative flex items-center justify-end" data-section="kenos">
+      <span class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Kenos SaaS</span>
+      <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
+    </a>
+    <a href="#space-station" class="dot-link group relative flex items-center justify-end" data-section="space-station">
+      <span class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Space</span>
+      <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
+    </a>
+  </div>
 
   <!-- Hero Content Overlay -->
   <section class="relative z-10 min-h-screen flex flex-col justify-between px-6 md:px-12 py-8">
@@ -2827,6 +2917,93 @@
     } else {
       initSpaceStation();
     }
+  </script>
+
+  <!-- Navigation System -->
+  <script>
+    (function() {
+      const nav = document.getElementById('main-nav');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const btnIcon = mobileMenuBtn.querySelector('.material-symbols-outlined');
+      const navLinks = document.querySelectorAll('.nav-link');
+      const dotLinks = document.querySelectorAll('.dot-link');
+      const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+      const sections = ['workflow', 'chatbot', 'kenos', 'space-station'];
+      let isMenuOpen = false;
+
+      // Nav glass background on scroll
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 80) {
+          nav.classList.add('nav-scrolled');
+        } else {
+          nav.classList.remove('nav-scrolled');
+        }
+      }, { passive: true });
+
+      // IntersectionObserver for active section detection
+      const observerOptions = {
+        root: null,
+        rootMargin: '-20% 0px -60% 0px',
+        threshold: 0
+      };
+
+      const sectionObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      }, observerOptions);
+
+      sections.forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) sectionObserver.observe(el);
+      });
+
+      function setActiveSection(sectionId) {
+        navLinks.forEach(function(link) {
+          link.classList.toggle('active', link.dataset.section === sectionId);
+        });
+        dotLinks.forEach(function(dot) {
+          dot.classList.toggle('active', dot.dataset.section === sectionId);
+        });
+        mobileLinks.forEach(function(link) {
+          link.classList.toggle('active', link.dataset.section === sectionId);
+        });
+      }
+
+      // Smooth scroll for all nav links
+      function handleNavClick(e) {
+        e.preventDefault();
+        var targetId = this.getAttribute('href').substring(1);
+        var target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        if (isMenuOpen) toggleMobileMenu();
+      }
+
+      navLinks.forEach(function(link) { link.addEventListener('click', handleNavClick); });
+      dotLinks.forEach(function(link) { link.addEventListener('click', handleNavClick); });
+      mobileLinks.forEach(function(link) { link.addEventListener('click', handleNavClick); });
+
+      // Mobile menu toggle
+      function toggleMobileMenu() {
+        isMenuOpen = !isMenuOpen;
+        mobileMenu.classList.toggle('mobile-menu-open', isMenuOpen);
+        btnIcon.textContent = isMenuOpen ? 'close' : 'menu';
+        btnIcon.style.transform = isMenuOpen ? 'rotate(90deg)' : 'rotate(0deg)';
+        document.body.style.overflow = isMenuOpen ? 'hidden' : '';
+      }
+
+      mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+      // Close mobile menu on Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isMenuOpen) toggleMobileMenu();
+      });
+    })();
   </script>
 </body>
 
