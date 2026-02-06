@@ -1,0 +1,24 @@
+{
+  "name": "howenh-workflow-remotion",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.419",
+    "@remotion/google-fonts": "4.0.419",
+    "@remotion/light-leaks": "4.0.419",
+    "@remotion/paths": "4.0.419",
+    "@remotion/transitions": "4.0.419",
+    "react": "^19",
+    "react-dom": "^19",
+    "remotion": "4.0.419"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5.7"
+  }
+}

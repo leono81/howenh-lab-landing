@@ -1,2 +1,3 @@
 .worktrees/
 .agents/
+node_modules/
