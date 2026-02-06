@@ -49,8 +49,8 @@ const C = {
 
 // ── Layout Constants ───────────────────────────────────────────────────────────
 const W = 1920;
-const H = 600;
-const AI_CENTER = { x: 960, y: 260 };
+const H = 800;
+const AI_CENTER = { x: 960, y: 350 };
 const AI_ORB_EDGE = 56; // AI orb radius (52) + margin (4)
 
 /** Calculate point on AI orb edge toward a target */
@@ -65,16 +65,16 @@ const aiEdgePoint = (targetX: number, targetY: number) => {
 };
 
 const PROCESS_NODES = [
-  { id: "entrada", label: "Entrada", sublabel: "Recepción", x: 340, y: 200 },
-  { id: "documentos", label: "Documentos", sublabel: "Gestión", x: 720, y: 140 },
-  { id: "controles", label: "Controles", sublabel: "Calidad", x: 1200, y: 180 },
-  { id: "metricas", label: "Métricas", sublabel: "Análisis", x: 1560, y: 320 },
+  { id: "entrada", label: "Entrada", sublabel: "Recepción", x: 340, y: 270 },
+  { id: "documentos", label: "Documentos", sublabel: "Gestión", x: 720, y: 190 },
+  { id: "controles", label: "Controles", sublabel: "Calidad", x: 1200, y: 240 },
+  { id: "metricas", label: "Métricas", sublabel: "Análisis", x: 1560, y: 430 },
 ];
 
 const CAPABILITY_NODES = [
-  { id: "analitica", label: "Analítica", x: 740, y: 470, icon: "chart" as const, color: C.cyan, colorLight: C.cyanLight, colorDark: C.cyanDark },
-  { id: "optimizacion", label: "Optimización", x: 960, y: 500, icon: "gear" as const, color: C.emerald, colorLight: C.emeraldLight, colorDark: C.emeraldDark },
-  { id: "prediccion", label: "Predicción", x: 1180, y: 470, icon: "trending" as const, color: C.violet, colorLight: C.violetLight, colorDark: C.violetDark },
+  { id: "analitica", label: "Analítica", x: 740, y: 620, icon: "chart" as const, color: C.cyan, colorLight: C.cyanLight, colorDark: C.cyanDark },
+  { id: "optimizacion", label: "Optimización", x: 960, y: 660, icon: "gear" as const, color: C.emerald, colorLight: C.emeraldLight, colorDark: C.emeraldDark },
+  { id: "prediccion", label: "Predicción", x: 1180, y: 620, icon: "trending" as const, color: C.violet, colorLight: C.violetLight, colorDark: C.violetDark },
 ];
 
 // Node activation frames (Act 3) — spaced out for slower dramatic effect
@@ -107,33 +107,33 @@ interface CameraKeyframe {
 
 const CAMERA_KEYFRAMES: CameraKeyframe[] = [
   // Start: zoomed into first node "Entrada"
-  { frame: 0, x: -340 + W / 2, y: -200 + H / 2, scale: 2.0, originX: 340, originY: 200 },
+  { frame: 0, x: -340 + W / 2, y: -270 + H / 2, scale: 2.0, originX: 340, originY: 270 },
   // Linger on Entrada
-  { frame: 28, x: -340 + W / 2, y: -200 + H / 2, scale: 2.0, originX: 340, originY: 200 },
+  { frame: 28, x: -340 + W / 2, y: -270 + H / 2, scale: 2.0, originX: 340, originY: 270 },
   // Pan to Documentos
-  { frame: 42, x: -720 + W / 2, y: -140 + H / 2, scale: 1.9, originX: 720, originY: 140 },
+  { frame: 42, x: -720 + W / 2, y: -190 + H / 2, scale: 1.9, originX: 720, originY: 190 },
   // Linger on Documentos
-  { frame: 70, x: -720 + W / 2, y: -140 + H / 2, scale: 1.9, originX: 720, originY: 140 },
+  { frame: 70, x: -720 + W / 2, y: -190 + H / 2, scale: 1.9, originX: 720, originY: 190 },
   // Pan to Controles
-  { frame: 84, x: -1200 + W / 2, y: -180 + H / 2, scale: 2.1, originX: 1200, originY: 180 },
+  { frame: 84, x: -1200 + W / 2, y: -240 + H / 2, scale: 2.1, originX: 1200, originY: 240 },
   // Linger on Controles
-  { frame: 110, x: -1200 + W / 2, y: -180 + H / 2, scale: 2.1, originX: 1200, originY: 180 },
+  { frame: 110, x: -1200 + W / 2, y: -240 + H / 2, scale: 2.1, originX: 1200, originY: 240 },
   // Pan to Metricas
-  { frame: 124, x: -1560 + W / 2, y: -320 + H / 2, scale: 1.85, originX: 1560, originY: 320 },
+  { frame: 124, x: -1560 + W / 2, y: -430 + H / 2, scale: 1.85, originX: 1560, originY: 430 },
   // Linger on Metricas
-  { frame: 148, x: -1560 + W / 2, y: -320 + H / 2, scale: 1.85, originX: 1560, originY: 320 },
+  { frame: 148, x: -1560 + W / 2, y: -430 + H / 2, scale: 1.85, originX: 1560, originY: 430 },
   // Act 2: Zoom out to reveal full scene
   { frame: 178, x: 0, y: 0, scale: 1.0, originX: W / 2, originY: H / 2 },
   // Hold for AI appearance
   { frame: 200, x: 0, y: 0, scale: 1.0, originX: W / 2, originY: H / 2 },
   // Act 3: Subtle tracking toward activating nodes (wider spacing)
-  { frame: 225, x: 20, y: 8, scale: 1.02, originX: 500, originY: 250 },
-  { frame: 275, x: -15, y: -5, scale: 1.02, originX: 900, originY: 280 },
-  { frame: 320, x: -30, y: 5, scale: 1.02, originX: 1300, originY: 240 },
-  { frame: 360, x: -10, y: -8, scale: 1.01, originX: 1400, originY: 300 },
-  // Act 4: Settle back to center
-  { frame: 380, x: 0, y: 15, scale: 0.98, originX: W / 2, originY: H / 2 },
-  // Act 5: Final
+  { frame: 225, x: 20, y: 8, scale: 1.02, originX: 500, originY: 330 },
+  { frame: 275, x: -15, y: -5, scale: 1.02, originX: 900, originY: 370 },
+  { frame: 320, x: -30, y: 5, scale: 1.02, originX: 1300, originY: 320 },
+  { frame: 360, x: -10, y: -8, scale: 1.01, originX: 1400, originY: 400 },
+  // Act 4: Settle back to center — match idle loop scale (0.96)
+  { frame: 380, x: 0, y: 0, scale: 0.96, originX: W / 2, originY: H / 2 },
+  // Act 5: Final hold
   { frame: 540, x: 0, y: 0, scale: 0.96, originX: W / 2, originY: H / 2 },
   { frame: 600, x: 0, y: 0, scale: 0.96, originX: W / 2, originY: H / 2 },
 ];
@@ -730,7 +730,8 @@ const AICore: React.FC<{
   frame: number;
   fps: number;
   entranceProgress: number;
-}> = ({ frame, fps, entranceProgress }) => {
+  showFullLabel?: boolean;
+}> = ({ frame, fps, entranceProgress, showFullLabel }) => {
   if (entranceProgress < 0.01) return null;
 
   const radius = 52;
@@ -739,10 +740,8 @@ const AICore: React.FC<{
   const pulsePhase = (frame - 160) * 0.08;
   const pulse = 0.6 + Math.sin(pulsePhase) * 0.2;
 
-  // "IA" text typewriter
-  const iaElapsed = Math.max(0, frame - 170);
-  const iaChars = iaElapsed > 4 ? (iaElapsed > 10 ? 2 : 1) : 0;
-  const iaText = "IA".slice(0, iaChars);
+  // "IA" text typewriter (or full label in idle mode)
+  const iaText = showFullLabel ? "IA" : "IA".slice(0, Math.max(0, frame - 170) > 10 ? 2 : Math.max(0, frame - 170) > 4 ? 1 : 0);
 
   return (
     <>
@@ -2142,7 +2141,7 @@ export const Idea4Idle: React.FC = () => {
         ))}
 
         {/* AI Core — fully visible */}
-        <AICore frame={frame} fps={fps} entranceProgress={1} />
+        <AICore frame={frame} fps={fps} entranceProgress={1} showFullLabel />
 
         {/* Capability auras */}
         {renderIdleAuras()}

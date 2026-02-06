@@ -21,7 +21,7 @@ export const RemotionRoot: React.FC = () => {
           durationInFrames={600}
           fps={30}
           width={1920}
-          height={600}
+          height={800}
         />
         <Composition
           id="Idea4-Idle"
@@ -29,7 +29,7 @@ export const RemotionRoot: React.FC = () => {
           durationInFrames={90}
           fps={30}
           width={1920}
-          height={600}
+          height={800}
         />
         <Composition
           id="Idea5-MultiFormat-Landscape"
