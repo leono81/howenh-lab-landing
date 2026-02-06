@@ -145,6 +145,12 @@
       font-weight: 500;
     }
 
+    @media (max-width: 767px) {
+      .hero-title {
+        text-align: center;
+      }
+    }
+
     /* Typewriter effect for rotating words */
     .typewriter-word {
       display: inline-block;
@@ -459,10 +465,10 @@
 
       .kenos-stack {
         display: flex;
-        gap: 20px;
+        gap: 16px;
         width: auto;
         height: auto;
-        padding: 20px 40px;
+        padding: 20px calc((100vw - 300px) / 2);
       }
 
       .kenos-card {
@@ -486,36 +492,74 @@
         z-index: 1;
       }
 
+      /* Desactivar hover lift en touch devices dentro del carousel */
       .kenos-stack:hover .kenos-card,
       .kenos-stack:hover .kenos-card:hover {
         transform: none !important;
       }
-
-      .kenos-card:hover {
-        transform: translateY(-10px) !important;
-        box-shadow:
-          0 30px 60px rgba(0, 0, 0, 0.5),
-          0 15px 30px rgba(255, 178, 0, 0.1);
-      }
     }
 
     @media (max-width: 768px) {
+      .kenos-stack-container {
+        overflow: visible;
+        scroll-snap-type: none;
+        justify-content: center;
+        min-height: auto;
+        padding: 20px 0;
+        perspective: 800px;
+      }
+
+      .kenos-stack {
+        position: relative;
+        width: min(280px, calc(100vw - 64px));
+        height: 440px;
+        margin: 0 auto;
+        transform-style: preserve-3d;
+      }
+
       .kenos-card {
-        width: 300px;
-        height: 340px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 320px;
+        scroll-snap-align: none;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        cursor: pointer;
+        transform-origin: center bottom;
+      }
+
+      /* Stack with 3D perspective: cards recede and peek below */
+      .kenos-card:nth-child(1) { transform: translateZ(0px) translateY(0px); z-index: 4; }
+      .kenos-card:nth-child(2) { transform: translateZ(-15px) translateY(35px) rotateX(1.5deg); z-index: 3; }
+      .kenos-card:nth-child(3) { transform: translateZ(-30px) translateY(70px) rotateX(3deg); z-index: 2; }
+      .kenos-card:nth-child(4) { transform: translateZ(-45px) translateY(105px) rotateX(4.5deg); z-index: 1; }
+
+      .kenos-card.mobile-active {
+        transform: translateZ(10px) translateY(0px) rotateX(0deg) !important;
+        z-index: 10 !important;
+        box-shadow:
+          0 30px 60px rgba(0, 0, 0, 0.5),
+          0 0 20px rgba(255, 178, 0, 0.1);
+      }
+
+      .kenos-card:not(.mobile-active) {
+        border: 1px solid rgba(255, 178, 0, 0.2);
+        border-top: 2px solid rgba(255, 178, 0, 0.4);
       }
 
       .kenos-card-header {
-        padding: 16px 20px;
+        padding: 12px 16px;
       }
 
       .kenos-card-body {
-        padding: 16px 20px;
+        padding: 12px 16px;
+        height: calc(100% - 65px);
       }
 
       .kenos-card::before {
         font-size: 48px;
-        right: 20px;
+        right: 16px;
       }
     }
 
@@ -634,8 +678,27 @@
 
     /* Mobile Responsive Fixes */
     @media (max-width: 768px) {
+      #workflow {
+        overflow-x: hidden;
+      }
+
       #workflow-animation {
-        height: 500px;
+        height: auto;
+        min-height: 300px;
+        max-width: calc(100vw - 48px);
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      #workflow-animation::-webkit-scrollbar {
+        display: none;
+      }
+
+      #workflow-svg {
+        min-width: 700px;
+        height: 400px;
       }
 
       #chatbot .grid {
@@ -644,6 +707,15 @@
 
       .chat-bubble {
         max-width: 90%;
+      }
+
+      .section-fullscreen {
+        min-height: auto;
+        scroll-snap-align: none;
+      }
+
+      html {
+        scroll-snap-type: none;
       }
     }
 
@@ -989,9 +1061,9 @@
     <div class="h-20"></div>
 
     <!-- Main Hero Text - Right aligned -->
-    <div class="flex-1 flex items-center justify-end pr-16 md:pr-24">
+    <div class="flex-1 flex items-center justify-center md:justify-end pr-4 md:pr-24">
       <div class="max-w-4xl">
-        <h1 class="hero-title text-white text-glow text-right">
+        <h1 class="hero-title text-white text-glow text-center md:text-right">
           <span class="block animate-reveal delay-1000"><span class="text-primary">Redefiniendo</span>
             <span id="typewriter-container" class="typewriter-word typing"><span id="typewriter-text"></span><span
                 class="typewriter-cursor"></span></span></span>
@@ -1647,7 +1719,7 @@
         </div>
 
         <!-- Mobile scroll indicator -->
-        <div class="flex justify-center gap-2 mt-4 lg:hidden">
+        <div class="flex justify-center gap-2 mt-4 hidden md:flex lg:hidden">
           <div class="w-8 h-1 rounded-full bg-primary"></div>
           <div class="w-2 h-1 rounded-full bg-gray-700"></div>
           <div class="w-2 h-1 rounded-full bg-gray-700"></div>
@@ -2375,24 +2447,60 @@
     const workflowAnim = new WorkflowAnimation();
     workflowAnim.init();
 
-    // Kenos Cards - Mobile scroll indicator update
+    // Kenos Cards - Mobile tap-to-front + Tablet scroll indicator
     const kenosStack = document.querySelector('.kenos-stack-container');
-    if (kenosStack && window.innerWidth < 1024) {
-      const dots = document.querySelectorAll('#kenos .flex.justify-center.gap-2 > div');
-      kenosStack.addEventListener('scroll', () => {
-        const scrollLeft = kenosStack.scrollLeft;
-        const cardWidth = 340 + 20; // card width + gap
-        const activeIndex = Math.round(scrollLeft / cardWidth);
-        dots.forEach((dot, i) => {
-          if (i === activeIndex) {
-            dot.classList.remove('w-2', 'bg-gray-700');
-            dot.classList.add('w-8', 'bg-primary');
-          } else {
-            dot.classList.remove('w-8', 'bg-primary');
-            dot.classList.add('w-2', 'bg-gray-700');
+    if (kenosStack && window.innerWidth <= 1200) {
+      if (window.innerWidth <= 768) {
+        // Mobile: tap to cycle through stacked cards
+        const cards = Array.from(document.querySelectorAll('.kenos-card'));
+        const zOffsets = [10, -15, -30, -45];
+        const yOffsets = [0, 35, 70, 105];
+        const rotations = [0, 1.5, 3, 4.5];
+        let activeIndex = 0;
+
+        function renderStack() {
+          cards.forEach(c => c.classList.remove('mobile-active'));
+
+          // Build order: active first, then the rest in circular order
+          const order = [];
+          for (let i = 0; i < cards.length; i++) {
+            order.push((activeIndex + i) % cards.length);
           }
+
+          order.forEach((cardIdx, stackPos) => {
+            const card = cards[cardIdx];
+            card.style.setProperty('transform', `translateZ(${zOffsets[stackPos]}px) translateY(${yOffsets[stackPos]}px) rotateX(${rotations[stackPos]}deg)`, 'important');
+            card.style.zIndex = 10 - stackPos;
+            if (stackPos === 0) card.classList.add('mobile-active');
+          });
+        }
+
+        renderStack();
+
+        // Tap active card to cycle to next
+        const stack = document.querySelector('.kenos-stack');
+        stack.addEventListener('click', () => {
+          activeIndex = (activeIndex + 1) % cards.length;
+          renderStack();
         });
-      });
+      } else {
+        // Tablet: scroll indicator dots
+        const dots = document.querySelectorAll('#kenos .flex.justify-center.gap-2 > div');
+        kenosStack.addEventListener('scroll', () => {
+          const scrollLeft = kenosStack.scrollLeft;
+          const cardWidth = 340 + 16;
+          const activeIndex = Math.round(scrollLeft / cardWidth);
+          dots.forEach((dot, i) => {
+            if (i === activeIndex) {
+              dot.classList.remove('w-2', 'bg-gray-700');
+              dot.classList.add('w-8', 'bg-primary');
+            } else {
+              dot.classList.remove('w-8', 'bg-primary');
+              dot.classList.add('w-2', 'bg-gray-700');
+            }
+          });
+        });
+      }
     }
 
     // Chatbot Scenarios Data
