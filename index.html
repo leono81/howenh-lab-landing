@@ -915,6 +915,22 @@
       scroll-behavior: smooth;
     }
 
+    /* AnythingLLM Chat Widget */
+    @keyframes chatGlow {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 178, 0, 0.3)); }
+      50% { filter: drop-shadow(0 0 16px rgba(255, 178, 0, 0.6)); }
+    }
+
+    #anything-llm-chat-widget {
+      z-index: 9999 !important;
+      animation: chatGlow 2.5s ease-in-out infinite;
+    }
+
+    #anything-llm-chat-widget.chat-opened {
+      animation: none;
+      filter: none;
+    }
+
   </style>
 </head>
 
@@ -2426,6 +2442,75 @@
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && isMenuOpen) toggleMobileMenu();
       });
+    })();
+  </script>
+
+  <!-- AnythingLLM Chat Widget (https://anythingllm.com) -->
+  <script
+    data-embed-id="c1e616d4-5910-496b-a172-d6db57913b39"
+    data-base-api-url="https://anythingllm.howenh-labs.com/api/embed"
+    data-button-color="#ffb200"
+    data-user-bg-color="#ffb200"
+    data-assistant-bg-color="#18181B"
+    data-position="bottom-right"
+    data-chat-icon="chatBubble"
+    data-greeting="Hola, soy el asistente de Howenh Labs. ¿En qué puedo ayudarte?"
+    data-assistant-name="Howenh Labs Assistant"
+    data-no-sponsor="on"
+    data-language="es"
+    src="https://anythingllm.howenh-labs.com/embed/anythingllm-chat-widget.min.js">
+  </script>
+
+  <script>
+    // Auto-open chat widget at 75% scroll & manage glow animation
+    (function() {
+      var chatAutoOpened = false;
+
+      function openChatWidget() {
+        var widget = document.getElementById('anything-llm-chat-widget');
+        if (!widget) return false;
+        var btn = widget.querySelector('button') ||
+                  (widget.shadowRoot && widget.shadowRoot.querySelector('button'));
+        if (btn) {
+          btn.click();
+          widget.classList.add('chat-opened');
+          return true;
+        }
+        return false;
+      }
+
+      window.addEventListener('scroll', function() {
+        if (chatAutoOpened) return;
+        var scrollPercent = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
+        if (scrollPercent >= 0.75) {
+          chatAutoOpened = true;
+          setTimeout(function() {
+            if (!openChatWidget()) {
+              setTimeout(openChatWidget, 1000);
+            }
+          }, 500);
+        }
+      }, { passive: true });
+
+      // Stop glow animation when user manually opens chat
+      var observer = new MutationObserver(function() {
+        var widget = document.getElementById('anything-llm-chat-widget');
+        if (widget && widget.children.length > 1) {
+          widget.classList.add('chat-opened');
+        }
+      });
+
+      // Start observing once widget is available
+      var checkWidget = setInterval(function() {
+        var widget = document.getElementById('anything-llm-chat-widget');
+        if (widget) {
+          clearInterval(checkWidget);
+          observer.observe(widget, { childList: true, subtree: true });
+        }
+      }, 500);
+
+      // Cleanup: stop checking after 30s
+      setTimeout(function() { clearInterval(checkWidget); }, 30000);
     })();
   </script>
 </body>
