@@ -4,11 +4,41 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>Howenh Labs | Enterprise AI & Software Architecture</title>
+  <title>Howenh Labs | IA Aplicada y Arquitectura de Software desde Tierra del Fuego</title>
   <meta name="description"
-    content="Enterprise AI and Software Architecture from Tierra del Fuego. High-performance logic for the world's most demanding systems.">
+    content="Howenh Labs transforma sistemas complejos en flujos de trabajo inteligentes con IA aplicada. Creadores de Kenos Medical SaaS. Startup de tecnología en Tierra del Fuego, Argentina.">
+  <meta name="keywords" content="IA aplicada, inteligencia artificial, SaaS médico, Kenos Medical, automatización, Tierra del Fuego, Argentina, software architecture, AI agents, salud digital">
+  <meta name="author" content="Howenh Labs">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://howenh-labs.com/">
+  <meta name="theme-color" content="#ffb200">
+
+  <!-- Idioma -->
+  <link rel="alternate" hreflang="es" href="https://howenh-labs.com/">
+  <link rel="alternate" hreflang="x-default" href="https://howenh-labs.com/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://howenh-labs.com/">
+  <meta property="og:title" content="Howenh Labs | IA Aplicada y Arquitectura de Software">
+  <meta property="og:description" content="Transformamos sistemas complejos en flujos de trabajo inteligentes con IA aplicada. Creadores de Kenos Medical SaaS, desde Tierra del Fuego, Argentina.">
+  <meta property="og:image" content="https://howenh-labs.com/assets/logo-icon.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:site_name" content="Howenh Labs">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Howenh Labs | IA Aplicada y Arquitectura de Software">
+  <meta name="twitter:description" content="Transformamos sistemas complejos en flujos de trabajo inteligentes con IA aplicada. Creadores de Kenos Medical SaaS.">
+  <meta name="twitter:image" content="https://howenh-labs.com/assets/logo-icon.png">
+
+  <!-- Preconnect & Preload para rendimiento -->
   <link href="https://fonts.googleapis.com" rel="preconnect" />
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link rel="preload" as="image" href="assets/logo-icon.png">
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
@@ -1031,13 +1061,77 @@
       box-shadow: none;
     }
   </style>
+
+  <!-- Structured Data: Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Howenh Labs",
+    "url": "https://howenh-labs.com",
+    "logo": "https://howenh-labs.com/assets/logo-icon-clean.png",
+    "description": "Startup de IA aplicada que transforma sistemas complejos en flujos de trabajo inteligentes y automatizados. Ubicada en Tierra del Fuego, Argentina.",
+    "foundingLocation": {
+      "@type": "Place",
+      "name": "Río Grande, Tierra del Fuego, Argentina",
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": -53.7877,
+        "longitude": -67.7095
+      }
+    },
+    "areaServed": "Global",
+    "knowsAbout": ["Inteligencia Artificial", "SaaS Médico", "Automatización de Procesos", "Arquitectura de Software"]
+  }
+  </script>
+
+  <!-- Structured Data: WebSite -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Howenh Labs",
+    "url": "https://howenh-labs.com",
+    "inLanguage": "es",
+    "description": "Howenh Labs - IA Aplicada y Arquitectura de Software desde Tierra del Fuego"
+  }
+  </script>
+
+  <!-- Structured Data: SoftwareApplication (Kenos Medical) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Kenos Medical SaaS",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Web",
+    "description": "Plataforma integral para la salud digital con dashboard de pacientes, monitor de vitales en tiempo real y predicciones con inteligencia artificial.",
+    "offers": {
+      "@type": "Offer",
+      "category": "SaaS"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Howenh Labs"
+    },
+    "featureList": ["Dashboard de pacientes", "Gestión de citas", "Monitor de vitales en tiempo real", "Predicciones IA", "Chatbot inteligente"]
+  }
+  </script>
 </head>
 
 <body class="bg-void text-gray-300 font-display selection:bg-primary selection:text-black">
+  <noscript>
+    <div style="padding: 2rem; text-align: center; background: #231d0f; color: #ffb200;">
+      <h1>Howenh Labs - IA Aplicada desde Tierra del Fuego</h1>
+      <p>Transformamos sistemas complejos en flujos de trabajo inteligentes con inteligencia artificial aplicada.</p>
+      <p>Nuestro producto principal: <strong>Kenos Medical SaaS</strong> - Plataforma integral para el futuro de la salud digital.</p>
+      <p>Por favor, habilita JavaScript para disfrutar la experiencia completa.</p>
+    </div>
+  </noscript>
 
   <!-- Hero Video Background -->
   <div class="hero-video-container">
-    <video autoplay muted loop playsinline id="hero-video">
+    <video autoplay muted loop playsinline id="hero-video" aria-hidden="true" poster="assets/logo-icon.png">
       <source src="assets/hero-video.mp4" type="video/mp4">
     </video>
     <!-- Subtle overlay for text readability -->
@@ -1045,12 +1139,12 @@
   </div>
 
   <!-- Floating Navigation -->
-  <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 px-6 py-5 transition-all duration-300">
+  <nav id="main-nav" aria-label="Navegación principal" class="fixed top-0 left-0 right-0 z-50 px-6 py-5 transition-all duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <!-- Logo -->
-      <a href="#" class="flex items-center gap-2 animate-fade delay-300">
+      <a href="#" class="flex items-center gap-2 animate-fade delay-300" aria-label="Howenh Labs - Inicio">
         <!-- Isotipo SVG - Mountain + Heartbeat -->
-        <svg class="h-7 w-auto" viewBox="0 0 100 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="h-7 w-auto" viewBox="0 0 100 45" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo de Howenh Labs">
           <path d="M2 32
                    C4 32, 6 30, 8 28
                    L14 22
@@ -1097,7 +1191,7 @@
   </nav>
 
   <!-- Mobile Menu Panel -->
-  <div id="mobile-menu"
+  <div id="mobile-menu" role="dialog" aria-label="Menú de navegación móvil" aria-hidden="true"
     class="fixed inset-0 z-[55] bg-void/95 backdrop-blur-lg flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
     <div class="flex flex-col items-center gap-8">
       <a href="#workflow"
@@ -1116,7 +1210,7 @@
   </div>
 
   <!-- Section Dots Navigation -->
-  <div id="section-dots" class="hidden md:flex fixed right-6 top-1/2 -translate-y-1/2 z-40 flex-col gap-4">
+  <nav id="section-dots" aria-label="Navegación de secciones" class="hidden md:flex fixed right-6 top-1/2 -translate-y-1/2 z-40 flex-col gap-4">
     <a href="#workflow" class="dot-link group relative flex items-center justify-end" data-section="workflow">
       <span
         class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Workflow</span>
@@ -1139,10 +1233,10 @@
         class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Space</span>
       <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
     </a>
-  </div>
+  </nav>
 
   <!-- Hero Content Overlay -->
-  <section class="relative z-10 min-h-screen flex flex-col justify-between px-6 md:px-12 py-8">
+  <header class="relative z-10 min-h-screen flex flex-col justify-between px-6 md:px-12 py-8" role="banner">
 
     <!-- Spacer for navbar -->
     <div class="h-20"></div>
@@ -1190,13 +1284,13 @@
         <div class="h-px w-16 bg-gradient-to-l from-transparent to-white"></div>
       </div>
     </div>
-  </section>
+  </header>
 
   <!-- Main Content (scrollable after hero) -->
   <main class="relative z-10 bg-void">
 
     <!-- Workflow Section -->
-    <section id="workflow" class="section-fullscreen relative z-10 py-12" style="background: #000;">
+    <section id="workflow" aria-label="Automatización inteligente" class="section-fullscreen relative z-10 py-12" style="background: #000;">
       <div class="max-w-7xl mx-auto px-6 md:px-12">
         <!-- Title with outline → filled effect -->
         <div class="text-center mb-16">
@@ -1213,9 +1307,9 @@
       <div id="workflow-animation" class="relative w-full overflow-hidden"
         style="aspect-ratio: 1920/800; background: #000;">
         <video id="workflow-intro" class="w-full h-full object-cover" muted playsinline preload="auto"
-          src="assets/workflow-intro.mp4"></video>
+          src="assets/workflow-intro.mp4" aria-hidden="true"></video>
         <video id="workflow-idle" class="w-full h-full object-cover absolute inset-0" muted loop playsinline
-          preload="auto" src="assets/workflow-idle.mp4" style="display: none;"></video>
+          preload="auto" src="assets/workflow-idle.mp4" style="display: none;" aria-hidden="true"></video>
       </div>
     </section>
     <!-- Workflow Video Switcher Script -->
@@ -1263,7 +1357,7 @@
     );"></div>
 
     <!-- Chatbot Comparison Section -->
-    <section id="chatbot" class="section-content py-24 px-6 md:px-12 bg-surface relative">
+    <section id="chatbot" aria-label="Chatbot con inteligencia artificial" class="section-content py-24 px-6 md:px-12 bg-surface relative">
       <div class="max-w-7xl mx-auto">
         <!-- Title -->
         <div class="text-center mb-16">
@@ -1321,10 +1415,10 @@
         </div>
 
         <!-- Carousel Navigation -->
-        <div class="flex justify-center gap-3">
-          <button class="carousel-dot active" data-scenario="0"></button>
-          <button class="carousel-dot" data-scenario="1"></button>
-          <button class="carousel-dot" data-scenario="2"></button>
+        <div class="flex justify-center gap-3" role="tablist" aria-label="Escenarios del chatbot">
+          <button class="carousel-dot active" data-scenario="0" role="tab" aria-selected="true" aria-label="Escenario 1: Agendar Cita"></button>
+          <button class="carousel-dot" data-scenario="1" role="tab" aria-selected="false" aria-label="Escenario 2: Consulta Médica"></button>
+          <button class="carousel-dot" data-scenario="2" role="tab" aria-selected="false" aria-label="Escenario 3: Acción Compleja"></button>
         </div>
       </div>
     </section>
@@ -1340,7 +1434,7 @@
     );"></div>
 
     <!-- Kenos Section - Card Stack Fan Out -->
-    <section id="kenos" class="section-fullscreen py-12 px-6 md:px-12 bg-void relative overflow-hidden">
+    <section id="kenos" aria-label="Kenos Medical SaaS" class="section-fullscreen py-12 px-6 md:px-12 bg-void relative overflow-hidden">
       <div class="max-w-7xl mx-auto">
         <!-- Title -->
         <div class="text-center mb-8">
@@ -1486,7 +1580,7 @@
                   </div>
                   <!-- ECG-like visualization -->
                   <div class="h-16 flex items-center">
-                    <svg class="w-full h-full" viewBox="0 0 200 40" preserveAspectRatio="none">
+                    <svg class="w-full h-full" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true" role="img" aria-label="Visualización de electrocardiograma">
                       <path
                         d="M0,20 L20,20 L25,20 L30,10 L35,30 L40,5 L45,35 L50,20 L55,20 L75,20 L80,20 L85,10 L90,30 L95,5 L100,35 L105,20 L110,20 L130,20 L135,20 L140,10 L145,30 L150,5 L155,35 L160,20 L165,20 L200,20"
                         fill="none" stroke="#ffb200" stroke-width="1.5" stroke-linecap="round"
@@ -1588,7 +1682,7 @@
     );"></div>
 
     <!-- Space Station Section -->
-    <section id="space-station"
+    <section id="space-station" aria-label="Estación espacial TinyGS"
       class="section-fullscreen space-section relative z-10 py-20 px-6 md:px-12 overflow-hidden">
 
       <!-- Animated Stars Background -->
@@ -1808,48 +1902,48 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-black pt-20 pb-10 border-t border-white/10 text-sm">
+    <footer class="bg-black pt-20 pb-10 border-t border-white/10 text-sm" role="contentinfo">
       <div class="max-w-7xl mx-auto px-6 md:px-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div class="md:col-span-1">
-            <a href="#" class="flex items-center gap-2 text-white mb-6">
+            <a href="#" class="flex items-center gap-2 text-white mb-6" aria-label="Howenh Labs - Inicio">
               <!-- Isotipo SVG - Mountain + Heartbeat -->
-              <svg class="h-7 w-auto" viewBox="0 0 100 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 32 
-                         C4 32, 6 30, 8 28 
-                         L14 22 
-                         L18 26 
-                         C20 28, 22 28, 24 26 
-                         L32 14 
-                         L38 8 
-                         L44 18 
-                         C46 22, 48 26, 52 30 
-                         L56 34 
-                         C58 36, 60 34, 62 30 
-                         L66 18 
-                         L70 10 
-                         L74 24 
-                         L76 28 
-                         L82 28 
+              <svg class="h-7 w-auto" viewBox="0 0 100 45" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 32
+                         C4 32, 6 30, 8 28
+                         L14 22
+                         L18 26
+                         C20 28, 22 28, 24 26
+                         L32 14
+                         L38 8
+                         L44 18
+                         C46 22, 48 26, 52 30
+                         L56 34
+                         C58 36, 60 34, 62 30
+                         L66 18
+                         L70 10
+                         L74 24
+                         L76 28
+                         L82 28
                          L98 28" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
                   fill="none" />
               </svg>
               <span class="font-semibold text-lg">Howenh Labs</span>
             </a>
             <p class="text-gray-500 mb-6">
-              Engineering logic from the end of the world. Building the next generation of resilient software systems.
+              Ingeniería lógica desde el fin del mundo. Construyendo la próxima generación de sistemas de software resilientes.
             </p>
             <div class="flex gap-4">
-              <a class="text-gray-400 hover:text-primary" href="#"><span
-                  class="material-symbols-outlined">alternate_email</span></a>
-              <a class="text-gray-400 hover:text-primary" href="#"><span
-                  class="material-symbols-outlined">code</span></a>
-              <a class="text-gray-400 hover:text-primary" href="#"><span
-                  class="material-symbols-outlined">rss_feed</span></a>
+              <a class="text-gray-400 hover:text-primary" href="#" aria-label="Email de contacto"><span
+                  class="material-symbols-outlined" aria-hidden="true">alternate_email</span></a>
+              <a class="text-gray-400 hover:text-primary" href="#" aria-label="Repositorio de código"><span
+                  class="material-symbols-outlined" aria-hidden="true">code</span></a>
+              <a class="text-gray-400 hover:text-primary" href="#" aria-label="Feed RSS"><span
+                  class="material-symbols-outlined" aria-hidden="true">rss_feed</span></a>
             </div>
           </div>
           <div>
-            <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Products</h4>
+            <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Productos</h4>
             <ul class="flex flex-col gap-3 text-gray-500">
               <li><a class="hover:text-white transition-colors" href="#">Kenos SaaS</a></li>
               <li><a class="hover:text-white transition-colors" href="#">Neural Engine</a></li>
@@ -1857,15 +1951,15 @@
             </ul>
           </div>
           <div>
-            <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Company</h4>
+            <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Empresa</h4>
             <ul class="flex flex-col gap-3 text-gray-500">
-              <li><a class="hover:text-white transition-colors" href="#">About Us</a></li>
-              <li><a class="hover:text-white transition-colors" href="#">Manifesto</a></li>
-              <li><a class="hover:text-white transition-colors" href="#">Careers</a></li>
+              <li><a class="hover:text-white transition-colors" href="#">Sobre Nosotros</a></li>
+              <li><a class="hover:text-white transition-colors" href="#">Manifiesto</a></li>
+              <li><a class="hover:text-white transition-colors" href="#">Carreras</a></li>
             </ul>
           </div>
           <div>
-            <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Coordinates</h4>
+            <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Coordenadas</h4>
             <div class="flex flex-col gap-3 text-gray-500 font-mono text-xs">
               <div class="flex justify-between border-b border-gray-800 pb-2">
                 <span>LAT</span>
@@ -1876,17 +1970,17 @@
                 <span class="text-primary">67.7095° W</span>
               </div>
               <div class="flex justify-between pt-2">
-                <span>LOC</span>
-                <span class="text-white">RIO GRANDE, TDF</span>
+                <span>UBI</span>
+                <span class="text-white">RÍO GRANDE, TDF</span>
               </div>
             </div>
           </div>
         </div>
         <div class="border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p class="text-gray-600">© 2025 Howenh Labs. All rights reserved.</p>
+          <p class="text-gray-600">© 2025–2026 Howenh Labs. Todos los derechos reservados.</p>
           <div class="flex gap-6 text-gray-600">
-            <a class="hover:text-gray-400" href="#">Privacy Policy</a>
-            <a class="hover:text-gray-400" href="#">Terms of Service</a>
+            <a class="hover:text-gray-400" href="#">Política de Privacidad</a>
+            <a class="hover:text-gray-400" href="#">Términos de Servicio</a>
           </div>
         </div>
       </div>
