@@ -988,6 +988,102 @@
       color: #ffb200;
     }
 
+    .mobile-menu-open .mobile-nav-link:nth-child(5) {
+      transition-delay: 0.25s;
+    }
+
+    /* Contact form inputs */
+    .contact-input {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 0.75rem;
+      padding: 0.875rem 1rem;
+      color: #fff;
+      font-family: 'Noto Sans', sans-serif;
+      font-size: 0.9375rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      width: 100%;
+    }
+
+    .contact-input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .contact-input:focus {
+      outline: none;
+      border-color: rgba(255, 178, 0, 0.5);
+      box-shadow: 0 0 0 3px rgba(255, 178, 0, 0.1);
+    }
+
+    .contact-input:invalid:not(:placeholder-shown):not(:focus) {
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .contact-input:valid:not(:placeholder-shown) {
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    /* Honeypot field — hidden off-screen */
+    .contact-hp {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+      opacity: 0;
+      height: 0;
+      width: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Submit button shimmer */
+    .contact-submit {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-submit::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .contact-submit:hover::after {
+      left: 100%;
+    }
+
+    /* Form status messages */
+    .form-status {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .form-status.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Button spinner */
+    .btn-spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0, 0, 0, 0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     /* Smooth scroll */
     html {
       scroll-behavior: smooth;
@@ -1081,7 +1177,13 @@
       }
     },
     "areaServed": "Global",
-    "knowsAbout": ["Inteligencia Artificial", "SaaS Médico", "Automatización de Procesos", "Arquitectura de Software"]
+    "knowsAbout": ["Inteligencia Artificial", "SaaS Médico", "Automatización de Procesos", "Arquitectura de Software"],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "email": "contacto@howenh-labs.com",
+      "availableLanguage": ["es", "en"]
+    }
   }
   </script>
 
@@ -1181,6 +1283,9 @@
         <a href="#space-station"
           class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
           data-section="space-station">Space</a>
+        <a href="#contacto"
+          class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
+          data-section="contacto">Contacto</a>
       </div>
 
       <!-- Mobile Menu Button -->
@@ -1206,6 +1311,9 @@
       <a href="#space-station"
         class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
         data-section="space-station">Space</a>
+      <a href="#contacto"
+        class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
+        data-section="contacto">Contacto</a>
     </div>
   </div>
 
@@ -1231,6 +1339,11 @@
     <a href="#space-station" class="dot-link group relative flex items-center justify-end" data-section="space-station">
       <span
         class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Space</span>
+      <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
+    </a>
+    <a href="#contacto" class="dot-link group relative flex items-center justify-end" data-section="contacto">
+      <span
+        class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Contacto</span>
       <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
     </a>
   </nav>
@@ -1901,6 +2014,140 @@
       </div>
     </section>
 
+    <!-- Contact Section -->
+    <section id="contacto" aria-label="Formulario de contacto"
+      class="section-content py-24 px-6 md:px-12 bg-void relative overflow-hidden">
+
+      <!-- Ambient glow -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-20 pointer-events-none"
+        style="background: radial-gradient(circle, rgba(255, 178, 0, 0.12) 0%, transparent 70%);"></div>
+
+      <div class="max-w-6xl mx-auto relative z-10">
+        <!-- Section header -->
+        <div class="text-center mb-16 animate-on-scroll">
+          <div
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 mb-6">
+            <span class="material-symbols-outlined text-primary text-sm">mail</span>
+            Hablemos
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+            Contacto
+          </h2>
+          <p class="text-gray-400 max-w-xl mx-auto">
+            ¿Tenés un proyecto en mente o querés saber más sobre nuestros servicios? Escribinos y te respondemos a la brevedad.
+          </p>
+        </div>
+
+        <!-- Grid: Form + Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14 animate-on-scroll">
+
+          <!-- Form Column (3/5) -->
+          <div class="lg:col-span-3">
+            <form id="contact-form" class="glass-panel rounded-2xl p-6 md:p-8 space-y-5" novalidate>
+              <!-- Web3Forms hidden fields -->
+              <input type="hidden" name="access_key" value="eeaa4894-8758-4c96-91e5-cb297c3be3b0">
+              <input type="hidden" name="subject" value="Nuevo mensaje desde howenh-labs.com">
+              <input type="hidden" name="from_name" value="Howenh Labs Web">
+              <input type="hidden" name="redirect" value="">
+
+              <!-- Honeypot -->
+              <div class="contact-hp" aria-hidden="true">
+                <input type="text" name="botcheck" tabindex="-1" autocomplete="off">
+              </div>
+
+              <!-- Nombre -->
+              <div>
+                <label for="contact-name" class="block text-sm text-gray-400 mb-2">Nombre *</label>
+                <input type="text" id="contact-name" name="name" required minlength="2" maxlength="100"
+                  placeholder="Tu nombre" class="contact-input" autocomplete="name">
+              </div>
+
+              <!-- Email -->
+              <div>
+                <label for="contact-email" class="block text-sm text-gray-400 mb-2">Email *</label>
+                <input type="email" id="contact-email" name="email" required maxlength="254"
+                  placeholder="tu@email.com" class="contact-input" autocomplete="email">
+              </div>
+
+              <!-- Asunto -->
+              <div>
+                <label for="contact-subject" class="block text-sm text-gray-400 mb-2">Asunto</label>
+                <input type="text" id="contact-subject" name="asunto" maxlength="200"
+                  placeholder="¿Sobre qué querés hablar?" class="contact-input">
+              </div>
+
+              <!-- Mensaje -->
+              <div>
+                <label for="contact-message" class="block text-sm text-gray-400 mb-2">Mensaje *</label>
+                <textarea id="contact-message" name="message" required minlength="10" maxlength="3000" rows="5"
+                  placeholder="Contanos sobre tu proyecto o consulta..." class="contact-input resize-none"></textarea>
+              </div>
+
+              <!-- Submit -->
+              <button type="submit" id="contact-submit-btn"
+                class="contact-submit w-full bg-primary hover:bg-primary/90 text-black font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="submit-text">Enviar mensaje</span>
+                <span id="submit-spinner" class="btn-spinner hidden"></span>
+                <span class="material-symbols-outlined text-lg" id="submit-icon">send</span>
+              </button>
+
+              <!-- Status message -->
+              <div id="form-status" class="form-status text-center text-sm py-2" role="alert" aria-live="polite"></div>
+            </form>
+          </div>
+
+          <!-- Info Column (2/5) -->
+          <div class="lg:col-span-2 flex flex-col gap-5">
+
+            <!-- Email directo card -->
+            <div class="glass-panel rounded-2xl p-6">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined text-primary">alternate_email</span>
+                </div>
+                <div>
+                  <h3 class="text-white font-semibold mb-1">Email directo</h3>
+                  <p class="text-gray-400 text-sm mb-3">Preferís escribir desde tu cliente de correo?</p>
+                  <a id="contact-email-link" href="#" class="text-primary hover:text-primary/80 text-sm font-medium transition-colors">
+                    Cargando email...
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ubicación card -->
+            <div class="glass-panel rounded-2xl p-6">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined text-primary">location_on</span>
+                </div>
+                <div>
+                  <h3 class="text-white font-semibold mb-1">Ubicación</h3>
+                  <p class="text-gray-400 text-sm">Río Grande, Tierra del Fuego</p>
+                  <p class="text-gray-500 text-xs mt-1 font-mono">54.8019° S, 68.3030° W</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Horario card -->
+            <div class="glass-panel rounded-2xl p-6">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined text-primary">schedule</span>
+                </div>
+                <div>
+                  <h3 class="text-white font-semibold mb-1">Tiempo de respuesta</h3>
+                  <p class="text-gray-400 text-sm">Respondemos en menos de 24 hs hábiles.</p>
+                  <p class="text-gray-500 text-xs mt-1">Lun–Vie · 9:00–18:00 ART (UTC−3)</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer -->
     <footer class="bg-black pt-20 pb-10 border-t border-white/10 text-sm" role="contentinfo">
       <div class="max-w-7xl mx-auto px-6 md:px-12">
@@ -1934,7 +2181,7 @@
               Ingeniería lógica desde el fin del mundo. Construyendo la próxima generación de sistemas de software resilientes.
             </p>
             <div class="flex gap-4">
-              <a class="text-gray-400 hover:text-primary" href="#" aria-label="Email de contacto"><span
+              <a id="footer-email-link" class="text-gray-400 hover:text-primary" href="#" aria-label="Email de contacto"><span
                   class="material-symbols-outlined" aria-hidden="true">alternate_email</span></a>
               <a class="text-gray-400 hover:text-primary" href="#" aria-label="Repositorio de código"><span
                   class="material-symbols-outlined" aria-hidden="true">code</span></a>
@@ -1956,6 +2203,7 @@
               <li><a class="hover:text-white transition-colors" href="#">Sobre Nosotros</a></li>
               <li><a class="hover:text-white transition-colors" href="#">Manifiesto</a></li>
               <li><a class="hover:text-white transition-colors" href="#">Carreras</a></li>
+              <li><a class="hover:text-white transition-colors" href="#contacto">Contacto</a></li>
             </ul>
           </div>
           <div>
@@ -2603,7 +2851,7 @@
       const navLinks = document.querySelectorAll('.nav-link');
       const dotLinks = document.querySelectorAll('.dot-link');
       const mobileLinks = document.querySelectorAll('.mobile-nav-link');
-      const sections = ['workflow', 'chatbot', 'kenos', 'space-station'];
+      const sections = ['workflow', 'chatbot', 'kenos', 'space-station', 'contacto'];
       let isMenuOpen = false;
 
       // Nav glass background on scroll
@@ -2779,6 +3027,143 @@
 
       // Cleanup: stop checking after 30s
       setTimeout(function () { clearInterval(checkWidget); }, 30000);
+    })();
+  </script>
+
+  <!-- Contact Form Handler -->
+  <script>
+    (function () {
+      // Email obfuscation — assembled from parts, never in HTML source
+      var eUser = 'contacto';
+      var eDomain = 'howenh-labs';
+      var eTLD = '.com';
+      var fullEmail = eUser + '@' + eDomain + eTLD;
+
+      // Set email links
+      var contactEmailLink = document.getElementById('contact-email-link');
+      if (contactEmailLink) {
+        contactEmailLink.href = 'mailto:' + fullEmail;
+        contactEmailLink.textContent = fullEmail;
+      }
+      var footerEmailLink = document.getElementById('footer-email-link');
+      if (footerEmailLink) {
+        footerEmailLink.href = 'mailto:' + fullEmail;
+      }
+
+      // Form handler
+      var form = document.getElementById('contact-form');
+      if (!form) return;
+
+      var submitBtn = document.getElementById('contact-submit-btn');
+      var submitText = document.getElementById('submit-text');
+      var submitSpinner = document.getElementById('submit-spinner');
+      var submitIcon = document.getElementById('submit-icon');
+      var statusDiv = document.getElementById('form-status');
+      var RATE_KEY = 'hw_contact_ts';
+      var RATE_MAX = 3;
+      var RATE_WINDOW = 600000; // 10 minutes in ms
+
+      function showStatus(msg, isError) {
+        statusDiv.textContent = msg;
+        statusDiv.className = 'form-status text-center text-sm py-2 visible ' +
+          (isError ? 'text-red-400' : 'text-green-400');
+        if (!isError) {
+          setTimeout(function () {
+            statusDiv.className = 'form-status text-center text-sm py-2';
+          }, 8000);
+        }
+      }
+
+      function setLoading(loading) {
+        submitBtn.disabled = loading;
+        submitText.textContent = loading ? 'Enviando...' : 'Enviar mensaje';
+        submitSpinner.classList.toggle('hidden', !loading);
+        submitIcon.classList.toggle('hidden', loading);
+      }
+
+      function checkRateLimit() {
+        try {
+          var timestamps = JSON.parse(sessionStorage.getItem(RATE_KEY) || '[]');
+          var now = Date.now();
+          timestamps = timestamps.filter(function (t) { return now - t < RATE_WINDOW; });
+          if (timestamps.length >= RATE_MAX) return false;
+          timestamps.push(now);
+          sessionStorage.setItem(RATE_KEY, JSON.stringify(timestamps));
+          return true;
+        } catch (e) {
+          return true;
+        }
+      }
+
+      function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // Honeypot check — if filled, fake success
+        var honeypot = form.querySelector('input[name="botcheck"]');
+        if (honeypot && honeypot.value) {
+          showStatus('Mensaje enviado con éxito. Te responderemos pronto.', false);
+          form.reset();
+          return;
+        }
+
+        // Client-side validation
+        var name = form.querySelector('#contact-name').value.trim();
+        var email = form.querySelector('#contact-email').value.trim();
+        var message = form.querySelector('#contact-message').value.trim();
+
+        if (!name || name.length < 2) {
+          showStatus('Por favor ingresá tu nombre (mínimo 2 caracteres).', true);
+          form.querySelector('#contact-name').focus();
+          return;
+        }
+        if (!email || !validateEmail(email)) {
+          showStatus('Por favor ingresá un email válido.', true);
+          form.querySelector('#contact-email').focus();
+          return;
+        }
+        if (!message || message.length < 10) {
+          showStatus('El mensaje debe tener al menos 10 caracteres.', true);
+          form.querySelector('#contact-message').focus();
+          return;
+        }
+
+        // Rate limiting
+        if (!checkRateLimit()) {
+          showStatus('Demasiados envíos. Por favor esperá unos minutos antes de intentar de nuevo.', true);
+          return;
+        }
+
+        // Submit via AJAX
+        setLoading(true);
+        statusDiv.className = 'form-status text-center text-sm py-2';
+
+        var formData = new FormData(form);
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: formData
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            setLoading(false);
+            if (data.success) {
+              showStatus('Mensaje enviado con éxito. Te responderemos pronto.', false);
+              form.reset();
+            } else {
+              showStatus('Hubo un error al enviar. Por favor intentá de nuevo o escribinos por email.', true);
+            }
+          })
+          .catch(function () {
+            setLoading(false);
+            showStatus('Error de conexión. Por favor intentá de nuevo o escribinos por email.', true);
+          });
+      });
     })();
   </script>
 </body>
