@@ -992,15 +992,18 @@
       transition-delay: 0.25s;
     }
 
-    /* Contact form inputs */
+    /* Contact form inputs — !important needed to override Tailwind forms plugin
+       which sets background-color:#fff on [type="text"],[type="email"],textarea
+       with same specificity but later cascade position */
     .contact-input {
-      background: rgba(255, 255, 255, 0.03);
-      background-color: transparent;
+      background: rgba(255, 255, 255, 0.03) !important;
+      background-color: transparent !important;
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 0.75rem;
       padding: 0.875rem 1rem;
-      color: #fff;
+      color: #fff !important;
+      -webkit-text-fill-color: #fff;
       font-family: 'Noto Sans', sans-serif;
       font-size: 0.9375rem;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -1009,6 +1012,7 @@
 
     .contact-input::placeholder {
       color: rgba(255, 255, 255, 0.3);
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.3);
     }
 
     .contact-input:focus {
@@ -1023,6 +1027,18 @@
 
     .contact-input:valid:not(:placeholder-shown) {
       border-color: rgba(34, 197, 94, 0.3);
+      color: #fff;
+      -webkit-text-fill-color: #fff;
+    }
+
+    /* Override Chrome autofill blue/yellow background */
+    .contact-input:-webkit-autofill,
+    .contact-input:-webkit-autofill:hover,
+    .contact-input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px #1a1a1c inset !important;
+      -webkit-text-fill-color: #fff !important;
+      caret-color: #fff;
+      transition: background-color 5000s ease-in-out 0s;
     }
 
     /* Honeypot field — hidden off-screen */
@@ -2075,7 +2091,7 @@
               <div>
                 <label for="contact-subject" class="block text-sm text-gray-400 mb-2">Asunto</label>
                 <input type="text" id="contact-subject" name="asunto" maxlength="200"
-                  placeholder="¿Sobre qué querés hablar?" class="contact-input">
+                  placeholder="¿Sobre qué querés hablar?" class="contact-input" autocomplete="off">
               </div>
 
               <!-- Mensaje -->
@@ -3064,6 +3080,8 @@
       var RATE_KEY = 'hw_contact_ts';
       var RATE_MAX = 3;
       var RATE_WINDOW = 600000; // 10 minutes in ms
+      var FORM_LOAD_TIME = Date.now();
+      var MIN_FILL_TIME = 3000; // 3 seconds minimum to fill form
 
       function showStatus(msg, isError) {
         statusDiv.textContent = msg;
@@ -3107,6 +3125,13 @@
         // Honeypot check — if filled, fake success
         var honeypot = form.querySelector('input[name="botcheck"]');
         if (honeypot && honeypot.value) {
+          showStatus('Mensaje enviado con éxito. Te responderemos pronto.', false);
+          form.reset();
+          return;
+        }
+
+        // Time-based bot check — form filled too fast
+        if (Date.now() - FORM_LOAD_TIME < MIN_FILL_TIME) {
           showStatus('Mensaje enviado con éxito. Te responderemos pronto.', false);
           form.reset();
           return;
