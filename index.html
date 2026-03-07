@@ -38,7 +38,6 @@
   <link href="https://fonts.googleapis.com" rel="preconnect" />
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
   <link rel="preconnect" href="https://cdn.tailwindcss.com">
-  <link rel="preload" as="image" href="assets/logo-icon.png">
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
@@ -1238,7 +1237,8 @@
   </script>
 </head>
 
-<body class="bg-void text-gray-300 font-display selection:bg-primary selection:text-black">
+<body class="bg-void text-gray-300 font-display selection:bg-primary selection:text-black" style="opacity:0;transition:opacity .3s ease">
+<script>document.body.style.opacity='1'</script>
   <noscript>
     <div style="padding: 2rem; text-align: center; background: #231d0f; color: #ffb200;">
       <h1>Howenh Labs - IA Aplicada desde Tierra del Fuego</h1>
@@ -2133,19 +2133,6 @@
               </div>
             </div>
 
-            <!-- Ubicación card -->
-            <div class="glass-panel rounded-2xl p-6">
-              <div class="flex items-start gap-4">
-                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <span class="material-symbols-outlined text-primary">location_on</span>
-                </div>
-                <div>
-                  <h3 class="text-white font-semibold mb-1">Ubicación</h3>
-                  <p class="text-gray-400 text-sm">Río Grande, Tierra del Fuego</p>
-                  <p class="text-gray-500 text-xs mt-1 font-mono">54.8019° S, 68.3030° W</p>
-                </div>
-              </div>
-            </div>
 
             <!-- Horario card -->
             <div class="glass-panel rounded-2xl p-6">
@@ -2223,23 +2210,6 @@
               <li><a class="hover:text-white transition-colors" href="#">Carreras</a></li>
               <li><a class="hover:text-white transition-colors" href="#contacto">Contacto</a></li>
             </ul>
-          </div>
-          <div>
-            <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Coordenadas</h4>
-            <div class="flex flex-col gap-3 text-gray-500 font-mono text-xs">
-              <div class="flex justify-between border-b border-gray-800 pb-2">
-                <span>LAT</span>
-                <span class="text-primary">53.7877° S</span>
-              </div>
-              <div class="flex justify-between border-b border-gray-800 pb-2">
-                <span>LONG</span>
-                <span class="text-primary">67.7095° W</span>
-              </div>
-              <div class="flex justify-between pt-2">
-                <span>UBI</span>
-                <span class="text-white">RÍO GRANDE, TDF</span>
-              </div>
-            </div>
           </div>
         </div>
         <div class="border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
