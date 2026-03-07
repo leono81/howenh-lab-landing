@@ -62,6 +62,7 @@ export const RemotionRoot: React.FC = () => {
           defaultProps={{ format: "vertical" as const }}
         />
       </Folder>
+
     </>
   );
 };

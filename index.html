@@ -13,6 +13,11 @@
   <link rel="canonical" href="https://howenh-labs.com/">
   <meta name="theme-color" content="#ffb200">
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
   <!-- Idioma -->
   <link rel="alternate" hreflang="es" href="https://howenh-labs.com/">
   <link rel="alternate" hreflang="x-default" href="https://howenh-labs.com/">
@@ -221,6 +226,78 @@
 
     .scroll-indicator {
       animation: bounce 2s infinite;
+    }
+
+    /* Preloader */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #0A0A0B;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      transition: opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #preloader.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #preloader-logo {
+      width: clamp(140px, 22vw, 220px);
+      height: auto;
+      opacity: 0;
+      animation: preloader-fade-in 1.8s ease forwards;
+    }
+
+    @keyframes preloader-fade-in {
+      to { opacity: 1; }
+    }
+
+    #preloader-glow {
+      opacity: 0;
+      animation: preloader-glow 2s ease forwards 1.2s;
+    }
+
+    @keyframes preloader-glow {
+      to {
+        opacity: 1;
+        filter: drop-shadow(0 0 20px rgba(255, 178, 0, 0.2)) drop-shadow(0 0 50px rgba(255, 178, 0, 0.08));
+      }
+    }
+
+    #preloader-text {
+      margin-top: 2rem;
+      text-align: center;
+      opacity: 0;
+      animation: preloader-fade-in 1.2s ease forwards 2s;
+    }
+
+    #preloader-text .welcome {
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    #preloader-text .brand {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 0.15em;
+    }
+
+    /* Defer hero animations until preloader is done */
+    body:not(.preloader-done) .animate-reveal,
+    body:not(.preloader-done) .animate-fade {
+      animation: none !important;
+      opacity: 0;
     }
 
     /* Smooth scroll with snap */
@@ -1239,6 +1316,18 @@
 
 <body class="bg-void text-gray-300 font-display selection:bg-primary selection:text-black" style="opacity:0;transition:opacity .3s ease">
 <script>document.body.style.opacity='1'</script>
+
+  <!-- Preloader -->
+  <div id="preloader" aria-hidden="true">
+    <div id="preloader-glow">
+      <img id="preloader-logo" src="assets/howenh-logo.png" alt="" class="brightness-0 invert">
+    </div>
+    <div id="preloader-text">
+      <p class="welcome font-body">Bienvenido a</p>
+      <p class="brand font-display">Howenh Labs</p>
+    </div>
+  </div>
+
   <noscript>
     <div style="padding: 2rem; text-align: center; background: #231d0f; color: #ffb200;">
       <h1>Howenh Labs - IA Aplicada desde Tierra del Fuego</h1>
@@ -1250,7 +1339,7 @@
 
   <!-- Hero Video Background -->
   <div class="hero-video-container">
-    <video autoplay muted loop playsinline id="hero-video" aria-hidden="true" poster="assets/logo-icon.png">
+    <video autoplay muted loop playsinline id="hero-video" aria-hidden="true">
       <source src="assets/hero-video.mp4" type="video/mp4">
     </video>
     <!-- Subtle overlay for text readability -->
@@ -1261,28 +1350,8 @@
   <nav id="main-nav" aria-label="Navegación principal" class="fixed top-0 left-0 right-0 z-50 px-6 py-5 transition-all duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <!-- Logo -->
-      <a href="#" class="flex items-center gap-2 animate-fade delay-300" aria-label="Howenh Labs - Inicio">
-        <!-- Isotipo SVG - Mountain + Heartbeat -->
-        <svg class="h-7 w-auto" viewBox="0 0 100 45" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo de Howenh Labs">
-          <path d="M2 32
-                   C4 32, 6 30, 8 28
-                   L14 22
-                   L18 26
-                   C20 28, 22 28, 24 26
-                   L32 14
-                   L38 8
-                   L44 18
-                   C46 22, 48 26, 52 30
-                   L56 34
-                   C58 36, 60 34, 62 30
-                   L66 18
-                   L70 10
-                   L74 24
-                   L76 28
-                   L82 28
-                   L98 28" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-            fill="none" />
-        </svg>
+      <a href="#" class="flex items-center gap-3 animate-fade delay-300" aria-label="Howenh Labs - Inicio">
+        <img src="assets/howenh-logo.png" alt="Howenh Labs" class="h-8 w-auto brightness-0 invert">
         <span class="text-white text-lg font-semibold tracking-tight">Howenh Labs</span>
       </a>
 
@@ -3162,6 +3231,25 @@
             showStatus('Error de conexión. Por favor intentá de nuevo o escribinos por email.', true);
           });
       });
+    })();
+  </script>
+
+  <!-- Preloader Logic -->
+  <script>
+    (function () {
+      var preloader = document.getElementById('preloader');
+      var dismissed = false;
+
+      function dismiss() {
+        if (dismissed) return;
+        dismissed = true;
+        document.body.classList.add('preloader-done');
+        preloader.classList.add('fade-out');
+        setTimeout(function () { preloader.remove(); }, 1500);
+      }
+
+      // Dismiss after animation completes (fade 1.8s + glow 2s + text 1.2s + hold 0.5s)
+      setTimeout(dismiss, 4200);
     })();
   </script>
 </body>
