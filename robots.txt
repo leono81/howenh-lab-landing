@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://howenh-labs.com/sitemap.xml
