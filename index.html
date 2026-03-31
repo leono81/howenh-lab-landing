@@ -1372,6 +1372,9 @@
         <a href="#space-station"
           class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
           data-section="space-station">Space</a>
+        <a href="#penon"
+          class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
+          data-section="penon">Penon</a>
         <a href="#contacto"
           class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
           data-section="contacto">Contacto</a>
@@ -1400,6 +1403,9 @@
       <a href="#space-station"
         class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
         data-section="space-station">Space</a>
+      <a href="#penon"
+        class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
+        data-section="penon">Penon</a>
       <a href="#contacto"
         class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
         data-section="contacto">Contacto</a>
@@ -1428,6 +1434,11 @@
     <a href="#space-station" class="dot-link group relative flex items-center justify-end" data-section="space-station">
       <span
         class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Space</span>
+      <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
+    </a>
+    <a href="#penon" class="dot-link group relative flex items-center justify-end" data-section="penon">
+      <span
+        class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Penon</span>
       <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
     </a>
     <a href="#contacto" class="dot-link group relative flex items-center justify-end" data-section="contacto">
@@ -2113,6 +2124,212 @@
       </div>
     </section>
 
+    <!-- Penon Monitor Section -->
+    <section id="penon" aria-label="Penon Monitor - Monitoreo satelital de incendios forestales"
+      class="section-content py-24 px-6 md:px-12 bg-surface relative overflow-hidden">
+
+      <!-- Ambient glow -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-15 pointer-events-none"
+        style="background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, rgba(255, 178, 0, 0.08) 40%, transparent 70%);"></div>
+
+      <div class="max-w-6xl mx-auto relative z-10">
+
+        <!-- Section Header -->
+        <div class="text-center mb-16 animate-on-scroll">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 mb-6">
+            <span class="material-symbols-outlined text-red-500 text-sm">local_fire_department</span>
+            Monitoreo Satelital de Incendios
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+            <span class="text-primary">Penon</span> Monitor
+          </h2>
+          <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+            Vigilancia satelital para los bosques del fin del mundo
+          </p>
+        </div>
+
+        <!-- Impact Stats Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16 animate-on-scroll">
+          <div class="glass-panel rounded-xl p-6 text-center">
+            <div class="text-3xl md:text-4xl font-bold text-red-500 mb-1">12.000 ha</div>
+            <div class="text-gray-400 text-sm">quemadas en Reserva Corazón de la Isla</div>
+          </div>
+          <div class="glass-panel rounded-xl p-6 text-center">
+            <div class="text-3xl md:text-4xl font-bold text-primary mb-1">2+ meses</div>
+            <div class="text-gray-400 text-sm">combatiendo el peor incendio de la historia provincial</div>
+          </div>
+          <div class="glass-panel rounded-xl p-6 text-center">
+            <div class="text-3xl md:text-4xl font-bold text-white mb-1">1.000</div>
+            <div class="text-gray-400 text-sm">brigadistas desplegados en 2022</div>
+          </div>
+        </div>
+
+        <!-- Sin Penon vs Con Penon -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16 animate-on-scroll">
+          <!-- Sin Penon -->
+          <div class="glass-panel rounded-xl p-6 border-red-500/20">
+            <div class="flex items-center gap-3 mb-5">
+              <span class="material-symbols-outlined text-red-500">warning</span>
+              <h3 class="text-white font-bold text-lg">Sin Penon</h3>
+            </div>
+            <p class="text-gray-400 text-sm mb-5">Detecciones crudas de NASA FIRMS — sin filtrado inteligente</p>
+            <!-- Simulated raw detections map -->
+            <div class="bg-void/80 rounded-lg p-5 relative overflow-hidden" style="min-height: 180px;">
+              <div class="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Tierra del Fuego · Detecciones</div>
+              <!-- Map with dots as SVG circles (positioned on island coordinates) -->
+              <div class="relative h-32">
+                <svg class="absolute inset-0 w-full h-full" viewBox="10 80 330 200" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                  <!-- Isla Grande -->
+                  <path d="M27.6 227.3 L31.6 229.4 30.2 230.7 33.0 233.3 28.9 233.0 32.1 235.4 35.7 235.1 34.8 231.7 38.3 233.4 35.5 231.1 41.1 231.7 39.3 233.4 40.3 236.6 41.8 231.2 44.2 231.8 41.8 234.3 43.9 233.5 43.3 236.0 46.4 231.8 46.5 238.4 47.4 235.0 49.9 235.8 49.2 233.1 52.5 234.0 48.1 230.6 50.5 230.4 49.4 228.1 52.3 230.9 51.8 227.2 57.0 231.6 55.1 234.0 59.3 234.4 53.0 235.9 57.3 239.1 62.7 236.0 62.0 232.9 67.2 234.2 64.0 237.3 65.6 240.2 63.3 244.0 67.1 237.2 73.0 238.4 67.5 239.7 66.0 242.3 69.2 243.3 84.3 235.0 83.2 239.0 70.8 243.9 69.6 247.0 73.0 248.8 80.7 242.8 78.6 244.4 87.8 248.6 89.0 242.3 94.2 237.5 88.3 246.1 92.8 249.9 94.4 249.5 91.9 247.5 96.8 247.4 95.0 245.1 97.8 244.8 97.0 249.2 102.1 248.3 102.1 238.7 103.2 248.1 108.6 247.4 110.0 243.6 108.1 240.7 110.2 243.1 108.8 247.4 111.6 247.5 111.0 239.3 112.6 245.4 114.1 241.0 115.1 243.4 112.2 248.0 134.9 255.6 146.4 252.9 143.0 247.5 151.5 251.0 163.2 247.7 161.2 245.9 163.6 244.9 183.8 250.7 198.6 249.4 225.9 261.1 245.9 255.7 245.5 251.6 254.3 252.0 255.0 255.8 264.0 250.7 267.1 254.0 276.8 236.4 252.0 236.1 228.1 225.4 218.3 211.8 197.2 198.6 188.8 190.4 189.1 185.9 175.8 175.8 177.8 176.1 172.3 168.7 167.6 154.3 152.5 149.5 152.9 143.3 160.5 134.4 162.9 134.7 165.3 142.6 162.2 130.9 150.1 111.7 144.7 105.5 144.1 109.8 131.1 114.9 120.9 100.0 115.3 104.5 115.1 112.0 111.2 118.5 103.8 123.9 95.1 117.1 84.6 120.0 90.2 121.6 89.5 128.4 97.1 129.5 91.4 137.7 87.9 137.8 88.7 131.8 85.2 134.6 83.6 152.6 87.1 152.6 83.7 156.4 92.6 163.3 104.5 157.3 123.4 156.3 125.3 163.4 123.8 166.1 95.5 179.9 94.4 188.0 97.5 199.9 103.2 205.8 130.9 218.6 137.7 225.1 131.7 223.7 130.2 227.2 131.7 231.1 128.6 228.2 123.1 235.2 124.2 240.5 122.6 235.7 118.6 239.4 129.2 223.5 116.8 216.6 118.6 223.2 115.3 221.4 115.7 228.7 113.2 223.7 114.4 218.4 105.9 213.5 110.6 227.1 109.0 233.0 108.6 229.4 105.8 231.4 109.5 227.8 107.5 224.6 103.5 227.7 107.0 223.5 101.5 219.4 102.7 214.9 100.8 212.4 93.2 215.2 99.0 219.5 95.0 219.6 95.9 222.8 66.6 203.0 70.6 207.8 67.4 205.7 68.8 211.6 81.3 214.4 81.9 219.9 96.5 230.5 89.4 226.8 92.0 232.2 80.2 220.6 74.8 229.0 77.9 233.3 74.4 229.8 72.6 234.6 74.6 222.6 79.5 217.7 71.5 215.9 66.5 218.5 66.3 227.8 65.0 223.8 59.9 222.6 61.8 228.5 58.7 226.7 60.5 226.1 59.1 222.4 55.7 224.3 57.1 222.0 50.8 218.8 48.9 220.5 50.3 224.4 42.0 220.8 48.4 226.0 43.1 225.0 44.7 227.2 37.9 220.3 32.9 222.6 45.2 229.0 36.9 226.0 41.1 231.4 34.9 229.5 31.6 223.2 28.3 223.9 30.0 228.8 27.6 227.3Z" stroke="rgba(255,178,0,0.2)" stroke-width="1" fill="rgba(255,178,0,0.04)" stroke-linejoin="round"/>
+                  <!-- Isla de los Estados -->
+                  <path d="M289.7 247.6 L290.4 247.9 290.4 248.9 293.0 248.2 292.4 249.0 293.8 250.7 291.7 252.4 295.1 252.0 296.6 250.6 297.7 250.7 298.5 249.5 298.0 249.4 298.3 248.6 300.2 246.7 300.1 247.4 301.0 247.7 299.6 248.2 299.3 249.5 300.9 249.8 302.4 248.7 302.9 247.0 305.4 246.8 306.3 245.6 306.0 244.5 307.3 244.7 307.6 245.5 308.6 244.1 309.0 246.5 308.5 247.7 309.1 247.8 309.1 248.8 309.8 247.0 310.6 247.6 310.8 246.7 311.7 247.1 312.7 246.1 313.2 247.2 314.4 245.8 314.5 244.9 314.0 244.7 315.0 244.0 315.0 244.9 315.9 245.7 318.7 243.2 318.3 244.9 319.1 245.0 318.9 246.0 321.3 244.0 321.2 244.8 322.6 244.6 323.4 242.6 324.3 242.2 323.9 241.4 324.5 240.7 323.4 240.3 321.5 242.5 322.3 241.0 321.5 240.9 321.6 240.1 318.6 241.6 317.5 241.3 315.5 243.9 316.0 242.2 315.4 240.9 314.4 240.9 313.2 243.0 312.5 242.6 313.2 241.4 311.7 240.9 311.2 241.6 311.8 241.8 312.1 243.4 309.3 241.1 308.3 241.9 307.0 240.9 305.4 241.3 304.8 239.9 304.5 241.6 303.5 242.3 304.2 244.4 303.7 245.9 303.8 244.3 302.8 244.1 303.0 242.1 301.9 242.5 302.5 243.0 302.2 244.2 301.5 242.8 299.4 243.0 297.4 240.6 297.5 243.3 298.8 245.1 297.1 244.9 295.8 246.5 294.0 245.1 293.7 243.8 292.3 244.0 292.7 245.3 290.9 245.4 289.7 247.6Z" stroke="rgba(255,178,0,0.12)" stroke-width="0.8" fill="rgba(255,178,0,0.03)" stroke-linejoin="round"/>
+                  <!-- False alarm: Ushuaia industrial zone -->
+                  <circle cx="100" cy="205" r="4" fill="#ef4444" opacity="0.9"><animate attributeName="opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite"/></circle>
+                  <!-- False alarm: Rio Grande industrial zone -->
+                  <circle cx="185" cy="210" r="3.5" fill="#f97316" opacity="0.9"><animate attributeName="opacity" values="0.9;0.5;0.9" dur="2.3s" repeatCount="indefinite"/></circle>
+                  <!-- Real forest fire: Corazón de la Isla -->
+                  <circle cx="150" cy="175" r="5" fill="#dc2626" opacity="0.9"><animate attributeName="opacity" values="0.9;0.5;0.9" dur="1.8s" repeatCount="indefinite"/></circle>
+                </svg>
+              </div>
+              <div class="flex items-center gap-4 mt-3">
+                <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500"></span><span class="text-[10px] text-gray-500">3 alertas</span></div>
+                <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-orange-500"></span><span class="text-[10px] text-red-400">~66% falsas alarmas</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Con Penon -->
+          <div class="glass-panel rounded-xl p-6 border-green-500/20" style="border-color: rgba(34, 197, 94, 0.2);">
+            <div class="flex items-center gap-3 mb-5">
+              <span class="material-symbols-outlined text-green-500">verified</span>
+              <h3 class="text-white font-bold text-lg">Con Penon</h3>
+            </div>
+            <p class="text-gray-400 text-sm mb-5">Filtrado inteligente — solo incendios forestales reales</p>
+            <!-- Simulated filtered detections -->
+            <div class="bg-void/80 rounded-lg p-5 relative overflow-hidden" style="min-height: 180px;">
+              <div class="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Tierra del Fuego · Filtrado</div>
+              <div class="relative h-32">
+                <svg class="absolute inset-0 w-full h-full" viewBox="10 80 330 200" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                  <!-- Isla Grande -->
+                  <path d="M27.6 227.3 L31.6 229.4 30.2 230.7 33.0 233.3 28.9 233.0 32.1 235.4 35.7 235.1 34.8 231.7 38.3 233.4 35.5 231.1 41.1 231.7 39.3 233.4 40.3 236.6 41.8 231.2 44.2 231.8 41.8 234.3 43.9 233.5 43.3 236.0 46.4 231.8 46.5 238.4 47.4 235.0 49.9 235.8 49.2 233.1 52.5 234.0 48.1 230.6 50.5 230.4 49.4 228.1 52.3 230.9 51.8 227.2 57.0 231.6 55.1 234.0 59.3 234.4 53.0 235.9 57.3 239.1 62.7 236.0 62.0 232.9 67.2 234.2 64.0 237.3 65.6 240.2 63.3 244.0 67.1 237.2 73.0 238.4 67.5 239.7 66.0 242.3 69.2 243.3 84.3 235.0 83.2 239.0 70.8 243.9 69.6 247.0 73.0 248.8 80.7 242.8 78.6 244.4 87.8 248.6 89.0 242.3 94.2 237.5 88.3 246.1 92.8 249.9 94.4 249.5 91.9 247.5 96.8 247.4 95.0 245.1 97.8 244.8 97.0 249.2 102.1 248.3 102.1 238.7 103.2 248.1 108.6 247.4 110.0 243.6 108.1 240.7 110.2 243.1 108.8 247.4 111.6 247.5 111.0 239.3 112.6 245.4 114.1 241.0 115.1 243.4 112.2 248.0 134.9 255.6 146.4 252.9 143.0 247.5 151.5 251.0 163.2 247.7 161.2 245.9 163.6 244.9 183.8 250.7 198.6 249.4 225.9 261.1 245.9 255.7 245.5 251.6 254.3 252.0 255.0 255.8 264.0 250.7 267.1 254.0 276.8 236.4 252.0 236.1 228.1 225.4 218.3 211.8 197.2 198.6 188.8 190.4 189.1 185.9 175.8 175.8 177.8 176.1 172.3 168.7 167.6 154.3 152.5 149.5 152.9 143.3 160.5 134.4 162.9 134.7 165.3 142.6 162.2 130.9 150.1 111.7 144.7 105.5 144.1 109.8 131.1 114.9 120.9 100.0 115.3 104.5 115.1 112.0 111.2 118.5 103.8 123.9 95.1 117.1 84.6 120.0 90.2 121.6 89.5 128.4 97.1 129.5 91.4 137.7 87.9 137.8 88.7 131.8 85.2 134.6 83.6 152.6 87.1 152.6 83.7 156.4 92.6 163.3 104.5 157.3 123.4 156.3 125.3 163.4 123.8 166.1 95.5 179.9 94.4 188.0 97.5 199.9 103.2 205.8 130.9 218.6 137.7 225.1 131.7 223.7 130.2 227.2 131.7 231.1 128.6 228.2 123.1 235.2 124.2 240.5 122.6 235.7 118.6 239.4 129.2 223.5 116.8 216.6 118.6 223.2 115.3 221.4 115.7 228.7 113.2 223.7 114.4 218.4 105.9 213.5 110.6 227.1 109.0 233.0 108.6 229.4 105.8 231.4 109.5 227.8 107.5 224.6 103.5 227.7 107.0 223.5 101.5 219.4 102.7 214.9 100.8 212.4 93.2 215.2 99.0 219.5 95.0 219.6 95.9 222.8 66.6 203.0 70.6 207.8 67.4 205.7 68.8 211.6 81.3 214.4 81.9 219.9 96.5 230.5 89.4 226.8 92.0 232.2 80.2 220.6 74.8 229.0 77.9 233.3 74.4 229.8 72.6 234.6 74.6 222.6 79.5 217.7 71.5 215.9 66.5 218.5 66.3 227.8 65.0 223.8 59.9 222.6 61.8 228.5 58.7 226.7 60.5 226.1 59.1 222.4 55.7 224.3 57.1 222.0 50.8 218.8 48.9 220.5 50.3 224.4 42.0 220.8 48.4 226.0 43.1 225.0 44.7 227.2 37.9 220.3 32.9 222.6 45.2 229.0 36.9 226.0 41.1 231.4 34.9 229.5 31.6 223.2 28.3 223.9 30.0 228.8 27.6 227.3Z" stroke="rgba(255,178,0,0.2)" stroke-width="1" fill="rgba(255,178,0,0.04)" stroke-linejoin="round"/>
+                  <!-- Isla de los Estados -->
+                  <path d="M289.7 247.6 L290.4 247.9 290.4 248.9 293.0 248.2 292.4 249.0 293.8 250.7 291.7 252.4 295.1 252.0 296.6 250.6 297.7 250.7 298.5 249.5 298.0 249.4 298.3 248.6 300.2 246.7 300.1 247.4 301.0 247.7 299.6 248.2 299.3 249.5 300.9 249.8 302.4 248.7 302.9 247.0 305.4 246.8 306.3 245.6 306.0 244.5 307.3 244.7 307.6 245.5 308.6 244.1 309.0 246.5 308.5 247.7 309.1 247.8 309.1 248.8 309.8 247.0 310.6 247.6 310.8 246.7 311.7 247.1 312.7 246.1 313.2 247.2 314.4 245.8 314.5 244.9 314.0 244.7 315.0 244.0 315.0 244.9 315.9 245.7 318.7 243.2 318.3 244.9 319.1 245.0 318.9 246.0 321.3 244.0 321.2 244.8 322.6 244.6 323.4 242.6 324.3 242.2 323.9 241.4 324.5 240.7 323.4 240.3 321.5 242.5 322.3 241.0 321.5 240.9 321.6 240.1 318.6 241.6 317.5 241.3 315.5 243.9 316.0 242.2 315.4 240.9 314.4 240.9 313.2 243.0 312.5 242.6 313.2 241.4 311.7 240.9 311.2 241.6 311.8 241.8 312.1 243.4 309.3 241.1 308.3 241.9 307.0 240.9 305.4 241.3 304.8 239.9 304.5 241.6 303.5 242.3 304.2 244.4 303.7 245.9 303.8 244.3 302.8 244.1 303.0 242.1 301.9 242.5 302.5 243.0 302.2 244.2 301.5 242.8 299.4 243.0 297.4 240.6 297.5 243.3 298.8 245.1 297.1 244.9 295.8 246.5 294.0 245.1 293.7 243.8 292.3 244.0 292.7 245.3 290.9 245.4 289.7 247.6Z" stroke="rgba(255,178,0,0.12)" stroke-width="0.8" fill="rgba(255,178,0,0.03)" stroke-linejoin="round"/>
+                  <!-- Filtered ghost dots (same positions as "Sin Penon") -->
+                  <circle cx="100" cy="205" r="3.5" fill="#374151" opacity="0.25"/>
+                  <circle cx="185" cy="210" r="3" fill="#374151" opacity="0.25"/>
+                  <!-- Real forest fire remains -->
+                  <circle cx="150" cy="175" r="5" fill="#dc2626" opacity="0.9"><animate attributeName="opacity" values="0.9;0.5;0.9" dur="1.8s" repeatCount="indefinite"/></circle>
+                  <circle cx="150" cy="175" r="10" fill="none" stroke="#dc2626" stroke-width="0.8" opacity="0.2"><animate attributeName="opacity" values="0.3;0.1;0.3" dur="1.8s" repeatCount="indefinite"/></circle>
+                </svg>
+              </div>
+              <div class="flex items-center gap-4 mt-3">
+                <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-600"></span><span class="text-[10px] text-gray-500">1 alerta real</span></div>
+                <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-[10px] text-green-400">0 falsas alarmas</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16 animate-on-scroll">
+          <!-- NASA FIRMS -->
+          <div class="glass-panel rounded-xl p-5">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-blue-400">satellite_alt</span>
+              </div>
+              <h4 class="text-white font-semibold">NASA FIRMS</h4>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              5 satélites de órbita polar + 2 geoestacionarios. VIIRS a 375m de resolución. 10+ pasadas diarias sobre TdF a 54°S.
+            </p>
+          </div>
+
+          <!-- Industrial Filter -->
+          <div class="glass-panel rounded-xl p-5">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary">factory</span>
+              </div>
+              <h4 class="text-white font-semibold">Filtro Industrial</h4>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              3 ciudades mapeadas. Filtra emisiones térmicas de zonas industriales y plataformas petroleras offshore.
+            </p>
+          </div>
+
+          <!-- FWI Index -->
+          <div class="glass-panel rounded-xl p-5">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-orange-400">thermostat</span>
+              </div>
+              <h4 class="text-white font-semibold">Índice FWI</h4>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              Fire Weather Index canadiense, estándar usado en 30+ países. Calcula riesgo de incendio en tiempo real.
+            </p>
+          </div>
+
+          <!-- Telegram Alerts -->
+          <div class="glass-panel rounded-xl p-5">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-cyan-400">notifications_active</span>
+              </div>
+              <h4 class="text-white font-semibold">Alertas Telegram</h4>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              Notificaciones instantáneas con coordenadas, nivel de confianza y ruta Google Maps al foco detectado.
+            </p>
+          </div>
+
+          <!-- Real-time Wind -->
+          <div class="glass-panel rounded-xl p-5">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-teal-400">air</span>
+              </div>
+              <h4 class="text-white font-semibold">Viento en Tiempo Real</h4>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              Datos Open-Meteo con dirección y velocidad del viento. Crucial para predecir la propagación del fuego.
+            </p>
+          </div>
+
+          <!-- Confidence Levels -->
+          <div class="glass-panel rounded-xl p-5">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-purple-400">speed</span>
+              </div>
+              <h4 class="text-white font-semibold">Niveles de Confianza</h4>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">
+              Clasificación Alta / Nominal / Baja para priorizar respuesta según la certeza de cada detección.
+            </p>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="text-center animate-on-scroll">
+          <a href="https://penon.howenh-labs.com/" target="_blank" rel="noopener noreferrer"
+            class="inline-flex items-center gap-3 glass-panel rounded-xl px-8 py-4 hover:border-primary/30 transition-all group">
+            <span class="material-symbols-outlined text-primary text-2xl">open_in_new</span>
+            <div class="text-left">
+              <div class="text-white font-semibold">Ver Penon Monitor en vivo</div>
+              <div class="text-gray-500 text-sm">penon.howenh-labs.com</div>
+            </div>
+            <span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform ml-4">arrow_forward</span>
+          </a>
+          <p class="text-gray-500 text-sm mt-6">
+            Un producto de <span class="text-primary font-medium">Howenh Labs</span>
+          </p>
+        </div>
+
+      </div>
+    </section>
+
     <!-- Contact Section -->
     <section id="contacto" aria-label="Formulario de contacto"
       class="section-content py-24 px-6 md:px-12 bg-void relative overflow-hidden">
@@ -2263,6 +2480,7 @@
             <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Productos</h4>
             <ul class="flex flex-col gap-3 text-gray-500">
               <li><a class="hover:text-white transition-colors" href="https://www.kenos.app/" target="_blank" rel="noopener">Kenos SaaS</a></li>
+              <li><a class="hover:text-white transition-colors" href="https://penon.howenh-labs.com/" target="_blank" rel="noopener">Penon Monitor</a></li>
               <li><a class="hover:text-white transition-colors" href="#">Neural Engine</a></li>
               <li><a class="hover:text-white transition-colors" href="#">Edge Analytics</a></li>
             </ul>
