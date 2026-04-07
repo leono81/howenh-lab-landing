@@ -2,6 +2,7 @@ import { Composition, Folder } from "remotion";
 import { Idea1VideoLoop } from "./compositions/Idea1VideoLoop";
 import { Idea4Storytelling, Idea4Idle } from "./compositions/Idea4Storytelling";
 import { Idea5MultiFormat, idea5Schema } from "./compositions/Idea5MultiFormat";
+import { HownChat, TOTAL_FRAMES } from "./compositions/HownChat";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -60,6 +61,17 @@ export const RemotionRoot: React.FC = () => {
           width={1080}
           height={1920}
           defaultProps={{ format: "vertical" as const }}
+        />
+      </Folder>
+
+      <Folder name="Hown">
+        <Composition
+          id="HownChat"
+          component={HownChat}
+          durationInFrames={TOTAL_FRAMES}
+          fps={30}
+          width={1080}
+          height={1920}
         />
       </Folder>
 
