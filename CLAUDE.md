@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Landing page para Howenh Labs - una startup de IA aplicada ubicada en Tierra del Fuego, Argentina. La página presenta la empresa y su producto principal: Kenos Medical SaaS.
+Landing page para Howenh Labs - una startup de IA aplicada ubicada en Tierra del Fuego, Argentina. La página presenta la empresa y sus productos: Kenos Medical SaaS y Hown Facturador.
 
 ## Development Commands
 
@@ -52,6 +52,7 @@ assets/
 - **Glassmorphism**: Usa `backdrop-blur` y `bg-opacity` para paneles translúcidos
 - **Animaciones scroll**: Intersection Observer activa clases `animate-fadeSlideUp` y `animate-fadeIn`
 - **Grid responsivo**: Bento grid de 4 columnas para features de Kenos
+- **Hown FAQ accordion**: Sección side-by-side (video Remotion + FAQ interactiva). Staggered reveal on scroll + accordion click. CSS custom en `.hown-faq-*`, JS en script dedicado
 - **Idioma**: Contenido en español
 
 ## Deployment
