@@ -1,3 +1,5 @@
 .worktrees/
 .agents/
 node_modules/
+.superpowers/
+remotion/out/
