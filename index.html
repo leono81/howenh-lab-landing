@@ -649,119 +649,6 @@
       }
     }
 
-    /* Chatbot Messages */
-    .chat-message {
-      display: flex;
-      gap: 12px;
-      opacity: 0;
-      animation: messageAppear 0.3s ease forwards;
-    }
-
-    @keyframes messageAppear {
-      to {
-        opacity: 1;
-      }
-    }
-
-    .chat-message.user {
-      flex-direction: row-reverse;
-    }
-
-    .chat-bubble {
-      max-width: 80%;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .chat-bubble.traditional {
-      background: #2A2A2E;
-      color: #E5E5E5;
-      border-radius: 12px 12px 12px 4px;
-    }
-
-    .chat-bubble.ai {
-      background: linear-gradient(135deg, #ffb200 0%, #ff8c00 100%);
-      color: #0A0A0B;
-      border-radius: 12px 12px 12px 4px;
-      font-weight: 500;
-    }
-
-    .chat-bubble.user {
-      background: #4A4A4E;
-      color: #FFFFFF;
-      border-radius: 12px 12px 4px 12px;
-    }
-
-    .chat-checkmark {
-      color: #0A0A0B;
-      font-size: 12px;
-      margin-top: 4px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .typing-indicator {
-      display: flex;
-      gap: 4px;
-      padding: 12px 16px;
-      background: #2A2A2E;
-      border-radius: 12px;
-      width: fit-content;
-    }
-
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      background: #6B7280;
-      border-radius: 50%;
-      animation: typingBounce 1.4s infinite;
-    }
-
-    .typing-dot:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .typing-dot:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-
-    @keyframes typingBounce {
-
-      0%,
-      60%,
-      100% {
-        transform: translateY(0);
-      }
-
-      30% {
-        transform: translateY(-8px);
-      }
-    }
-
-    /* Carousel Dots */
-    .carousel-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #4A4A4E;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .carousel-dot.active {
-      background: #ffb200;
-      width: 32px;
-      border-radius: 6px;
-    }
-
-    .carousel-dot:hover {
-      background: #6B7280;
-    }
-
     /* Mobile Responsive Fixes */
     @media (max-width: 768px) {
       #workflow {
@@ -773,14 +660,6 @@
         min-height: 200px;
       }
 
-
-      #chatbot .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .chat-bubble {
-        max-width: 90%;
-      }
 
       .section-fullscreen {
         min-height: auto;
@@ -1413,9 +1292,9 @@
         <a href="#workflow"
           class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
           data-section="workflow">Workflow</a>
-        <a href="#chatbot"
+        <a href="#hown"
           class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
-          data-section="chatbot">AI Chat</a>
+          data-section="hown">Hown</a>
         <a href="#kenos"
           class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
           data-section="kenos">Kenos SaaS</a>
@@ -1425,9 +1304,6 @@
         <a href="#penon"
           class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
           data-section="penon">Penon</a>
-        <a href="#hown"
-          class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
-          data-section="hown">Hown</a>
         <a href="#contacto"
           class="nav-link text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
           data-section="contacto">Contacto</a>
@@ -1447,9 +1323,9 @@
       <a href="#workflow"
         class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
         data-section="workflow">Workflow</a>
-      <a href="#chatbot"
+      <a href="#hown"
         class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
-        data-section="chatbot">AI Chat</a>
+        data-section="hown">Hown</a>
       <a href="#kenos"
         class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
         data-section="kenos">Kenos SaaS</a>
@@ -1459,9 +1335,6 @@
       <a href="#penon"
         class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
         data-section="penon">Penon</a>
-      <a href="#hown"
-        class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
-        data-section="hown">Hown</a>
       <a href="#contacto"
         class="mobile-nav-link text-white/60 text-2xl font-display font-medium transition-colors duration-200 translate-y-4 opacity-0"
         data-section="contacto">Contacto</a>
@@ -1475,10 +1348,9 @@
         class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Workflow</span>
       <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
     </a>
-    <a href="#chatbot" class="dot-link group relative flex items-center justify-end" data-section="chatbot">
+    <a href="#hown" class="dot-link group relative flex items-center justify-end" data-section="hown">
       <span
-        class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">AI
-        Chat</span>
+        class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Hown</span>
       <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
     </a>
     <a href="#kenos" class="dot-link group relative flex items-center justify-end" data-section="kenos">
@@ -1495,11 +1367,6 @@
     <a href="#penon" class="dot-link group relative flex items-center justify-end" data-section="penon">
       <span
         class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Penon</span>
-      <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
-    </a>
-    <a href="#hown" class="dot-link group relative flex items-center justify-end" data-section="hown">
-      <span
-        class="dot-tooltip absolute right-full mr-3 px-2 py-1 rounded bg-white/10 backdrop-blur text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Hown</span>
       <span class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></span>
     </a>
     <a href="#contacto" class="dot-link group relative flex items-center justify-end" data-section="contacto">
@@ -1620,91 +1487,114 @@
         })();
     </script>
 
-    <!-- Transición Workflow → Chatbot (void → surface) -->
+    <!-- Transición Workflow → Hown (void → hown-bg) -->
     <div class="h-32 md:h-48 relative z-10" style="background: linear-gradient(180deg,
-      #0A0A0B 0%,
-      #0C0C0E 20%,
-      #0F0F11 40%,
-      #121214 60%,
-      #151517 80%,
-      #18181B 100%
+      #000000 0%,
+      #050710 25%,
+      #07090f 50%,
+      #08090f 75%,
+      #0a0b10 100%
     );"></div>
 
-    <!-- Chatbot Comparison Section -->
-    <section id="chatbot" aria-label="Chatbot con inteligencia artificial" class="section-content py-24 px-6 md:px-12 bg-surface relative">
-      <div class="max-w-7xl mx-auto">
-        <!-- Title -->
-        <div class="text-center mb-16">
-          <h2 class="text-white text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Conversaciones <span class="text-primary">Inteligentes</span>
+    <!-- Hown Facturador Section -->
+    <section id="hown" aria-label="Hown - Bot facturador en Telegram"
+      class="section-content py-24 px-6 md:px-12 hown-bg relative overflow-hidden">
+
+      <!-- Ambient glow -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-15 pointer-events-none"
+        style="background: radial-gradient(circle, rgba(0, 136, 204, 0.1) 0%, rgba(255, 178, 0, 0.06) 40%, transparent 70%);"></div>
+
+      <div class="max-w-6xl mx-auto relative z-10">
+
+        <!-- Section Header -->
+        <div class="text-center mb-16 animate-on-scroll">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 mb-6">
+            <svg class="tg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            Bot Facturador en Telegram
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+            <span class="text-primary">Hown</span> Facturador
           </h2>
           <p class="text-gray-400 text-lg max-w-2xl mx-auto">
-            Compara la diferencia entre un chatbot tradicional y uno potenciado con IA
+            Emití facturas electrónicas desde Telegram. Facturas A, B y C con validación de ARCA, descarga de PDF y envío por email.
           </p>
-        </div>
-
-        <!-- Split Comparison -->
-        <div class="grid md:grid-cols-2 gap-8 mb-8">
-          <!-- Traditional Chatbot -->
-          <div class="bg-void rounded-2xl overflow-hidden border border-white/5">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-4 border-b border-white/10">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-                  <span class="text-xl">⚙️</span>
-                </div>
-                <div>
-                  <div class="text-white font-semibold">Bot Tradicional</div>
-                  <div class="text-gray-500 text-xs">Respuestas básicas</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Chat Container -->
-            <div id="chat-traditional" class="p-6 h-96 overflow-y-auto space-y-4">
-              <!-- Messages will be added by JavaScript -->
-            </div>
-          </div>
-
-          <!-- AI Chatbot -->
-          <div class="bg-void rounded-2xl overflow-hidden border border-primary/20">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-primary/20 to-primary/10 px-6 py-4 border-b border-primary/20">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-primary/30 rounded-full flex items-center justify-center">
-                  <span class="text-xl">🤖</span>
-                </div>
-                <div>
-                  <div class="text-white font-semibold">Howenh Labs IA Chat</div>
-                  <div class="text-primary text-xs">Inteligencia real</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Chat Container -->
-            <div id="chat-ai" class="p-6 h-96 overflow-y-auto space-y-4">
-              <!-- Messages will be added by JavaScript -->
-            </div>
+          <div class="mt-8">
+            <a href="https://hown.howenh-labs.com/" target="_blank" rel="noopener"
+              class="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-background-dark font-semibold text-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5">
+              Ir a Hown
+              <span class="material-symbols-outlined text-lg transition-transform duration-300 group-hover:translate-x-[3px] group-hover:-translate-y-[3px]">arrow_outward</span>
+            </a>
           </div>
         </div>
 
-        <!-- Carousel Navigation -->
-        <div class="flex justify-center gap-3" role="tablist" aria-label="Escenarios del chatbot">
-          <button class="carousel-dot active" data-scenario="0" role="tab" aria-selected="true" aria-label="Escenario 1: Agendar Cita"></button>
-          <button class="carousel-dot" data-scenario="1" role="tab" aria-selected="false" aria-label="Escenario 2: Consulta Médica"></button>
-          <button class="carousel-dot" data-scenario="2" role="tab" aria-selected="false" aria-label="Escenario 3: Acción Compleja"></button>
+        <!-- Video + FAQ side by side -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center mb-16 animate-on-scroll">
+
+          <!-- Video del chat Hown (renderizado con Remotion) -->
+          <div class="max-w-xs sm:max-w-sm mx-auto md:mx-0 md:ml-auto">
+            <div class="rounded-2xl overflow-hidden shadow-2xl shadow-primary/5 border border-white/5">
+              <video id="hown-video" muted loop playsinline class="w-full h-auto"
+                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1080' height='1920' fill='%230E1621'%3E%3Crect width='1080' height='1920'/%3E%3C/svg%3E">
+                <source src="assets/hown-chat.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+
+          <!-- FAQ Accordion -->
+          <div class="flex flex-col gap-4" id="hown-faq">
+            <div class="hown-faq-item glass-panel rounded-xl overflow-hidden cursor-pointer opacity-0 translate-y-6">
+              <div class="hown-faq-question flex items-center justify-between p-5">
+                <p class="text-white font-semibold">"¿Puedo facturar desde el celular?"</p>
+                <span class="material-symbols-outlined text-primary/60 text-xl hown-faq-chevron transition-transform duration-300">expand_more</span>
+              </div>
+              <div class="hown-faq-answer">
+                <p class="text-gray-400 text-sm leading-relaxed px-5 pb-5">Sí, directo desde Telegram. Escribí un mensaje o grabá un audio.</p>
+              </div>
+            </div>
+
+            <div class="hown-faq-item glass-panel rounded-xl overflow-hidden cursor-pointer opacity-0 translate-y-6">
+              <div class="hown-faq-question flex items-center justify-between p-5">
+                <p class="text-white font-semibold">"¿Qué facturas puedo emitir?"</p>
+                <span class="material-symbols-outlined text-primary/60 text-xl hown-faq-chevron transition-transform duration-300">expand_more</span>
+              </div>
+              <div class="hown-faq-answer">
+                <p class="text-gray-400 text-sm leading-relaxed px-5 pb-5">A, B y C — todas validadas automáticamente por ARCA.</p>
+              </div>
+            </div>
+
+            <div class="hown-faq-item glass-panel rounded-xl overflow-hidden cursor-pointer opacity-0 translate-y-6">
+              <div class="hown-faq-question flex items-center justify-between p-5">
+                <p class="text-white font-semibold">"¿Funciona con audio?"</p>
+                <span class="material-symbols-outlined text-primary/60 text-xl hown-faq-chevron transition-transform duration-300">expand_more</span>
+              </div>
+              <div class="hown-faq-answer">
+                <p class="text-gray-400 text-sm leading-relaxed px-5 pb-5">Sí, grabá un audio y Hown interpreta lo que necesitás facturar.</p>
+              </div>
+            </div>
+
+            <div class="hown-faq-item glass-panel rounded-xl overflow-hidden cursor-pointer opacity-0 translate-y-6">
+              <div class="hown-faq-question flex items-center justify-between p-5">
+                <p class="text-white font-semibold">"¿Y si necesito el PDF?"</p>
+                <span class="material-symbols-outlined text-primary/60 text-xl hown-faq-chevron transition-transform duration-300">expand_more</span>
+              </div>
+              <div class="hown-faq-answer">
+                <p class="text-gray-400 text-sm leading-relaxed px-5 pb-5">Te lo manda al chat y por email. También podés consultar tu historial.</p>
+              </div>
+            </div>
+          </div>
+
         </div>
+
+
       </div>
     </section>
 
-    <!-- Transición Chatbot → Kenos (surface → void) -->
+    <!-- Transición Hown → Kenos (hown-bg → void) -->
     <div class="h-32 md:h-48 relative z-10" style="background: linear-gradient(180deg,
-      #18181B 0%,
-      #151517 20%,
-      #121214 40%,
-      #0F0F11 60%,
-      #0C0C0E 80%,
-      #0A0A0B 100%
+      #0a0b10 0%,
+      #0a0b0e 25%,
+      #0a0a0c 50%,
+      #0a0a0b 100%
     );"></div>
 
     <!-- Kenos Section - Card Stack Fan Out -->
@@ -2391,107 +2281,13 @@
       </div>
     </section>
 
-    <!-- Transición Penon → Hown (surface → hown-bg) -->
+    <!-- Transición Penon → Contacto (surface → void) -->
     <div class="h-32 md:h-48 relative z-10" style="background: linear-gradient(180deg,
       #18181B 0%,
-      #14151a 25%,
-      #0f1017 50%,
-      #0b0d14 75%,
-      #0a0b10 100%
-    );"></div>
-
-    <!-- Hown Facturador Section -->
-    <section id="hown" aria-label="Hown - Bot facturador en Telegram"
-      class="section-content py-24 px-6 md:px-12 hown-bg relative overflow-hidden">
-
-      <!-- Ambient glow -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-15 pointer-events-none"
-        style="background: radial-gradient(circle, rgba(0, 136, 204, 0.1) 0%, rgba(255, 178, 0, 0.06) 40%, transparent 70%);"></div>
-
-      <div class="max-w-6xl mx-auto relative z-10">
-
-        <!-- Section Header -->
-        <div class="text-center mb-16 animate-on-scroll">
-          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 mb-6">
-            <svg class="tg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-            Bot Facturador en Telegram
-          </div>
-          <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-            <span class="text-primary">Hown</span> Facturador
-          </h2>
-          <p class="text-gray-400 text-lg max-w-2xl mx-auto">
-            Emití facturas electrónicas desde Telegram. Facturas A, B y C con validación de ARCA, descarga de PDF y envío por email.
-          </p>
-        </div>
-
-        <!-- Video + FAQ side by side -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center mb-16 animate-on-scroll">
-
-          <!-- Video del chat Hown (renderizado con Remotion) -->
-          <div class="max-w-xs sm:max-w-sm mx-auto md:mx-0 md:ml-auto">
-            <div class="rounded-2xl overflow-hidden shadow-2xl shadow-primary/5 border border-white/5">
-              <video id="hown-video" muted loop playsinline class="w-full h-auto"
-                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1080' height='1920' fill='%230E1621'%3E%3Crect width='1080' height='1920'/%3E%3C/svg%3E">
-                <source src="assets/hown-chat.mp4" type="video/mp4">
-              </video>
-            </div>
-          </div>
-
-          <!-- FAQ Accordion -->
-          <div class="flex flex-col gap-4" id="hown-faq">
-            <div class="hown-faq-item glass-panel rounded-xl overflow-hidden cursor-pointer opacity-0 translate-y-6">
-              <div class="hown-faq-question flex items-center justify-between p-5">
-                <p class="text-white font-semibold">"¿Puedo facturar desde el celular?"</p>
-                <span class="material-symbols-outlined text-primary/60 text-xl hown-faq-chevron transition-transform duration-300">expand_more</span>
-              </div>
-              <div class="hown-faq-answer">
-                <p class="text-gray-400 text-sm leading-relaxed px-5 pb-5">Sí, directo desde Telegram. Escribí un mensaje o grabá un audio.</p>
-              </div>
-            </div>
-
-            <div class="hown-faq-item glass-panel rounded-xl overflow-hidden cursor-pointer opacity-0 translate-y-6">
-              <div class="hown-faq-question flex items-center justify-between p-5">
-                <p class="text-white font-semibold">"¿Qué facturas puedo emitir?"</p>
-                <span class="material-symbols-outlined text-primary/60 text-xl hown-faq-chevron transition-transform duration-300">expand_more</span>
-              </div>
-              <div class="hown-faq-answer">
-                <p class="text-gray-400 text-sm leading-relaxed px-5 pb-5">A, B y C — todas validadas automáticamente por ARCA.</p>
-              </div>
-            </div>
-
-            <div class="hown-faq-item glass-panel rounded-xl overflow-hidden cursor-pointer opacity-0 translate-y-6">
-              <div class="hown-faq-question flex items-center justify-between p-5">
-                <p class="text-white font-semibold">"¿Funciona con audio?"</p>
-                <span class="material-symbols-outlined text-primary/60 text-xl hown-faq-chevron transition-transform duration-300">expand_more</span>
-              </div>
-              <div class="hown-faq-answer">
-                <p class="text-gray-400 text-sm leading-relaxed px-5 pb-5">Sí, grabá un audio y Hown interpreta lo que necesitás facturar.</p>
-              </div>
-            </div>
-
-            <div class="hown-faq-item glass-panel rounded-xl overflow-hidden cursor-pointer opacity-0 translate-y-6">
-              <div class="hown-faq-question flex items-center justify-between p-5">
-                <p class="text-white font-semibold">"¿Y si necesito el PDF?"</p>
-                <span class="material-symbols-outlined text-primary/60 text-xl hown-faq-chevron transition-transform duration-300">expand_more</span>
-              </div>
-              <div class="hown-faq-answer">
-                <p class="text-gray-400 text-sm leading-relaxed px-5 pb-5">Te lo manda al chat y por email. También podés consultar tu historial.</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-
-      </div>
-    </section>
-
-    <!-- Transición Hown → Contacto (hown-bg → void) -->
-    <div class="h-32 md:h-48 relative z-10" style="background: linear-gradient(180deg,
-      #0a0b10 0%,
-      #0a0b0e 25%,
-      #0a0a0c 50%,
-      #0a0a0b 100%
+      #151517 25%,
+      #121214 50%,
+      #0F0F11 75%,
+      #0A0A0B 100%
     );"></div>
 
     <!-- Contact Section -->
@@ -2768,230 +2564,6 @@
       }
     }
 
-    // Chatbot Scenarios Data
-    const chatbotScenarios = [
-      {
-        name: "Agendar Cita",
-        traditional: [
-          { type: 'user', text: 'Necesito agendar una cita' },
-          { type: 'bot', text: 'Por favor complete el formulario en este enlace: [Formulario de Citas]' }
-        ],
-        ai: [
-          { type: 'user', text: 'Necesito agendar una cita' },
-          { type: 'bot', text: '¡Claro! Veo que prefieres las mañanas. ¿Te viene bien el miércoles a las 10am con la Dra. González?' },
-          { type: 'user', text: 'Perfecto' },
-          {
-            type: 'bot', text: 'Excelente. Confirmo:', checkmarks: [
-              'Cita agendada para 05/02 10:00',
-              'Recordatorio enviado a tu email',
-              'Preparación pre-consulta lista'
-            ]
-          }
-        ]
-      },
-      {
-        name: "Consulta Médica",
-        traditional: [
-          { type: 'user', text: 'Me duele la cabeza desde hace 3 días' },
-          { type: 'bot', text: 'Consulta nuestras FAQs sobre síntomas comunes:\n- Dolor de cabeza [link]\n- Migraña [link]\n- Fiebre [link]' }
-        ],
-        ai: [
-          { type: 'user', text: 'Me duele la cabeza desde hace 3 días' },
-          { type: 'bot', text: 'Entiendo tu preocupación. Veo en tu historial que tuviste migrañas en 2024. ¿Este dolor es similar? ¿Viene acompañado de sensibilidad a la luz?' },
-          { type: 'user', text: 'Sí, es similar' },
-          {
-            type: 'bot', text: 'Basándome en tu historial y síntomas:', checkmarks: [
-              'Recomiendo consulta con neurología',
-              'He enviado tus síntomas al Dr. Ramírez',
-              'Mientras tanto, evita pantallas brillantes'
-            ]
-          }
-        ]
-      },
-      {
-        name: "Acción Compleja",
-        traditional: [
-          { type: 'user', text: 'Necesito enviar mis últimos análisis al especialista y agendar seguimiento' },
-          { type: 'bot', text: 'Lo siento, no puedo ayudarte con eso. Por favor contacta a soporte en horario de oficina.' }
-        ],
-        ai: [
-          { type: 'user', text: 'Necesito enviar mis últimos análisis al especialista y agendar seguimiento' },
-          {
-            type: 'bot', text: 'Perfecto, déjame ayudarte:', checkmarks: [
-              'Análisis de sangre (28/01) enviados al Dr. López',
-              'Seguimiento agendado para 12/02 a las 15:00',
-              'Recordatorio añadido a tu calendario',
-              'Preparación para la consulta lista'
-            ]
-          },
-          { type: 'bot', text: '¿Necesitas algo más?' }
-        ]
-      }
-    ];
-
-    // Render Chat Message
-    function createChatMessage(message, isAI = false) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `chat-message ${message.type}`;
-
-      const bubble = document.createElement('div');
-      bubble.className = `chat-bubble ${message.type === 'user' ? 'user' : (isAI ? 'ai' : 'traditional')}`;
-
-      if (message.checkmarks) {
-        bubble.innerHTML = `<div>${message.text}</div>`;
-        const checksDiv = document.createElement('div');
-        checksDiv.className = 'chat-checkmark';
-        message.checkmarks.forEach(check => {
-          const checkItem = document.createElement('div');
-          checkItem.innerHTML = `✓ ${check}`;
-          checksDiv.appendChild(checkItem);
-        });
-        bubble.appendChild(checksDiv);
-      } else {
-        bubble.textContent = message.text;
-      }
-
-      messageDiv.appendChild(bubble);
-      return messageDiv;
-    }
-
-    // Chatbot Carousel Controller
-    class ChatbotCarousel {
-      constructor() {
-        this.currentScenario = 0;
-        this.isPlaying = false;
-        this.autoplayInterval = null;
-        this.traditionalContainer = document.getElementById('chat-traditional');
-        this.aiContainer = document.getElementById('chat-ai');
-        this.dots = document.querySelectorAll('.carousel-dot');
-        this.observer = null;
-      }
-
-      init() {
-        // Setup dot click handlers
-        this.dots.forEach((dot, index) => {
-          dot.addEventListener('click', () => {
-            this.goToScenario(index);
-          });
-        });
-
-        // Setup Intersection Observer
-        this.observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-              this.startAutoplay();
-            } else {
-              this.stopAutoplay();
-            }
-          });
-        }, { threshold: 0.5 });
-
-        const chatbotSection = document.getElementById('chatbot');
-        if (chatbotSection) {
-          this.observer.observe(chatbotSection);
-        }
-
-        // Pause on hover
-        const section = document.getElementById('chatbot');
-        section.addEventListener('mouseenter', () => this.pauseAutoplay());
-        section.addEventListener('mouseleave', () => this.resumeAutoplay());
-      }
-
-      async goToScenario(index) {
-        if (this.isPlaying) return;
-
-        this.currentScenario = index;
-        this.updateDots();
-        await this.playScenario(chatbotScenarios[index]);
-      }
-
-      async playScenario(scenario) {
-        this.isPlaying = true;
-
-        // Clear chats
-        this.traditionalContainer.innerHTML = '';
-        this.aiContainer.innerHTML = '';
-
-        // Play traditional chat
-        const traditionalPromise = this.playMessages(scenario.traditional, this.traditionalContainer, false);
-
-        // Play AI chat simultaneously
-        const aiPromise = this.playMessages(scenario.ai, this.aiContainer, true);
-
-        await Promise.all([traditionalPromise, aiPromise]);
-
-        this.isPlaying = false;
-      }
-
-      async playMessages(messages, container, isAI) {
-        for (const message of messages) {
-          // Show typing indicator
-          if (message.type === 'bot') {
-            const typing = this.createTypingIndicator();
-            container.appendChild(typing);
-            await new Promise(resolve => setTimeout(resolve, 800));
-            typing.remove();
-          }
-
-          // Add message
-          const messageEl = createChatMessage(message, isAI);
-          container.appendChild(messageEl);
-
-          // Scroll to bottom
-          container.scrollTop = container.scrollHeight;
-
-          // Wait before next message
-          await new Promise(resolve => setTimeout(resolve, message.type === 'user' ? 1000 : 1500));
-        }
-      }
-
-      createTypingIndicator() {
-        const typing = document.createElement('div');
-        typing.className = 'typing-indicator';
-        typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-        return typing;
-      }
-
-      updateDots() {
-        this.dots.forEach((dot, index) => {
-          dot.classList.toggle('active', index === this.currentScenario);
-        });
-      }
-
-      startAutoplay() {
-        if (this.autoplayInterval) return;
-
-        // Play first scenario immediately
-        this.goToScenario(0);
-
-        // Then autoplay every 6 seconds
-        this.autoplayInterval = setInterval(() => {
-          if (!this.isPlaying) {
-            this.currentScenario = (this.currentScenario + 1) % chatbotScenarios.length;
-            this.goToScenario(this.currentScenario);
-          }
-        }, 6000);
-      }
-
-      stopAutoplay() {
-        if (this.autoplayInterval) {
-          clearInterval(this.autoplayInterval);
-          this.autoplayInterval = null;
-        }
-      }
-
-      pauseAutoplay() {
-        this.stopAutoplay();
-      }
-
-      resumeAutoplay() {
-        this.startAutoplay();
-      }
-    }
-
-    // Initialize chatbot carousel
-    const chatbotCarousel = new ChatbotCarousel();
-    chatbotCarousel.init();
 
     // ============================================
     // Hero Typewriter Effect
@@ -3355,7 +2927,7 @@
       const navLinks = document.querySelectorAll('.nav-link');
       const dotLinks = document.querySelectorAll('.dot-link');
       const mobileLinks = document.querySelectorAll('.mobile-nav-link');
-      const sections = ['workflow', 'chatbot', 'kenos', 'space-station', 'penon', 'hown', 'contacto'];
+      const sections = ['workflow', 'hown', 'kenos', 'space-station', 'penon', 'contacto'];
       let isMenuOpen = false;
 
       // Nav glass background on scroll
