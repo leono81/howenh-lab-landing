@@ -1,0 +1,30 @@
+---
+// La baliza del Cabo Domingo en la maqueta, según flow/ref-cabo-25.png: torre de reticulado
+// con un panel de tablillas, la linterna arriba y los tensores. Chica frente al acantilado.
+// Medidas en metros aproximados; (x, y) es el pie, sobre el filo.
+import { iso, pol, lin, rayas } from '../data/iso';
+interface Props {
+  x: number;
+  y: number;
+  escala?: number;
+}
+const { x, y, escala = 1.25 } = Astro.props;
+const B = 1.5, T = 0.55, H = 8.5; // medio lado abajo y arriba, alto del reticulado
+const m = (z: number) => B + ((T - B) * z) / H;
+const pata = (sx: number, sy: number) => lin(iso(sx * B, sy * B, 0), iso(sx * T, sy * T, H));
+// cruces de San Andrés en las dos caras que se ven (la del mar y la que da a la ciudad)
+const cruces = [0, 2.9, 5.6].map((z0, i, a) => {
+  const z1 = a[i + 1] ?? H, [p, q] = [m(z0), m(z1)];
+  return lin(iso(-p, -p, z0), iso(q, -q, z1)) + lin(iso(p, -p, z0), iso(-q, -q, z1)) + lin(iso(p, -p, z0), iso(q, q, z1)) + lin(iso(p, p, z0), iso(q, -q, z1)) + lin(iso(-q, -q, z1), iso(q, -q, z1), iso(q, q, z1));
+}).join('');
+const P0 = 5.4, P1 = 9.2, PA = 1.35; // panel de tablillas
+---
+<g class="maqueta-baliza" transform={`translate(${x} ${y}) scale(${escala})`} fill="none" stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round">
+  <path d={lin(iso(0, 0, H), iso(5.5, 4, 0)) + lin(iso(0, 0, H), iso(-6, 2.5, 0)) + lin(iso(0, 0, H), iso(-1, -4.2, 0))} stroke="var(--tinta-suave)" stroke-width="0.3" />
+  <path d={pata(1, 1) + pata(1, -1) + pata(-1, 1) + pata(-1, -1)} stroke-width="0.6" />
+  <path d={cruces} stroke-width="0.3" />
+  <path d={pol(iso(-PA, -0.7, P0), iso(PA, -0.7, P0), iso(PA, -0.7, P1), iso(-PA, -0.7, P1))} fill="var(--papel)" stroke-width="0.55" />
+  <path d={rayas(iso(-PA, -0.7, P0), iso(PA, -0.7, P0), iso(-PA, -0.7, P1), iso(PA, -0.7, P1), 5)} stroke-width="0.3" />
+  <path d={pol(iso(-0.6, -0.6, P1), iso(0.6, -0.6, P1), iso(0.6, -0.6, P1 + 2), iso(-0.6, -0.6, P1 + 2)) + pol(iso(0.6, -0.6, P1), iso(0.6, 0.6, P1), iso(0.6, 0.6, P1 + 2), iso(0.6, -0.6, P1 + 2))} fill="var(--papel)" stroke-width="0.5" />
+  <path d={pol(iso(-0.9, -0.9, P1 + 2), iso(0.9, -0.9, P1 + 2), iso(0, 0, P1 + 3.2)) + pol(iso(0.9, -0.9, P1 + 2), iso(0.9, 0.9, P1 + 2), iso(0, 0, P1 + 3.2))} fill="var(--tinta)" stroke-width="0.4" />
+</g>

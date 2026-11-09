@@ -1,0 +1,155 @@
+---
+// Hero con la maqueta isométrica (prueba: /pruebas/isometrica). La costa sube en diagonal
+// desde la ciudad (abajo a la izquierda) hasta el cabo (arriba a la derecha); el texto va
+// arriba a la izquierda, sobre el papel (con las coordenadas de volanta), y en el mar va la vista del cabo desde la playa,
+// como los perfiles de costa de las cartas náuticas. Todo se mide con --w, el ancho de la
+// lámina, así el texto y el dibujo guardan siempre la misma relación.
+import Maqueta from './Maqueta.astro';
+import Vista from './Vista.astro';
+import m from '../data/maqueta.json';
+const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
+---
+<section class="hero" aria-labelledby="hero-titulo" style={`--prop:${(m.ancho / m.alto).toFixed(4)}`}>
+  <div class="arte" role="img" aria-label="Maqueta grabada de la costa norte de Río Grande, Tierra del Fuego, vista desde el mar: adelante la ciudad con la Torre de Agua junto a la desembocadura del río Grande; detrás el aeropuerto, la Ruta 3 y la Misión Salesiana; al fondo, el Cabo Domingo con su baliza sobre el acantilado.">
+    <Maqueta />
+  </div>
+
+  <div class="texto">
+    <p class="coordenadas">53°47′09″ S · 67°42′07″ O</p>
+    <h1 id="hero-titulo">Un laboratorio en el borde del continente</h1>
+    <p class="bajada">Inteligencia artificial, satélites y software en producción. Hechos con tiempo, cerca del mar.</p>
+    <div class="acciones">
+      <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar una reunión →</a>
+      <a class="secundario" href="#laboratorio">Conocer el laboratorio ↓</a>
+    </div>
+  </div>
+
+  <div class="lamina" role="img" aria-label="El Cabo Domingo visto desde la playa, al sudeste: meseta que sube hacia la punta, borde de roca y la baliza en lo más alto.">
+    <Vista />
+  </div>
+
+</section>
+
+<style>
+  .hero {
+    --alto: max(680px, 100svh);
+    --w: min(100vw, var(--alto) * var(--prop));
+    position: relative;
+    height: var(--alto);
+    overflow: hidden;
+  }
+  /* un 8 % más grande que la lámina: por la derecha se va a sangre el extremo oeste,
+     que ya viene fundido; el cabo queda entero */
+  .arte {
+    position: absolute;
+    right: calc(var(--w) * -0.068);
+    bottom: 0;
+    width: calc(var(--w) * 1.08);
+  }
+  .texto {
+    position: relative;
+    z-index: 2;
+    padding: max(88px, var(--w) * 0.074) var(--margen) 0;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: calc(var(--w) * 0.045);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    max-width: 14em;
+    text-wrap: balance;
+  }
+  .bajada {
+    margin-top: calc(var(--w) * 0.011);
+    font-size: max(15px, var(--w) * 0.0128);
+    line-height: 1.45;
+    max-width: 46ch;
+  }
+  .acciones {
+    margin-top: calc(var(--w) * 0.016);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .acciones a {
+    padding: 0.9em 1.35em;
+    font-weight: 600;
+    font-size: max(14px, var(--w) * 0.011);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .primario {
+    background: var(--tinta);
+    color: var(--papel);
+  }
+  .secundario {
+    color: var(--tinta);
+    border: 1px solid var(--tinta-suave);
+    background: var(--papel);
+  }
+  .acciones a:focus-visible {
+    outline: 2px solid var(--tinta);
+    outline-offset: 3px;
+  }
+  .lamina {
+    position: absolute;
+    right: var(--margen);
+    bottom: calc(var(--w) * 0.022);
+    width: calc(var(--w) * 0.38);
+  }
+  /* las coordenadas de Río Grande, como volanta del titular */
+  .coordenadas {
+    margin-bottom: calc(var(--w) * 0.011);
+    font: 400 11px var(--mono);
+    letter-spacing: 0.12em;
+    color: var(--tinta-suave);
+  }
+  /* pantallas angostas: el texto arriba; abajo, una ventana de la maqueta sobre el cabo y la misión */
+  @media (max-width: 900px) {
+    .hero {
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      min-height: 100svh;
+    }
+    .texto {
+      padding-top: 92px;
+    }
+    h1 {
+      font-size: clamp(40px, 11.5vw, 60px);
+    }
+    .bajada {
+      margin-top: 16px;
+      font-size: 17px;
+      max-width: 36ch;
+    }
+    .acciones {
+      margin-top: 22px;
+    }
+    .acciones a {
+      font-size: 15px;
+    }
+    .coordenadas {
+      margin-bottom: 14px;
+    }
+    .arte {
+      order: 3;
+      position: relative;
+      right: auto;
+      width: 100%;
+      height: 86vw;
+      margin-top: auto;
+      overflow: hidden;
+    }
+    .arte :global(.maqueta) {
+      position: absolute;
+      width: 286vw;
+      left: -154vw;
+      top: -31vw;
+    }
+    .lamina {
+      display: none;
+    }
+  }
+</style>

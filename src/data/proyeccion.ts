@@ -1,19 +1,16 @@
 // Cómo se dibuja el plano del mapa en pantalla. El mapa está en coordenadas de planta
 // (x a lo largo de la costa, y hacia tierra adentro; ver scripts/mapa.mjs). Una proyección
 // paralela de un plano es una transformación afín: u = a·x + c·y, v = b·x + d·y.
+// (La isométrica con relieve levantado no sale de acá: es la maqueta de scripts/maqueta.mjs.)
 import mapa from './mapa.json';
 
-export type Proyeccion = 'plano' | 'caballera' | 'isometrica';
+export type Proyeccion = 'plano' | 'caballera';
 
-const C30 = Math.cos(Math.PI / 6), S30 = 0.5;
 export const MATRICES: Record<Proyeccion, [number, number, number, number]> = {
   plano: [1, 0, 0, 1],
   // perspectiva caballera (oblicua): la costa sigue horizontal; la profundidad se acorta
   // y se corre en diagonal, como mirar la mesa desde el sur, levantado.
   caballera: [1, 0, -0.42, 0.52],
-  // isométrica: el plano girado 45° y aplastado; la costa sube a 30° hacia la derecha
-  // (el eje de la costa va a (cos30, -sen30); tierra adentro, a (cos30, sen30))
-  isometrica: [C30, -S30, C30, S30],
 };
 
 // lo que hay con datos: todo el ancho, del mar hasta ~5 km tierra adentro

@@ -1,11 +1,12 @@
 ---
-// Prueba temporal: el hero con el mapa en otra proyección (/pruebas/caballera, /pruebas/isometrica).
+// Pruebas temporales del hero: /pruebas/caballera (el plano inclinado) y /pruebas/isometrica
+// (la maqueta con el relieve levantado, scripts/maqueta.mjs).
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
-import type { Proyeccion } from '../../data/proyeccion';
+import HeroMaqueta from '../../components/HeroMaqueta.astro';
 export const getStaticPaths = () => ['caballera', 'isometrica'].map((proyeccion) => ({ params: { proyeccion } }));
-const proyeccion = Astro.params.proyeccion as Proyeccion;
+const { proyeccion } = Astro.params;
 ---
 <Base>
-  <Hero proyeccion={proyeccion} />
+  {proyeccion === 'isometrica' ? <HeroMaqueta /> : <Hero proyeccion="caballera" />}
 </Base>
