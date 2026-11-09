@@ -1,0 +1,211 @@
+{
+ "fuente": "api.opentopodata.org srtm30m (resolucion ~30m, SRTM tiene error vertical ~\u00b110 m y suaviza acantilados)",
+ "fecha": "2026-11-09",
+ "nota": "perfil W-E a lat -53.6873 yendo de mar (este) a oeste; baliza OSM 3607789181 en lon -67.84759",
+ "puntos": [
+  {
+   "lat": -53.6873,
+   "lon": -67.83,
+   "elev_m": 0.0,
+   "dist_m_from_first": 0
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.833,
+   "elev_m": 0.0,
+   "dist_m_from_first": 198
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.836,
+   "elev_m": 0.0,
+   "dist_m_from_first": 396
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.839,
+   "elev_m": 0.0,
+   "dist_m_from_first": 594
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.842,
+   "elev_m": 0.0,
+   "dist_m_from_first": 793
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.845,
+   "elev_m": 0.0,
+   "dist_m_from_first": 991
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.848,
+   "elev_m": 91.0,
+   "dist_m_from_first": 1189
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.851,
+   "elev_m": 71.0,
+   "dist_m_from_first": 1387
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.854,
+   "elev_m": 70.0,
+   "dist_m_from_first": 1585
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.857,
+   "elev_m": 51.0,
+   "dist_m_from_first": 1783
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.86,
+   "elev_m": 42.0,
+   "dist_m_from_first": 1981
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.863,
+   "elev_m": 38.0,
+   "dist_m_from_first": 2180
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.866,
+   "elev_m": 42.0,
+   "dist_m_from_first": 2378
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.869,
+   "elev_m": 41.0,
+   "dist_m_from_first": 2576
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.872,
+   "elev_m": 39.0,
+   "dist_m_from_first": 2774
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.875,
+   "elev_m": 48.0,
+   "dist_m_from_first": 2972
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.878,
+   "elev_m": 50.0,
+   "dist_m_from_first": 3170
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.881,
+   "elev_m": 46.0,
+   "dist_m_from_first": 3368
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.884,
+   "elev_m": 48.0,
+   "dist_m_from_first": 3566
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.887,
+   "elev_m": 53.0,
+   "dist_m_from_first": 3765
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.89,
+   "elev_m": 55.0,
+   "dist_m_from_first": 3963
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.893,
+   "elev_m": 61.0,
+   "dist_m_from_first": 4161
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.896,
+   "elev_m": 48.0,
+   "dist_m_from_first": 4359
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.899,
+   "elev_m": 47.0,
+   "dist_m_from_first": 4557
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.902,
+   "elev_m": 31.0,
+   "dist_m_from_first": 4755
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.905,
+   "elev_m": 20.0,
+   "dist_m_from_first": 4953
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.908,
+   "elev_m": 17.0,
+   "dist_m_from_first": 5152
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.911,
+   "elev_m": 19.0,
+   "dist_m_from_first": 5350
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.914,
+   "elev_m": 21.0,
+   "dist_m_from_first": 5548
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.917,
+   "elev_m": 22.0,
+   "dist_m_from_first": 5746
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.92,
+   "elev_m": 21.0,
+   "dist_m_from_first": 5944
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.923,
+   "elev_m": 19.0,
+   "dist_m_from_first": 6142
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.926,
+   "elev_m": 17.0,
+   "dist_m_from_first": 6340
+  },
+  {
+   "lat": -53.6873,
+   "lon": -67.929,
+   "elev_m": 19.0,
+   "dist_m_from_first": 6539
+  }
+ ]
+}
