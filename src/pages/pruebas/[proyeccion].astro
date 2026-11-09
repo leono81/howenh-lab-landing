@@ -1,0 +1,11 @@
+---
+// Prueba temporal: el hero con el mapa en otra proyección (/pruebas/caballera, /pruebas/isometrica).
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import type { Proyeccion } from '../../data/proyeccion';
+export const getStaticPaths = () => ['caballera', 'isometrica'].map((proyeccion) => ({ params: { proyeccion } }));
+const proyeccion = Astro.params.proyeccion as Proyeccion;
+---
+<Base>
+  <Hero proyeccion={proyeccion} />
+</Base>

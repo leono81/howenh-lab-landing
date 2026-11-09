@@ -1,9 +1,14 @@
 ---
 import Mapa from './Mapa.astro';
 import Vista from './Vista.astro';
-import mapa from '../data/mapa.json';
+import { encuadre, type Proyeccion } from '../data/proyeccion';
+interface Props {
+  proyeccion?: Proyeccion;
+}
+const { proyeccion = 'plano' } = Astro.props;
+const enc = encuadre(proyeccion);
 // la costa del mapa cae a esta altura del hero; margin-top en % se mide sobre el ancho
-const subir = ((mapa.costaY / mapa.marco.w) * 100).toFixed(3);
+const subir = ((enc.costaY / enc.ancho) * 100).toFixed(3);
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
 ---
 <section class="hero" aria-labelledby="hero-titulo">
@@ -16,8 +21,8 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     </div>
   </div>
 
-  <div class="arte" style={`--subir:${subir}`} role="img" aria-label="Mapa grabado de la costa norte de Río Grande, Tierra del Fuego: el Cabo Domingo con su baliza, la Misión Salesiana, la Ruta 3, la ciudad y la desembocadura del río Grande.">
-    <Mapa />
+  <div class={`arte ${proyeccion}`} style={`--subir:${subir}`} role="img" aria-label="Mapa grabado de la costa norte de Río Grande, Tierra del Fuego: el Cabo Domingo con su baliza, la Misión Salesiana, la Ruta 3, la ciudad y la desembocadura del río Grande.">
+    <Mapa proyeccion={proyeccion} />
   </div>
 
   <div class="lamina">
@@ -84,6 +89,16 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     width: calc(100% * var(--zoom, 1));
     top: 74%;
     margin-top: calc(-1% * var(--subir) * var(--zoom, 1));
+  }
+  .arte.caballera {
+    --zoom: 1.45;
+    left: -24%;
+    top: 75%;
+  }
+  .arte.isometrica {
+    --zoom: 1.45;
+    left: -22%;
+    top: 58%;
   }
   .lamina {
     position: absolute;

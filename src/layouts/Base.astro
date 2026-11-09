@@ -1,0 +1,106 @@
+---
+// Página base: cabecera, barra y estilos globales. El contenido va en el slot.
+const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Howenh Labs · Laboratorio de inteligencia artificial en Tierra del Fuego</title>
+    <meta name="description" content="Howenh Labs es un laboratorio de inteligencia artificial, datos satelitales y software en producción en Tierra del Fuego." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=EB+Garamond:ital,wght@0,400..700;1,400..600&family=Martian+Mono:wght@400..600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <a class="saltar" href="#contenido">Saltar al contenido</a>
+    <header class="barra">
+      <a class="marca" href="/">HOWENH LABS</a>
+      <nav aria-label="Principal">
+        <a href="#laboratorio">Laboratorio</a>
+        <a href="#proyectos">Proyectos</a>
+        <a href="#productos">Productos</a>
+        <a href="#nosotros">Nosotros</a>
+        <a class="cta" href={agenda} target="_blank" rel="noopener">Agendar reunión</a>
+      </nav>
+    </header>
+    <main id="contenido">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --papel: #f6f7fb;
+    --tinta: #1f3a8f;
+    --tinta-suave: #5b6fae;
+    --serif: 'EB Garamond', serif;
+    --sans: 'Archivo', sans-serif;
+    --mono: 'Martian Mono', monospace;
+    --margen: 48px;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: var(--sans);
+  }
+  .saltar {
+    position: absolute;
+    left: -9999px;
+  }
+  .saltar:focus {
+    left: 16px;
+    top: 16px;
+    z-index: 10;
+    background: var(--papel);
+    padding: 8px 12px;
+  }
+  .barra {
+    position: absolute;
+    z-index: 5;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 28px var(--margen);
+    font: 500 12px var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .barra a {
+    color: var(--tinta);
+    text-decoration: none;
+  }
+  .marca {
+    font: 800 15px var(--sans);
+    font-stretch: 125%;
+    letter-spacing: 0.1em;
+  }
+  .barra nav {
+    margin-left: auto;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+  }
+  .barra .cta {
+    border: 1px solid var(--tinta);
+    padding: 9px 16px;
+    background: var(--papel);
+  }
+  @media (max-width: 820px) {
+    :root {
+      --margen: 16px;
+    }
+    .barra nav a:not(.cta) {
+      display: none;
+    }
+  }
+</style>
