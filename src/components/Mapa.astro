@@ -2,6 +2,8 @@
 // Mapa de la costa norte de Río Grande en grabado de una tinta.
 // La geometría es real (OSM, ver scripts/mapa.mjs); acá solo se le da estilo.
 import mapa from '../data/mapa.json';
+import VinetaMision from './VinetaMision.astro';
+import VinetaTorre from './VinetaTorre.astro';
 const { marco, capas: c, lugares } = mapa;
 
 // líneas de agua: distancias a la costa (en unidades, 100 = 1 km), cada vez más separadas y suaves
@@ -113,14 +115,18 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
   <path d={abanico} fill="none" stroke="var(--tinta)" stroke-width="0.9" stroke-dasharray="2 3" />
   <path d={`M${cam.x} ${cam.y - 5}l4.5 7.5h-9z`} fill="var(--tinta)" />
 
-  <!-- marcas provisorias de los lugares (las reemplazan las viñetas) -->
-  <g class="marcas">
-    {Object.entries(lugares).filter(([n]) => n !== 'cabo').map(([n, [x, y]]) => (
-      <g transform={`translate(${x} ${y})`}>
-        <circle r="5" fill="var(--papel)" stroke="var(--tinta)" stroke-width="1.6" />
-        <text class="rotulo" y="-11" text-anchor="middle">{n}</text>
-      </g>
-    ))}
+  <!-- viñetas -->
+  <VinetaMision x={lugares.mision[0]} y={lugares.mision[1]} escala={1.05} />
+  <VinetaTorre x={lugares.torre[0]} y={lugares.torre[1]} escala={1.1} />
+
+  <!-- baliza del cabo: torre de reticulado con panel y linterna, sobre el filo -->
+  <g transform={`translate(${lugares.baliza[0]} ${lugares.baliza[1]}) scale(1.15)`} fill="none" stroke="var(--tinta)" stroke-linecap="round">
+    <path d="M-3.4 0L-1 -19M3.4 0L1 -19" stroke-width="1.1" />
+    <path d="M-2.9 -4L2.4 -8.5M2.9 -4L-2.4 -8.5M-2.3 -9L1.8 -13.5M2.3 -9L-1.8 -13.5" stroke-width="0.5" />
+    <rect x="-4.2" y="-18.5" width="8.4" height="6.5" fill="var(--papel)" stroke-width="0.8" />
+    <path d="M-4.2 -16.3h8.4M-4.2 -14.2h8.4" stroke-width="0.5" />
+    <rect x="-1.8" y="-23" width="3.6" height="4" fill="var(--papel)" stroke-width="0.8" />
+    <path d="M-2.3 -23L0 -25L2.3 -23" stroke-width="0.8" />
   </g>
 </svg>
 
@@ -129,12 +135,5 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
     display: block;
     width: 100%;
     height: auto;
-  }
-  .rotulo {
-    font: 500 13px var(--mono);
-    fill: var(--tinta);
-    paint-order: stroke;
-    stroke: var(--papel);
-    stroke-width: 4px;
   }
 </style>
