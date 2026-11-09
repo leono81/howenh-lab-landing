@@ -6,7 +6,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "mapa": "node scripts/mapa.mjs"
+    "mapa": "node scripts/mapa.mjs && node scripts/vista.mjs"
   },
   "dependencies": {
     "astro": "^7.4.7"

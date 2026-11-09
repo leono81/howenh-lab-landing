@@ -2,10 +2,17 @@
 // Mapa de la costa norte de Río Grande en grabado de una tinta.
 // La geometría es real (OSM, ver scripts/mapa.mjs); acá solo se le da estilo.
 import mapa from '../data/mapa.json';
+import vista from '../data/vista.json';
 const { marco, capas: c, lugares } = mapa;
 
 // líneas de agua: distancias a la costa (en unidades, 100 = 1 km), cada vez más separadas y suaves
 const lineasMar = [5, 11, 18, 26, 35, 46, 59, 74, 92, 113, 137].map((d, i, a) => ({ d, w: 1.25 - (i / a.length) * 0.6, o: 1 - (i / a.length) * 0.75 }));
+// desde dónde se mira la vista de costa: el punto y el abanico de la mirada (24°)
+const cam = vista.camara;
+const ang = Math.atan2(cam.mira.y - cam.y, cam.mira.x - cam.x);
+const largo = Math.hypot(cam.mira.x - cam.x, cam.mira.y - cam.y) * 0.9;
+const rayo = (a: number) => `M${cam.x} ${cam.y}L${(cam.x + Math.cos(a) * largo).toFixed(1)} ${(cam.y + Math.sin(a) * largo).toFixed(1)}`;
+const abanico = rayo(ang - 0.21) + rayo(ang + 0.21);
 const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }));
 ---
 <svg class="mapa" viewBox={`0 0 ${marco.w} ${marco.h}`} style={`--costa:${(mapa.costaY / marco.h).toFixed(4)}`} aria-hidden="true">
@@ -101,6 +108,10 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
 
   <!-- la costa -->
   <path d={c.lineaCosta} fill="none" stroke="var(--tinta)" stroke-width="2.2" stroke-linejoin="round" />
+
+  <!-- punto de vista de la lámina del cabo -->
+  <path d={abanico} fill="none" stroke="var(--tinta)" stroke-width="0.9" stroke-dasharray="2 3" />
+  <path d={`M${cam.x} ${cam.y - 5}l4.5 7.5h-9z`} fill="var(--tinta)" />
 
   <!-- marcas provisorias de los lugares (las reemplazan las viñetas) -->
   <g class="marcas">

@@ -1,0 +1,67 @@
+---
+// Vista de costa del Cabo Domingo (como las de las cartas náuticas), generada del relieve real
+// por scripts/vista.mjs. Se dibuja sin marco, flotando sobre el mar del mapa.
+import vista from '../data/vista.json';
+const { ancho: W, alto: H, capas, baliza } = vista;
+const [bx, by] = baliza;
+---
+<figure class="vista">
+  <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+    <defs>
+      <linearGradient id="v-fundido" x1="0" x2="1">
+        <stop offset="0" stop-color="#fff" stop-opacity="0" />
+        <stop offset="0.12" stop-color="#fff" />
+        <stop offset="0.9" stop-color="#fff" />
+        <stop offset="1" stop-color="#fff" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="v-fundido-mar" x1="0" x2="0" y1={vista.horizonte} y2={H} gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#fff" />
+        <stop offset="1" stop-color="#fff" stop-opacity="0" />
+      </linearGradient>
+      <mask id="v-bordes" maskUnits="userSpaceOnUse" x="0" y="0" width={W} height={H}>
+        <rect width={W} height={H} fill="url(#v-fundido)" />
+      </mask>
+      <mask id="v-mar" maskUnits="userSpaceOnUse" x="0" y="0" width={W} height={H}>
+        <rect width={W} height={H} fill="url(#v-fundido-mar)" />
+      </mask>
+    </defs>
+    <g mask="url(#v-bordes)">
+      <g mask="url(#v-mar)">
+        <path d={vista.mar} stroke="var(--tinta-suave)" stroke-width="0.5" />
+      </g>
+      {capas.map((c) => <path d={c.d} fill="none" stroke="var(--tinta)" stroke-width={c.w} stroke-linejoin="round" />)}
+      <path d={vista.sedimento} stroke="var(--tinta)" stroke-width="0.9" />
+      {vista.paredes.map((p) => <path d={p.d} stroke="var(--tinta)" stroke-width={p.w} />)}
+      <path d={vista.perfil} fill="none" stroke="var(--tinta)" stroke-width="2.2" stroke-linejoin="round" />
+    </g>
+    <!-- la baliza: torre de reticulado con riendas y linterna -->
+    <g class="baliza" transform={`translate(${bx} ${by})`} fill="none" stroke="var(--tinta)" stroke-linecap="round">
+      <path d="M-3.2 0L-0.9 -17M3.2 0L0.9 -17" stroke-width="1.1" />
+      <path d="M-2.7 -3.5L2.2 -7.5M2.7 -3.5L-2.2 -7.5M-2.1 -8L1.6 -12M2.1 -8L-1.6 -12M-1.5 -12.5L1.1 -16M1.5 -12.5L-1.1 -16" stroke-width="0.5" />
+      <path d="M-0.9 -17L-9 0M0.9 -17L9 0" stroke-width="0.3" stroke-dasharray="1 1.4" />
+      <rect x="-1.9" y="-21.5" width="3.8" height="4.5" fill="var(--papel)" stroke-width="0.8" />
+      <path d="M-2.4 -21.5L0 -23.6L2.4 -21.5" stroke-width="0.8" />
+    </g>
+  </svg>
+  <figcaption>Vista desde el mar, 2 km al sudeste · relieve real, altura ×2</figcaption>
+</figure>
+
+<style>
+  .vista {
+    margin: 0;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  figcaption {
+    margin-top: 6px;
+    text-align: center;
+    font: 400 10px var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+  }
+</style>

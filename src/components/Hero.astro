@@ -1,5 +1,6 @@
 ---
 import Mapa from './Mapa.astro';
+import Vista from './Vista.astro';
 import mapa from '../data/mapa.json';
 // la costa del mapa cae a esta altura del hero; margin-top en % se mide sobre el ancho
 const subir = ((mapa.costaY / mapa.marco.w) * 100).toFixed(3);
@@ -17,6 +18,10 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
 
   <div class="arte" style={`--subir:${subir}`} role="img" aria-label="Mapa grabado de la costa norte de Río Grande, Tierra del Fuego: el Cabo Domingo con su baliza, la Misión Salesiana, la Ruta 3, la ciudad y la desembocadura del río Grande.">
     <Mapa />
+  </div>
+
+  <div class="lamina">
+    <Vista />
   </div>
 
   <p class="coordenadas">53°47′09″ S · 67°42′07″ O</p>
@@ -80,6 +85,13 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     top: 74%;
     margin-top: calc(-1% * var(--subir) * var(--zoom, 1));
   }
+  .lamina {
+    position: absolute;
+    z-index: 1;
+    right: var(--margen);
+    top: 21%;
+    width: min(54vw, 860px);
+  }
   .coordenadas {
     position: absolute;
     z-index: 2;
@@ -90,6 +102,9 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     color: var(--tinta-suave);
   }
   @media (max-width: 820px) {
+    .lamina {
+      display: none;
+    }
     /* en el teléfono se acerca al cabo y la misión */
     .arte {
       --zoom: 2.6;
