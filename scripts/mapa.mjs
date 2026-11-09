@@ -1,7 +1,7 @@
 // Construye src/data/mapa.json desde los datos OSM de docs/lugar/.
 // Proyecta, gira el mapa para que la costa quede horizontal (mar arriba) y simplifica.
 // Uso: node scripts/mapa.mjs
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 const L = new URL('../docs/lugar/', import.meta.url);
 const leer = (f) => JSON.parse(readFileSync(new URL(f, L), 'utf8'));
@@ -36,16 +36,19 @@ function simplificar(pts, tol) {
   if (pts.length < 3) return pts;
   const [a, b] = [pts[0], pts[pts.length - 1]];
   let max = 0, idx = 0;
-  const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1;
+  const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
   for (let i = 1; i < pts.length - 1; i++) {
-    const d = Math.abs((pts[i][0] - a[0]) * dy - (pts[i][1] - a[1]) * dx) / len;
+    // anillo cerrado (a == b): distancia al punto, no a la recta
+    const d = len ? Math.abs((pts[i][0] - a[0]) * dy - (pts[i][1] - a[1]) * dx) / len : Math.hypot(pts[i][0] - a[0], pts[i][1] - a[1]);
     if (d > max) (max = d), (idx = i);
   }
   if (max <= tol) return [a, b];
   return [...simplificar(pts.slice(0, idx + 1), tol).slice(0, -1), ...simplificar(pts.slice(idx), tol)];
 }
 const MARGEN = 400;
-const dentro = ([x, y]) => x > -MARGEN && x < marco.w + MARGEN && y > -MARGEN && y < marco.h + MARGEN;
+// el hero corta el mapa unos 5 km tierra adentro: lo de más abajo no se ve y no se exporta
+const FONDO = ALTO * COSTA_Y + 520;
+const dentro = ([x, y]) => x > -MARGEN && x < marco.w + MARGEN && y > -MARGEN && y < FONDO;
 const camino = (coords, cerrar = false, tol = 0.8) => {
   const pts = simplificar(coords.map(T), tol);
   if (!pts.some(dentro)) return null;
@@ -158,6 +161,126 @@ const lugares = {
 };
 for (const n in lugares) lugares[n] = lugares[n].map((v) => +v.toFixed(1));
 
+// --- relieve: hachures (rayitas en la dirección de la pendiente, más gruesas cuanto más empinado) ---
+// Necesita docs/lugar/dem-marco.bin (scripts/relieve.py). Sin él, el mapa sale sin relieve.
+let azarS = 7;
+const azar = () => (azarS = (azarS * 16807) % 2147483647) / 2147483647;
+let hachures = [], estepa = '';
+const demUrl = new URL('dem-marco.bin', L);
+if (existsSync(demUrl)) {
+  const b = readFileSync(demUrl);
+  const [nx, ny, paso] = [b.readInt32LE(0), b.readInt32LE(4), b.readInt32LE(8)];
+  let z = new Float32Array(nx * ny);
+  for (let i = 0; i < nx * ny; i++) z[i] = b.readInt16LE(12 + i * 2) / 10;
+  // suavizado 3x3, dos pasadas: el DSM tiene ruido de ±1-2 m
+  for (let n = 0; n < 2; n++) {
+    const s = new Float32Array(nx * ny);
+    for (let r = 0; r < ny; r++)
+      for (let q = 0; q < nx; q++) {
+        let t = 0, m = 0;
+        for (let dr = -1; dr <= 1; dr++)
+          for (let dq = -1; dq <= 1; dq++) {
+            const rr = r + dr, qq = q + dq;
+            if (rr < 0 || qq < 0 || rr >= ny || qq >= nx) continue;
+            t += z[rr * nx + qq];
+            m++;
+          }
+        s[r * nx + q] = t / m;
+      }
+    z = s;
+  }
+  const alt = (x, y) => {
+    const fq = Math.min(nx - 1.001, Math.max(0, x / paso)), fr = Math.min(ny - 1.001, Math.max(0, y / paso));
+    const q = Math.floor(fq), r = Math.floor(fr), tq = fq - q, tr = fr - r;
+    const i = r * nx + q;
+    return z[i] * (1 - tq) * (1 - tr) + z[i + 1] * tq * (1 - tr) + z[i + nx] * (1 - tq) * tr + z[i + nx + 1] * tq * tr;
+  };
+  const metros = 10; // 1 unidad = 10 m
+  const grad = (x, y) => {
+    const h = paso;
+    return [(alt(x + h, y) - alt(x - h, y)) / (2 * h * metros), (alt(x, y + h) - alt(x, y - h)) / (2 * h * metros)];
+  };
+
+  // máscara de ciudad: celdas de 20 u con calles cerca (no se raya el relieve ni la estepa adentro)
+  const CEL = 20, mw = Math.ceil(marco.w / CEL), mh = Math.ceil(marco.h / CEL);
+  const urbano = new Uint8Array(mw * mh);
+  for (const e of calles) {
+    if (['trunk', 'service'].includes(tipo(e))) continue;
+    for (const g of e.geometry) {
+      const [x, y] = T([g.lon, g.lat]);
+      const q = Math.floor(x / CEL), r = Math.floor(y / CEL);
+      for (let dr = -1; dr <= 1; dr++) for (let dq = -1; dq <= 1; dq++) {
+        const rr = r + dr, qq = q + dq;
+        if (rr >= 0 && qq >= 0 && rr < mh && qq < mw) urbano[rr * mw + qq] = 1;
+      }
+    }
+  }
+  const enCiudad = (x, y) => urbano[Math.floor(y / CEL) * mw + Math.floor(x / CEL)] === 1;
+
+  // agua: mar por encima de la costa + lagunas + estuario (punto en polígono)
+  const poligonos = [
+    ...rio.filter((f) => f.geometry.type === 'Polygon').map((f) => f.geometry.coordinates[0].map(T)),
+    ...anillos(rel(2146734)).map((r) => r.map(T)),
+  ];
+  const enPoli = (x, y, pts) => {
+    let a = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const [xi, yi] = pts[i], [xj, yj] = pts[j];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) a = !a;
+    }
+    return a;
+  };
+  // y de la costa para cada x (la costa ya está ordenada de izquierda a derecha)
+  const costaEn = (x) => {
+    for (let i = 1; i < ptsCosta.length; i++) {
+      const [x1, y1] = ptsCosta[i - 1], [x2, y2] = ptsCosta[i];
+      if ((x1 <= x && x <= x2) || (x2 <= x && x <= x1)) return y1 + ((y2 - y1) * (x - x1)) / (x2 - x1 || 1);
+    }
+    return 0;
+  };
+  const enAgua = (x, y) => y < costaEn(x) + 1.5 || alt(x, y) < 0.3 || poligonos.some((p) => enPoli(x, y, p));
+
+  // hachures: barrancas (empinado) en tinta llena; laderas suaves, finas y ralas. Rayitas rectas
+  // en la dirección de la caída, en grilla de ladrillo, como en las cartas grabadas.
+  const H = 3.6; // separación entre rayitas
+  const PROF = 420; // solo los primeros ~4 km tierra adentro
+  const fuerte = new Map(), suave = [];
+  let fila = 0;
+  for (let y = H / 2; y < FONDO; y += H, fila++)
+    for (let x = (fila % 2) * (H / 2); x < marco.w; x += H) {
+      const sx = x + (azar() - 0.5) * H * 0.3, sy = y + (azar() - 0.5) * H * 0.3;
+      const yc = costaEn(sx);
+      if (sy > yc + PROF) continue;
+      const [gx, gy] = grad(sx, sy);
+      const pend = Math.hypot(gx, gy);
+      const empinado = pend >= 0.1;
+      if (pend < 0.035) continue;
+      if (!empinado && (fila % 2 || pend < 0.05 || sy > yc + 220)) continue; // las suaves: ralas y solo cerca de la costa
+      if (enCiudad(sx, sy) || enAgua(sx, sy)) continue;
+      const ux = -gx / pend, uy = -gy / pend; // cuesta abajo
+      const l = (empinado ? 1.25 : 0.9) * H;
+      const seg = `M${(sx - (ux * l) / 2).toFixed(1)} ${(sy - (uy * l) / 2).toFixed(1)}l${(ux * l).toFixed(1)} ${(uy * l).toFixed(1)}`;
+      if (empinado) {
+        const w = pend > 0.3 ? 1.6 : pend > 0.2 ? 1.25 : pend > 0.14 ? 0.95 : 0.7;
+        fuerte.set(w, (fuerte.get(w) || '') + seg);
+      } else suave.push(seg);
+    }
+  hachures = [...[...fuerte].map(([w, d]) => ({ w, d, suave: false })), { w: 0.55, d: suave.join(''), suave: true }];
+
+  // estepa: matas de coirón sueltas en lo llano, lejos de la ciudad, el agua y las barrancas
+  const matas = [];
+  for (let i = 0; i < 2600; i++) {
+    const x = azar() * marco.w, y = costaEn(0) - 40 + azar() * (FONDO - costaEn(0) + 40);
+    const [gx, gy] = grad(x, y);
+    if (Math.hypot(gx, gy) > 0.02 || enCiudad(x, y) || enAgua(x, y) || y < costaEn(x) + 8) continue;
+    const s = 0.8 + azar() * 0.6;
+    const f = (v) => (v * s).toFixed(1);
+    matas.push(`M${x.toFixed(1)} ${y.toFixed(1)}l${f(-1.6)} ${f(-2.6)}M${x.toFixed(1)} ${y.toFixed(1)}l${f(0.2)} ${f(-3.4)}M${x.toFixed(1)} ${y.toFixed(1)}l${f(1.7)} ${f(-2.4)}M${(x - 2.4 * s).toFixed(1)} ${y.toFixed(1)}h${f(4.8)}`);
+  }
+  estepa = matas.join('');
+  console.log('hachures', hachures.map((g) => [g.w, g.d.length]), 'matas', matas.length);
+}
+
 // norte en el mapa girado (para la rosa)
 const norte = +(((-ANG * 180) / Math.PI) - 0).toFixed(1);
 
@@ -166,9 +289,11 @@ const salida = {
   unidadesPorKm: U,
   marco,
   costaY: Math.round(ALTO * COSTA_Y),
+  // para que scripts/relieve.py muestree el DEM en el mismo marco
+  proy: { LAT0, LON0, KX, KY, ANG, U, X0, Y0 },
   giroGrados: +((ANG * 180) / Math.PI).toFixed(2),
   norte,
-  capas: { mar, lineaCosta, estuario, humedal, playa, arenas, lagunas, rioLinea, arroyos, ruta, trama, avenidas, pista, rodajes, plataformas },
+  capas: { mar, lineaCosta, estuario, humedal, playa, arenas, lagunas, rioLinea, arroyos, ruta, trama, avenidas, pista, rodajes, plataformas, hachures, estepa },
   lugares,
 };
 writeFileSync(new URL('../src/data/mapa.json', import.meta.url), JSON.stringify(salida));

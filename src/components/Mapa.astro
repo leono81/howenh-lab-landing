@@ -13,6 +13,15 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
     <clipPath id="m-mar"><path d={c.mar} /></clipPath>
     <clipPath id="m-estuario"><path d={c.estuario} clip-rule="evenodd" /></clipPath>
     <clipPath id="m-lagunas"><path d={c.lagunas.join('')} /></clipPath>
+    <!-- el relieve se apaga tierra adentro: manda la costa -->
+    <linearGradient id="m-fundido" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1={mapa.costaY} y2={mapa.costaY + 480}>
+      <stop offset="0" stop-color="#fff" />
+      <stop offset="0.3" stop-color="#fff" />
+      <stop offset="1" stop-color="#fff" stop-opacity="0.15" />
+    </linearGradient>
+    <mask id="m-tierra" maskUnits="userSpaceOnUse" x="0" y="0" width={marco.w} height={marco.h}>
+      <rect width={marco.w} height={marco.h} fill="url(#m-fundido)" />
+    </mask>
     <pattern id="m-rayado" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
       <line x1="0" y1="0" x2="0" y2="3.2" stroke="var(--tinta)" stroke-width="1.1" />
     </pattern>
@@ -38,6 +47,13 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
       </>
     ))}
   </g>
+
+  <!-- relieve: hachures del DEM (meseta, barranca del cabo, cañadones) -->
+  <g fill="none" stroke-linecap="round" mask="url(#m-tierra)">
+    {c.hachures.map((g) => <path d={g.d} stroke-width={g.w} stroke={g.suave ? 'var(--tinta-suave)' : 'var(--tinta)'} />)}
+  </g>
+  <!-- estepa: matas de coirón -->
+  <path d={c.estepa} fill="none" stroke="var(--tinta-suave)" stroke-width="0.55" stroke-linecap="round" mask="url(#m-tierra)" />
 
   <!-- playas, arenas y mallines de la boca -->
   <path d={c.playa + c.arenas} fill="url(#m-puntos)" />
