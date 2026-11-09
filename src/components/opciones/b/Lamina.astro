@@ -1,0 +1,579 @@
+---
+// Opción B · «Lámina de atlas». La maqueta presentada como una lámina impresa: doble filete,
+// marco graduado en latitud y longitud, número de lámina, escala gráfica, rosa de los rumbos
+// y la vista del cabo desde la playa como cartela. Sin nombres de lugares: solo coordenadas.
+// La maqueta y la vista son las piezas comunes, sin tocar; todo lo demás se calcula en carta.ts.
+import Maqueta from '../../Maqueta.astro';
+import Vista from '../../Vista.astro';
+import maqueta from '../../../data/maqueta.json';
+import mapa from '../../../data/mapa.json';
+import { graduar, grados, rumbo, dePlanta, ABREVIADOS, EJE_COSTA, EJE_MAR, KM, type P, type Ventana, type Marca } from './carta';
+
+// Qué parte de la maqueta muestra la lámina (en sus unidades) y dónde va cada pieza del aparato.
+// En el teléfono la lámina es vertical y se cierra sobre el cabo y la misión.
+// `px` es cuántos píxeles ocupa más o menos una unidad (solo para no encimar los grados del marco).
+const VISTAS: { clase: string; v: Ventana; px: number; cadaLon: number; rosa: { c: P; r: number }; regla: { cero: P; km: number } }[] = [
+  { clase: 'escritorio', v: { x: 690, y: 150, w: 1010, h: 795 }, px: 0.72, cadaLon: 2, rosa: { c: [1560, 600], r: 66 }, regla: { cero: [1378, 560.5], km: 3 } },
+  { clase: 'telefono', v: { x: 930, y: 170, w: 700, h: 1000 }, px: 0.45, cadaLon: 4, rosa: { c: [1500, 690], r: 58 }, regla: { cero: [1404, 545.5], km: 2 } },
+];
+
+const f = (n: number) => (Math.round(n * 10) / 10).toString();
+const linea = (ps: P[]) => 'M' + ps.map(([x, y]) => `${f(x)} ${f(y)}`).join('L');
+
+// --- rosa de los rumbos, acostada sobre el plano del mar (misma proyección que la maqueta) ---
+function rosa(c: P, R: number) {
+  const anillo = (r: number) => linea(Array.from({ length: 73 }, (_, i) => rumbo(c, r, i * 5)));
+  const cuartas = Array.from({ length: 32 }, (_, i) => linea([rumbo(c, R * (i % 4 === 0 ? 0.82 : i % 2 === 0 ? 0.87 : 0.92), i * 11.25), rumbo(c, R, i * 11.25)])).join('');
+  // cada punta, partida al medio: una mitad en tinta y la otra en papel
+  const punta = (g: number, largo: number, hombro: number) => [linea([c, rumbo(c, R * hombro, g + 45), rumbo(c, R * largo, g)]) + 'Z', linea([c, rumbo(c, R * hombro, g - 45), rumbo(c, R * largo, g)]) + 'Z'];
+  const puntas = [...[45, 135, 225, 315].map((g) => punta(g, 0.5, 0.1)), ...[90, 180, 270].map((g) => punta(g, 0.8, 0.15)), punta(0, 1.24, 0.15)];
+  return { anillos: anillo(R) + anillo(R * 0.82), cuartas, llenas: puntas.map((p) => p[0]).join(''), vacias: puntas.map((p) => p[1]).join(''), n: rumbo(c, R * 1.5, 0) };
+}
+
+// --- escala gráfica: una regla apoyada a lo largo de la costa (100 unidades = 1 km sobre ese eje) ---
+function regla(cero: P, km: number) {
+  const G = 5.5; // grosor, hacia el mar
+  const en = (k: number, g = 0): P => [cero[0] - EJE_COSTA[0] * k * KM + EJE_MAR[0] * g, cero[1] - EJE_COSTA[1] * k * KM + EJE_MAR[1] * g];
+  const cortes = [0, 0.2, 0.4, 0.6, 0.8, ...Array.from({ length: km }, (_, i) => i + 1)];
+  const tramo = (a: number, b: number) => linea([en(a), en(b), en(b, G), en(a, G)]) + 'Z';
+  return {
+    borde: tramo(0, km),
+    llenos: cortes.slice(0, -1).map((a, i) => (i % 2 === 0 ? tramo(a, cortes[i + 1]) : '')).join(''),
+    marcas: Array.from({ length: km + 1 }, (_, k) => linea([en(k, G), en(k, G + 5)])).join(''),
+    cifras: Array.from({ length: km + 1 }, (_, k) => ({ k, p: en(k, G + 17) })),
+  };
+}
+
+// --- los dos tramos de costa abreviados, señalados en el zócalo con el signo de corte de los planos ---
+const cortes = ABREVIADOS.map((x) => {
+  const [u, v] = dePlanta(x, maqueta.franja.y), [ax, ay] = [EJE_COSTA[0] * 3.2, EJE_COSTA[1] * 3.2];
+  const zig = (dx: number, dy: number): P[] => [[u + dx, v + dy - 6], [u + dx, v + dy + 4.5], [u + dx - 3.2, v + dy + 6.5], [u + dx + 3.2, v + dy + 9.5], [u + dx, v + dy + 11.5], [u + dx, v + dy + 21]];
+  return { papel: linea([...zig(-ax, -ay), ...zig(ax, ay).reverse()]) + 'Z', lineas: linea(zig(-ax, -ay)) + linea(zig(ax, ay)) };
+});
+
+// --- desde dónde se dibujó la vista del cabo: la playa, unos 2,3 km al sudeste de la baliza (igual que en Mapa.astro) ---
+const [bx, by] = mapa.lugares.baliza;
+const estacion = dePlanta(bx + 230, by + 3);
+// dos rayitas que abren hacia la baliza, como el abanico de la planta
+const rumboBaliza = Math.atan2(maqueta.lugares.baliza[1] - estacion[1], maqueta.lugares.baliza[0] - estacion[0]);
+const haciaElCabo = [-0.16, 0.16].map((d) => linea([9, 46].map((r): P => [estacion[0] + Math.cos(rumboBaliza + d) * r, estacion[1] + Math.sin(rumboBaliza + d) * r]))).join('');
+
+// --- la linterna de la baliza: en la maqueta (pie + alto de MaquetaBaliza a escala 2.1) y en la
+// vista (el pie está en X(272), Y(61) de Vista.astro; la linterna, unas 21 unidades más arriba) ---
+const linterna: P = [maqueta.lugares.baliza[0], maqueta.lugares.baliza[1] - 21.6];
+const linternaVista: P = [40 + 272 * 1.72, 262 - (238 - 61) * 1.3 - 21.2];
+// El destello va en un SVG chico aparte, encima de la linterna: así lo único que queda vivo se
+// anima en su propia capa (opacidad y escala) y no hace repintar la maqueta.
+const rayos = (r0: number, r1: number, r2: number) =>
+  Array.from({ length: 16 }, (_, i) => {
+    const t = (i / 16) * Math.PI * 2 + 0.2, r = i % 2 ? r1 : r2;
+    return linea([[Math.cos(t) * r0, Math.sin(t) * r0], [Math.cos(t) * r, Math.sin(t) * r]]);
+  }).join('');
+const pct = (n: number, de: number) => `${((n / de) * 100).toFixed(3)}%`;
+const sobre = (c: P, r: number, ancho: number, alto: number) => `left:${pct(c[0] - r, ancho)};top:${pct(c[1] - r, alto)};width:${pct(r * 2, ancho)}`;
+
+// --- graduación del marco ---
+const largo = (m: Marca) => (m.seg % 60 === 0 ? 10 : m.seg % 30 === 0 ? 6 : 3.5);
+const marcas = VISTAS.map(({ clase, v, px, cadaLon }) => {
+  const g = graduar(v);
+  // grados en los minutos enteros, sin pegarse a las esquinas ni entre sí (en los tramos abreviados las marcas se juntan)
+  const rotulos = (ms: Marca[], letra: string, cada: number, largoLado: number) => {
+    let ultimo = -1;
+    return ms
+      .filter((m) => m.seg % (60 * cada) === 0 && m.t > 0.05 && m.t < 0.95 && (m.t - ultimo) * largoLado * px > 62 && ((ultimo = m.t), true))
+      .map((m) => ({ t: m.t, texto: grados(m.seg, letra) }));
+  };
+  return {
+    clase,
+    lados: [
+      { lado: 'arriba', caja: '0 0 1000 10', d: g.arriba.map((m) => `M${f(m.t * 1000)} 10v${-largo(m)}`).join(''), rotulos: rotulos(g.arriba, 'S', 1, v.w) },
+      { lado: 'abajo', caja: '0 0 1000 10', d: g.abajo.map((m) => `M${f(m.t * 1000)} 0v${largo(m)}`).join(''), rotulos: rotulos(g.abajo, 'S', 1, v.w) },
+      { lado: 'izquierda', caja: '0 0 10 1000', d: g.izquierda.map((m) => `M10 ${f(m.t * 1000)}h${-largo(m)}`).join(''), rotulos: rotulos(g.izquierda, 'O', cadaLon, v.h) },
+      { lado: 'derecha', caja: '0 0 10 1000', d: g.derecha.map((m) => `M0 ${f(m.t * 1000)}h${largo(m)}`).join(''), rotulos: rotulos(g.derecha, 'O', cadaLon, v.h) },
+    ],
+  };
+});
+const [E, T] = VISTAS.map((x) => x.v);
+const vars = `--ex:${E.x};--ey:${E.y};--ew:${E.w};--eh:${E.h};--tx:${T.x};--ty:${T.y};--tw:${T.w};--th:${T.h};--mw:${maqueta.ancho}`;
+---
+<div
+  class="lamina"
+  style={vars}
+  role="img"
+  aria-label="Lámina primera: maqueta grabada de la costa norte de Río Grande, Tierra del Fuego, vista desde el mar hacia el oeste. La costa sube en diagonal desde los barrios del norte de la ciudad, pasa por la Misión Salesiana junto a la Ruta 3 y termina en el Cabo Domingo, con la baliza sobre el acantilado. El marco está graduado en latitud y longitud; lleva escala en kilómetros, rosa de los rumbos con el norte a la derecha y, en un recuadro, el cabo visto desde la playa."
+>
+  <div class="cabeza rotulo">
+    <span class="titulo">Vista desde el mar, hacia el oeste</span>
+    <span class="numero">Lám. I</span>
+  </div>
+
+  <div class="hoja">
+    <div class="filete">
+      <div class="ventana">
+        <div class="plano">
+          <Maqueta />
+          <svg class="aparato" viewBox={`0 0 ${maqueta.ancho} ${maqueta.alto}`} fill="none" stroke="var(--tinta)" stroke-linecap="round" stroke-linejoin="round">
+            {VISTAS.map(({ clase, rosa: ro, regla: re }) => {
+              const r = rosa(ro.c, ro.r), e = regla(re.cero, re.km);
+              return (
+                <g class={`solo-${clase}`}>
+                  <g class="rotulo" style="--i:2">
+                    <path d={e.llenos} fill="var(--tinta)" stroke="none" />
+                    <path d={e.borde + e.marcas} stroke-width="0.8" />
+                    {e.cifras.map(({ k, p }) => (
+                      <text class="cifra" x={f(p[0])} y={f(p[1])}>{k}{k === re.km && <tspan dx="5">km</tspan>}</text>
+                    ))}
+                  </g>
+                  <g class="rotulo" style="--i:3">
+                    <path d={r.anillos} stroke-width="0.7" />
+                    <path d={r.cuartas} stroke-width="0.6" />
+                    <path d={r.vacias} fill="var(--papel)" stroke-width="0.7" />
+                    <path d={r.llenas} fill="var(--tinta)" stroke-width="0.7" />
+                    <text class="norte" x={f(r.n[0])} y={f(r.n[1])}>N</text>
+                  </g>
+                </g>
+              );
+            })}
+            <g class="rotulo" style="--i:2">
+              {cortes.map((c) => (
+                <>
+                  <path d={c.papel} fill="var(--papel)" stroke="none" />
+                  <path d={c.lineas} stroke-width="0.8" />
+                </>
+              ))}
+            </g>
+            <g class="rotulo" style="--i:4">
+              <circle cx={f(estacion[0])} cy={f(estacion[1])} r="5.2" fill="var(--papel)" stroke-width="1" />
+              <circle cx={f(estacion[0])} cy={f(estacion[1])} r="1.5" fill="var(--tinta)" stroke="none" />
+              <path d={haciaElCabo} stroke-width="0.8" stroke-dasharray="3 3.5" />
+            </g>
+          </svg>
+          <svg class="destello" viewBox="-36 -36 72 72" style={sobre(linterna, 36, maqueta.ancho, maqueta.alto)}><path d={rayos(5.5, 17, 33)} stroke-width="0.9" /></svg>
+        </div>
+
+        <div class="cartela rotulo" style="--i:5">
+          <Vista />
+          <div class="sobre-vista">
+            <svg class="destello" viewBox="-28 -28 56 56" style={sobre(linternaVista, 28, 960, 340)}><path d={rayos(5, 14, 25)} stroke-width="1.1" /></svg>
+          </div>
+          <!-- la misma leyenda de Vista.astro, compuesta en dos renglones y con el signo de la estación -->
+          <p class="leyenda">
+            <svg class="ojo" viewBox="-7 -7 14 14" fill="none" stroke="var(--tinta)"><circle r="5.2" stroke-width="1.1" /><circle r="1.6" fill="var(--tinta)" stroke="none" /></svg>
+            Vista desde la playa, al sudeste
+            <span>Dibujo a partir de fotografías</span>
+          </p>
+        </div>
+      </div>
+
+      {marcas.map(({ clase, lados }) => (
+        <div class={`graduacion solo-${clase}`}>
+          {lados.map(({ lado, caja, d, rotulos }) => (
+            <>
+              <svg class={`marcas ${lado}`} viewBox={caja} preserveAspectRatio="none"><path d={d} vector-effect="non-scaling-stroke" /></svg>
+              <div class={`grados ${lado} rotulo`} style="--i:1">
+                {rotulos.map((r) => <span style={`--t:${(r.t * 100).toFixed(2)}%`}>{r.texto}</span>)}
+              </div>
+            </>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="pie rotulo" style="--i:6">
+    <span>Relieve exagerado {maqueta.exageracion} veces · tramos sin accidentes, abreviados</span>
+    <span>{maqueta.fuente.replace(' (ODbL)', '')} · Copernicus DEM</span>
+  </div>
+</div>
+
+<script is:inline>
+  // lo que no se ve no se mueve: fuera de pantalla se pausan la impresión y el destello
+  new IntersectionObserver(([e]) => e.target.classList.toggle('fuera', !e.isIntersecting)).observe(document.querySelector('.lamina'));
+</script>
+
+<style>
+  .lamina {
+    /* la ventana sobre la maqueta: una en escritorio, otra en teléfono */
+    --vx: var(--ex);
+    --vy: var(--ey);
+    --vw: var(--ew);
+    --vh: var(--eh);
+    --banda: 22px; /* entre el filete y el recuadro, donde va la graduación */
+    --marca: 9px;
+    /* los tiempos de la impresión: marco, costa, relieve, viñetas, rótulos */
+    --t1: 0.65s;
+    --t2: 1.6s;
+    --t3: 2.6s;
+    --t4: 3.1s;
+    color: var(--tinta);
+  }
+  .cabeza,
+  .pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px 24px;
+  }
+  .cabeza {
+    margin-bottom: 9px;
+    font: italic 400 16px/1.2 var(--serif);
+  }
+  .numero {
+    font-style: normal;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .pie {
+    flex-wrap: wrap;
+    margin-top: 10px;
+    font: 400 8.5px/1.5 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+  }
+
+  /* doble filete (grueso y fino), banda graduada y recuadro */
+  .hoja {
+    border: 2px solid var(--tinta);
+    padding: 3px;
+    animation: lam-marco 0.85s cubic-bezier(0.45, 0, 0.2, 1) backwards;
+  }
+  .filete {
+    position: relative;
+    border: 1px solid var(--tinta);
+    padding: var(--banda);
+  }
+  .ventana {
+    position: relative;
+    aspect-ratio: var(--vw) / var(--vh);
+    overflow: hidden;
+    border: 1px solid var(--tinta);
+    box-sizing: content-box;
+  }
+  .plano {
+    position: absolute;
+    left: calc(var(--vx) / var(--vw) * -100%);
+    top: calc(var(--vy) / var(--vh) * -100%);
+    width: calc(var(--mw) / var(--vw) * 100%);
+  }
+  .aparato {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .cifra,
+  .norte {
+    stroke: none;
+    fill: var(--tinta);
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .cifra {
+    font: 500 11.5px var(--mono);
+    letter-spacing: 0.04em;
+  }
+  .norte {
+    font: 500 25px var(--serif);
+  }
+
+  /* graduación: marcas pegadas al recuadro, grados en la banda */
+  .marcas,
+  .grados {
+    position: absolute;
+  }
+  .marcas {
+    stroke: var(--tinta);
+    stroke-width: 1px;
+  }
+  .marcas.arriba,
+  .marcas.abajo,
+  .grados.arriba,
+  .grados.abajo {
+    left: calc(var(--banda) + 1px);
+    right: calc(var(--banda) + 1px);
+  }
+  .marcas.izquierda,
+  .marcas.derecha,
+  .grados.izquierda,
+  .grados.derecha {
+    top: calc(var(--banda) + 1px);
+    bottom: calc(var(--banda) + 1px);
+  }
+  .marcas.arriba,
+  .marcas.abajo {
+    width: calc(100% - 2 * var(--banda) - 2px);
+    height: var(--marca);
+  }
+  .marcas.izquierda,
+  .marcas.derecha {
+    height: calc(100% - 2 * var(--banda) - 2px);
+    width: var(--marca);
+  }
+  .marcas.arriba {
+    top: calc(var(--banda) - var(--marca));
+  }
+  .marcas.abajo {
+    bottom: calc(var(--banda) - var(--marca));
+  }
+  .marcas.izquierda {
+    left: calc(var(--banda) - var(--marca));
+  }
+  .marcas.derecha {
+    right: calc(var(--banda) - var(--marca));
+  }
+  .grados {
+    font: 400 7.5px/1 var(--mono);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .grados span {
+    position: absolute;
+  }
+  .grados.arriba,
+  .grados.abajo {
+    height: calc(var(--banda) - var(--marca));
+  }
+  .grados.arriba {
+    top: 0;
+  }
+  .grados.abajo {
+    bottom: 0;
+  }
+  .grados.arriba span,
+  .grados.abajo span {
+    left: var(--t);
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .grados.izquierda,
+  .grados.derecha {
+    width: calc(var(--banda) - var(--marca));
+  }
+  .grados.izquierda {
+    left: 0;
+  }
+  .grados.derecha {
+    right: 0;
+  }
+  .grados.izquierda span,
+  .grados.derecha span {
+    top: var(--t);
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg);
+  }
+  .grados.derecha span {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  /* cartela: el cabo visto desde la playa; el mismo signo marca en la maqueta desde dónde se mira */
+  .cartela {
+    position: absolute;
+    right: 1.5%;
+    bottom: 2%;
+    width: 44%;
+    padding: 12px 12px 8px;
+    background: var(--papel);
+    border: 1px solid var(--tinta);
+  }
+  .leyenda {
+    margin-top: 6px;
+    text-align: center;
+    font: 400 7.5px/1.6 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .leyenda span {
+    display: block;
+    color: var(--tinta-suave);
+  }
+  .ojo {
+    display: inline-block;
+    width: 9px;
+    margin-right: 3px;
+    vertical-align: -1.5px;
+  }
+  .sobre-vista {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    width: calc(100% - 24px);
+    aspect-ratio: 960 / 340; /* el dibujo de Vista.astro */
+  }
+  .cartela :global(figcaption) {
+    display: none;
+  }
+
+  .solo-telefono {
+    display: none;
+  }
+
+  /* --- la impresión: una sola vez, en orden: marco, costa, relieve, viñetas y, al final, la letra
+     (título, grados, escala, rosa, cartela), como en las pruebas «antes de la letra» --- */
+  @keyframes lam-marco {
+    from {
+      clip-path: inset(-3px 100% -3px -3px);
+    }
+    to {
+      clip-path: inset(-3px);
+    }
+  }
+  @keyframes lam-tinta {
+    from {
+      opacity: 0;
+    }
+  }
+  /* un trazo que se dibuja de punta a punta: --l mayor que su tramo más largo, --hueco = l + 4 y
+     --desde = l + 2; los 2 de más evitan el punto que deja el remate redondo cuando el trazo
+     todavía no empezó. Para dibujarlo desde el final, --hasta = l + hueco (una vuelta entera del
+     patrón; sin desplazamientos negativos, que Safari viejo no entiende). */
+  @keyframes lam-trazo {
+    from {
+      stroke-dasharray: var(--l) var(--hueco);
+      stroke-dashoffset: var(--desde);
+    }
+    to {
+      stroke-dasharray: var(--l) var(--hueco);
+      stroke-dashoffset: var(--hasta, 0);
+    }
+  }
+  .rotulo {
+    animation: lam-tinta 0.6s ease-out backwards;
+    animation-delay: calc(var(--t4) + var(--i, 0) * 0.08s);
+  }
+  /* ponytail: las capas de Maqueta.astro se eligen por su orden (el archivo no se toca).
+     Si esta opción queda, conviene ponerle una clase a cada capa y apuntar acá a las clases. */
+  .plano :global(.maqueta > g:nth-of-type(1) > g:nth-of-type(1)), /* líneas de agua del mar */
+  .plano :global(.maqueta > g:nth-of-type(1) > g:nth-of-type(2) > g > g), /* estuario */
+  .plano :global(.maqueta > g:nth-of-type(1) > g:nth-of-type(2) > g > path:nth-of-type(-n + 5)) /* playas, mallines, río, arroyos */ {
+    animation: lam-tinta 0.7s ease-out backwards;
+    animation-delay: calc(var(--t1) + 0.45s);
+  }
+  .plano :global(.maqueta > g:nth-of-type(1) > g:nth-of-type(4)), /* zócalo del bloque */
+  .plano :global(.maqueta > g:nth-of-type(2)) /* corte este */ {
+    animation: lam-tinta 0.8s ease-out backwards;
+    animation-delay: calc(var(--t1) + 0.15s);
+  }
+  .plano :global(.maqueta > g:nth-of-type(1) > g:nth-of-type(2) > g > path:nth-of-type(22)) /* la costa, de la ciudad al cabo */ {
+    --l: 1700;
+    --hueco: 1704;
+    --desde: 1702;
+    --hasta: 3404;
+    animation: lam-trazo 0.95s cubic-bezier(0.5, 0, 0.3, 1) backwards;
+    animation-delay: var(--t1);
+  }
+  .plano :global(.maqueta > g:nth-of-type(1) > g:nth-of-type(3)) /* el cabo */ {
+    animation: lam-tinta 0.7s ease-out backwards;
+    animation-delay: var(--t2);
+  }
+  .plano :global(.maqueta > g:nth-of-type(1) > g:nth-of-type(2) > g > path:nth-of-type(n + 6):nth-of-type(-n + 10)) /* hachures: crecen */ {
+    --l: 13;
+    --hueco: 17;
+    --desde: 15;
+    animation: lam-trazo 0.7s ease-out backwards;
+    animation-delay: calc(var(--t2) + 0.2s);
+  }
+  .plano :global(.maqueta > g:nth-of-type(1) > g:nth-of-type(2) > g > path:nth-of-type(n + 11):nth-of-type(-n + 19)) /* estepa, lagunas, ciudad, aeropuerto */ {
+    animation: lam-tinta 0.7s ease-out backwards;
+    animation-delay: calc(var(--t2) + 0.4s);
+  }
+  .plano :global(.maqueta > g:nth-of-type(1) > g:nth-of-type(2) > g > path:nth-of-type(n + 20):nth-of-type(-n + 21)) /* Ruta 3 */ {
+    --l: 780;
+    --hueco: 784;
+    --desde: 782;
+    animation: lam-trazo 0.8s ease-in-out backwards;
+    animation-delay: calc(var(--t2) + 0.25s);
+  }
+  .plano :global(.maqueta-mision),
+  .plano :global(.maqueta-torre),
+  .plano :global(.maqueta-baliza) {
+    animation: lam-tinta 0.45s ease-out backwards;
+    animation-delay: var(--t3);
+  }
+  .plano :global(.maqueta-baliza) {
+    animation-delay: calc(var(--t3) + 0.2s);
+  }
+
+  /* después solo queda vivo el destello de la linterna, lento */
+  .destello {
+    position: absolute;
+    overflow: visible;
+    fill: none;
+    stroke: var(--tinta);
+    stroke-linecap: round;
+    opacity: 0;
+    will-change: opacity, transform;
+    animation: lam-destello 7s linear calc(var(--t4) + 1.2s) infinite;
+  }
+  @keyframes lam-destello {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    6%,
+    13% {
+      opacity: 1;
+      transform: none;
+    }
+    36%,
+    100% {
+      opacity: 0;
+      transform: none;
+    }
+  }
+  .lamina.fuera,
+  .lamina.fuera :global(*) {
+    animation-play-state: paused !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lamina,
+    .lamina :global(*) {
+      animation: none !important;
+    }
+    .destello {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .lamina {
+      --vx: var(--tx);
+      --vy: var(--ty);
+      --vw: var(--tw);
+      --vh: var(--th);
+      --banda: 18px;
+      --marca: 7px;
+    }
+    .solo-escritorio {
+      display: none;
+    }
+    .solo-telefono {
+      display: block;
+    }
+    .cabeza {
+      font-size: 15px;
+    }
+    .cifra {
+      font-size: 17px;
+    }
+    .grados {
+      font-size: 7px;
+    }
+    .cartela {
+      left: 2.5%;
+      right: 2.5%;
+      bottom: 1.6%;
+      width: auto;
+      padding: 10px 10px 8px;
+    }
+    .sobre-vista {
+      left: 10px;
+      top: 10px;
+      width: calc(100% - 20px);
+    }
+    .pie {
+      font-size: 7.5px;
+    }
+  }
+</style>

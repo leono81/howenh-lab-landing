@@ -1,0 +1,292 @@
+---
+// El Cabo Domingo levantado sobre la planta: la vista desde la playa (al sudeste), parada sobre
+// su lugar real del mapa, con el pie cortado por la costa. Es una copia de Vista.astro con el
+// rayado rehecho a mano alzada: trazos que siguen la caída de la ladera, más cerrados a la sombra
+// de cada cárcava, en vez del rayado parejo.
+// El <svg> va en coordenadas del mapa (100 = 1 km); el dibujo, en las de la foto 24 (500 x 333).
+import mapa from '../../../data/mapa.json';
+interface Props {
+  k: number; // unidades de mapa por unidad de la vista
+  pie: number; // y del mapa donde apoya la base de la vista
+  caja: { x: number; y: number; w: number; h: number };
+}
+const { k, pie, caja } = Astro.props;
+
+const X = (x: number) => 40 + x * 1.72;
+const Y = (y: number) => 262 - (238 - y) * 1.3;
+type P = [number, number];
+const f = (n: number) => n.toFixed(1);
+const camino = (pts: P[], cerrar = true) => 'M' + pts.map(([x, y]) => `${f(X(x))} ${f(Y(y))}`).join('L') + (cerrar ? 'Z' : '');
+
+let semilla = 23;
+const azar = () => (semilla = (semilla * 16807) % 2147483647) / 2147483647;
+const entre = (a: number, b: number) => a + (b - a) * azar();
+// interpolación lineal por tramos
+const curva = (pts: P[]) => (x: number) => {
+  if (x <= pts[0][0]) return pts[0][1];
+  for (let i = 1; i < pts.length; i++) {
+    if (x <= pts[i][0]) {
+      const [a, b] = [pts[i - 1], pts[i]];
+      return a[1] + ((b[1] - a[1]) * (x - a[0])) / (b[0] - a[0]);
+    }
+  }
+  return pts[pts.length - 1][1];
+};
+
+const BASE = 238;
+const FONDO = 262; // el dibujo sigue por debajo de la playa: lo corta la costa del mapa
+// silueta, de la meseta (izquierda) a la punta (derecha) y abajo hasta la playa
+const silueta: P[] = [
+  [-40, 99], [0, 97], [30, 95], [60, 97], [85, 92], [100, 86], [118, 78], [135, 73], [160, 69], [190, 67], [225, 66], [255, 64],
+  [272, 61], [290, 62], [308, 64], [316, 66], [322, 70], [326, 77], [328, 92], [331, 108], [338, 118], [347, 127],
+  [352, 140], [357, 153], [366, 166], [371, 181], [374, 196], [382, 208], [392, 222], [406, 237], [414, 246], [428, FONDO],
+];
+// borde superior de la pared que mira al mar (separa la meseta de la ladera)
+const borde: P[] = [[88, 97], [120, 93], [160, 91], [200, 89], [240, 87], [275, 83], [300, 79], [312, 74], [320, 69]];
+const cara: P[] = [...silueta, [-40, FONDO]];
+const meseta: P[] = [...silueta.filter(([x]) => x <= 320), ...[...borde].reverse(), [-40, 101]];
+const roca: P[] = [[240, 87], [275, 83], [300, 79], [312, 74], [320, 69], [326, 77], [328, 92], [331, 108], [338, 118], [300, 126], [272, 116], [248, 102]];
+const rocaBaja: P[] = [
+  [338, 118], [347, 127], [352, 140], [357, 153], [366, 166], [371, 181], [374, 196], [382, 208], [392, 222], [406, 237], [414, 246], [428, FONDO],
+  [310, FONDO], [302, BASE], [272, 205], [258, 165], [252, 132], [272, 116], [300, 126],
+];
+const carcavas: P[][] = [
+  [[195, 91], [205, 112], [217, 138], [233, 176], [250, 212], [260, 237], [268, FONDO]],
+  [[150, 93], [156, 120], [166, 160], [175, 200], [180, 236], [183, FONDO]],
+  [[110, 98], [113, 130], [118, 175], [121, 236], [122, FONDO]],
+  [[262, 100], [266, 130], [272, 170], [285, 210], [292, 236], [298, FONDO]],
+];
+// cornisas de la roca baja (capas que sobresalen)
+const cornisas: P[][] = [
+  [[305, 126], [322, 129], [344, 129]],
+  [[285, 150], [312, 153], [350, 149]],
+  [[300, 179], [330, 182], [369, 181]],
+  [[318, 207], [350, 209], [383, 210]],
+  [[262, 140], [280, 143]],
+  [[268, 192], [290, 194]],
+];
+
+// trazo a mano: subdivide y mueve un poco cada punto
+function amano(pts: P[], amp: number): P[] {
+  const out: P[] = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [a, b] = [pts[i], pts[i + 1]];
+    for (let j = 0; j < 4; j++) {
+      const t = j / 4;
+      out.push([a[0] + (b[0] - a[0]) * t + (azar() - 0.5) * amp, a[1] + (b[1] - a[1]) * t + (azar() - 0.5) * amp]);
+    }
+  }
+  out.push(pts[pts.length - 1]);
+  return out;
+}
+
+// --- ladera: trazos que siguen la caída ---
+// cuánto se corre hacia la punta una línea de caída entre el borde y la playa (las cárcavas
+// de la izquierda bajan casi derechas; las de la derecha, inclinadas)
+const corrimiento = curva([[-40, 0], [40, 4], [110, 11], [150, 30], [195, 65], [262, 70]]);
+const arriba = (x: number) => (x < 88 ? curva(silueta.slice(0, 5))(x) : curva(borde)(x));
+// tono: la ladera se oscurece hacia la punta, y cada cárcava tiene su pared izquierda a la sombra
+const cabezas = [110, 150, 195];
+const tono = (x: number) => {
+  let t = curva([[-40, 0.16], [100, 0.24], [190, 0.36], [262, 0.62]])(x);
+  for (const c of cabezas) {
+    const d = c - x;
+    if (d > 0 && d < 26) t += 0.62 * Math.exp(-d / 8);
+  }
+  return Math.min(1, t);
+};
+const caida = { fino: '', medio: '' };
+for (let x = -44; x < 262; ) {
+  const t = tono(x);
+  const y0 = arriba(x) - 1, dx = corrimiento(x), alto = FONDO - y0;
+  const panza = entre(-1.4, 1.4);
+  // en lo claro los trazos se cortan y algunos no llegan; a la sombra van enteros
+  let s0 = 0, s1 = 1;
+  if (t < 0.45 && azar() < 0.4) {
+    if (azar() < 0.5) s0 = entre(0.08, 0.5);
+    else s1 = entre(0.45, 0.9);
+  }
+  // la pluma se levanta una, dos o tres veces por trazo (más en lo claro)
+  const cortes = Array.from({ length: 1 + Math.floor(azar() * (t < 0.45 ? 3 : 1.6)) }, () => ({ s: entre(s0 + 0.06, s1 - 0.06), h: entre(0.012, 0.04) }));
+  let d = '', pluma = false;
+  for (let i = 0; i <= 22; i++) {
+    const s = s0 + ((s1 - s0) * i) / 22;
+    if (cortes.some((c) => Math.abs(s - c.s) < c.h)) { pluma = false; continue; }
+    const px = x + dx * s + panza * Math.sin(Math.PI * s) + entre(-0.22, 0.22);
+    d += `${pluma ? 'L' : 'M'}${f(X(px))} ${f(Y(y0 + alto * s))}`;
+    pluma = true;
+  }
+  if (t > 0.5) caida.medio += d;
+  else caida.fino += d;
+  x += (1.05 + (1 - t) * 3.1) * entre(0.72, 1.28);
+}
+// plumeado de cada cárcava: trazos cortos que salen de la grieta hacia su pared en sombra
+let plumas = '';
+for (const c of carcavas.slice(0, 3)) {
+  const cx = curva(c.map(([x, y]) => [y, x] as P));
+  for (let y = c[0][1] + 3; y < FONDO; y += entre(1.5, 2.6)) {
+    const x = cx(y), l = entre(3.5, 9) * (0.6 + (0.5 * (y - 90)) / 150);
+    plumas += `M${f(X(x))} ${f(Y(y))}l${f(-l * 1.72)} ${f(-l * 0.62 + entre(-0.6, 0.6))}`;
+  }
+}
+// derrubio al pie de la ladera: rayitas echadas, más juntas contra la playa
+let derrubio = '';
+for (let i = 0; i < 240; i++) {
+  const s = Math.pow(azar(), 0.4);
+  const x = entre(-44, 300), y = 214 + s * (FONDO - 214), l = entre(2, 6.5);
+  derrubio += `M${f(X(x))} ${f(Y(y))}l${f(l * 1.72)} ${f(entre(-0.5, 0.9))}`;
+}
+
+// --- roca de arriba: estratos a pulso, con juntas verticales ---
+let estratos = { fino: '', medio: '' };
+for (let y = 66, i = 0; y < 130; y += entre(2, 3.1), i++) {
+  // los estratos acompañan la caída suave del filo hacia la izquierda
+  const pts: P[] = [];
+  const x0 = 236 + (azar() < 0.3 ? entre(0, 30) : 0), x1 = 342 - (azar() < 0.3 ? entre(0, 22) : 0);
+  for (let x = x0; x <= x1; x += 7) pts.push([x, y + (320 - x) * 0.085 + entre(-0.35, 0.35)]);
+  const d = camino(pts, false);
+  if (i % 3 === 0) estratos.medio += d;
+  else estratos.fino += d;
+}
+let juntas = '';
+for (let i = 0; i < 34; i++) {
+  const x = entre(244, 336), y = entre(70, 122), l = entre(3, 10);
+  juntas += `M${f(X(x))} ${f(Y(y))}L${f(X(x + entre(-0.6, 0.6)))} ${f(Y(y + l))}`;
+}
+
+// --- roca baja, a la sombra: rayado vertical que se corta en cada cornisa (escalones) ---
+const escalones = cornisas.slice(0, 4).map((c) => ({ x0: c[0][0] - 6, x1: c[c.length - 1][0] + 5, y: curva(c) }));
+let sombra = '', sombraFina = '';
+for (let x = 250; x < 432; x += entre(0.95, 1.6)) {
+  const cortes = escalones.filter((e) => x > e.x0 && x < e.x1).map((e) => e.y(x));
+  const niveles = [112, ...cortes, FONDO + 2];
+  for (let i = 0; i < niveles.length - 1; i++) {
+    const jx = x + entre(-0.35, 0.35);
+    // deja un filete de papel sobre cada cornisa: el canto iluminado del escalón
+    const [y0, y1] = [niveles[i] + (i ? 0.6 : 0), niveles[i + 1] - (i < niveles.length - 2 ? 2.1 : 0)];
+    if (y1 - y0 < 2) continue;
+    const d = `M${f(X(jx))} ${f(Y(y0))}L${f(X(jx + entre(-0.3, 0.5)))} ${f(Y(y1))}`;
+    if (azar() < 0.72) sombra += d;
+    else sombraFina += d;
+  }
+}
+
+const cornisasD = cornisas.map((c) => camino(amano(c, 2.2), false));
+const carcavasD = carcavas.map((c) => camino(amano(c, 2.4), false));
+// pasto de la meseta: rayitas cortas sueltas, que acompañan la pendiente
+const pasto = Array.from({ length: 230 }, () => {
+  const x = X(entre(40, 322)), y = Y(entre(62, 100)), l = entre(3, 8);
+  return `M${f(x)} ${f(y)}l${f(l)} ${f(-l * 0.07)}`;
+}).join('');
+
+// --- del dibujo al mapa ---
+const [fx, fy] = [X(272), Y(61)];
+const [bx] = mapa.lugares.baliza;
+const aMapa = `translate(${f(bx - fx * k)} ${f(pie - Y(BASE) * k)}) scale(${k})`;
+
+// el suelo donde apoya: la costa de afuera, salteando la ría que entra al oeste del cabo
+const costa: P[] = [...mapa.capas.lineaCosta.matchAll(/(-?[\d.]+) (-?[\d.]+)/g)].map((m) => [+m[1], +m[2]]);
+const linea = (pts: P[]) => 'M' + pts.map(([x, y]) => `${x} ${y}`).join('L');
+const puntaRia = costa.findIndex(([x, y], i) => i > 0 && x < costa[i - 1][0] && y > costa[i - 1][1]); // donde la costa vuelve al oeste
+const finRia = costa.findIndex(([x], i) => i > puntaRia && x > costa[puntaRia - 1][0] + 8);
+const afueraO = costa.slice(0, puntaRia), afueraE = costa.slice(finRia);
+const sobreElSuelo = linea([...afueraO, ...afueraE]) + `L${caja.x + caja.w + 50} ${caja.y - 50}L${costa[0][0]} ${caja.y - 50}Z`;
+---
+<svg class="cabo" viewBox={`${caja.x} ${caja.y} ${caja.w} ${caja.h}`} aria-hidden="true">
+  <defs>
+    <clipPath id="d-suelo"><path d={sobreElSuelo} /></clipPath>
+    <clipPath id="d-cara"><path d={camino(cara)} /></clipPath>
+    <clipPath id="d-meseta"><path d={camino(meseta)} /></clipPath>
+    <clipPath id="d-roca"><path d={camino(roca)} /></clipPath>
+    <clipPath id="d-roca-baja"><path d={camino(rocaBaja)} /></clipPath>
+  </defs>
+
+  <g clip-path="url(#d-suelo)">
+    <g class="levanta" style={`transform-origin: 0 ${pie + 44}px`}>
+      <g transform={aMapa} fill="none" stroke="var(--tinta)" stroke-linecap="round">
+        <!-- el recorte de papel: tapa las líneas del mar que quedan detrás -->
+        <path d={camino(cara)} fill="var(--papel)" stroke="none" />
+
+        <!-- ladera que mira al mar -->
+        <g clip-path="url(#d-cara)">
+          <path d={caida.fino} stroke-width="0.45" />
+          <path d={caida.medio} stroke-width="0.62" />
+          <path d={plumas} stroke-width="0.5" />
+          <path d={derrubio} stroke-width="0.55" />
+        </g>
+        <!-- meseta: clara, con pasto -->
+        <path d={camino(meseta)} fill="var(--papel)" stroke="none" />
+        <g clip-path="url(#d-meseta)">
+          <path d={pasto} stroke="var(--tinta-suave)" stroke-width="0.6" />
+        </g>
+        <!-- borde de roca arriba: estratos y juntas -->
+        <path d={camino(roca)} fill="var(--papel)" stroke="none" />
+        <g clip-path="url(#d-roca)">
+          <path d={estratos.fino} stroke-width="0.5" />
+          <path d={estratos.medio} stroke-width="0.85" />
+          <path d={juntas} stroke-width="0.45" />
+        </g>
+        <!-- roca baja, a la sombra -->
+        <path d={camino(rocaBaja)} fill="var(--papel)" stroke="none" />
+        <g clip-path="url(#d-roca-baja)">
+          <path d={sombra} stroke-width="0.7" />
+          <path d={sombraFina} stroke-width="0.45" />
+        </g>
+        {cornisasD.map((d) => <path d={d} stroke-width="1.1" />)}
+        {carcavasD.map((d) => <path d={d} stroke-width="1.2" />)}
+        <path d={camino(borde, false)} stroke-width="1.2" />
+        <path d={camino(silueta, false)} stroke-width="2.2" stroke-linejoin="round" />
+
+        <!-- la baliza, en el punto más alto: torre de reticulado, panel de tablillas, linterna -->
+        <g transform={`translate(${f(fx)} ${f(fy)}) scale(1.3)`}>
+          <path d="M-3.4 0L-1 -19M3.4 0L1 -19" stroke-width="1.1" />
+          <path d="M-2.9 -4L2.4 -8.5M2.9 -4L-2.4 -8.5M-2.3 -9L1.8 -13.5M2.3 -9L-1.8 -13.5" stroke-width="0.5" />
+          <rect x="-4.2" y="-18.5" width="8.4" height="6.5" fill="var(--papel)" stroke-width="0.8" />
+          <path d="M-4.2 -16.3h8.4M-4.2 -14.2h8.4" stroke-width="0.5" />
+          <path d="M-1 -19L-10 0M1 -19L10 0" stroke-width="0.3" stroke-dasharray="1 1.4" />
+          <rect x="-1.8" y="-23" width="3.6" height="4" fill="var(--papel)" stroke-width="0.8" />
+          <path d="M-2.3 -23L0 -25L2.3 -23" stroke-width="0.8" />
+          <!-- encendida: la lámpara y sus destellos -->
+          <g class="lumbre">
+            <circle cx="0" cy="-21" r="1" fill="var(--tinta)" stroke="none" />
+            <path d="M-3.4 -21h-3.2M-2.6 -23.6l-2.2 -2.2M0 -26.4v-3M-2.6 -18.6l-2.1 1.6" stroke-width="0.6" />
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- la costa, de nuevo, por encima del pie del recorte -->
+  <path d={linea(afueraO) + linea(afueraE)} fill="none" stroke="var(--tinta)" stroke-width="2.2" stroke-linejoin="round" />
+</svg>
+
+<style>
+  .cabo {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  /* se despliega una vez: una lámina que se para vista de frente es un escalado vertical */
+  .levanta {
+    animation: levantar 1.5s cubic-bezier(0.2, 0.75, 0.2, 1) 0.35s backwards;
+  }
+  .lumbre {
+    animation: encender 0.5s ease-out 1.9s backwards;
+  }
+  @keyframes levantar {
+    from {
+      transform: scaleY(0);
+    }
+  }
+  @keyframes encender {
+    from {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .levanta,
+    .lumbre {
+      animation: none;
+    }
+  }
+</style>

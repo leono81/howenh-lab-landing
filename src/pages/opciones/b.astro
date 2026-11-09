@@ -1,0 +1,108 @@
+---
+// Opción B del hero · «Lámina de atlas»: el texto a la izquierda y, a la derecha, la maqueta
+// de la costa presentada como una lámina impresa (src/components/opciones/b/Lamina.astro).
+import Base from '../../layouts/Base.astro';
+import Lamina from '../../components/opciones/b/Lamina.astro';
+const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
+---
+<Base>
+  <section class="hero" aria-labelledby="hero-titulo">
+    <div class="texto">
+      <p class="coordenadas">53°47′09″ S · 67°42′07″ O</p>
+      <h1 id="hero-titulo">Un laboratorio en el borde del continente</h1>
+      <p class="bajada">Inteligencia artificial, satélites y software en producción. Hechos con tiempo, cerca del mar.</p>
+      <div class="acciones">
+        <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar una reunión →</a>
+        <a class="secundario" href="#laboratorio">Conocer el laboratorio ↓</a>
+      </div>
+    </div>
+    <div class="lado"><Lamina /></div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    --alto: max(680px, 100svh);
+    min-height: var(--alto);
+    display: grid;
+    grid-template-columns: minmax(0, 37fr) minmax(0, 63fr);
+    align-items: center;
+    gap: clamp(28px, 3.6vw, 64px);
+    padding: 100px var(--margen) 34px;
+  }
+  .lado {
+    justify-self: end;
+    /* la lámina llena su columna, pero nunca más alta que la pantalla */
+    width: min(100%, (var(--alto) - 270px) * 1.27 + 58px);
+  }
+  .coordenadas {
+    margin-bottom: 22px;
+    font: 400 11px var(--mono);
+    letter-spacing: 0.12em;
+    color: var(--tinta-suave);
+  }
+  h1 {
+    font: 400 clamp(46px, 5.2vw, 92px) / 0.98 var(--serif);
+    letter-spacing: -0.012em;
+    max-width: 6.4em;
+    text-wrap: balance;
+  }
+  .bajada {
+    margin-top: 26px;
+    font-size: clamp(16px, 1.25vw, 20px);
+    line-height: 1.45;
+    max-width: 31ch;
+  }
+  .acciones {
+    margin-top: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .acciones a {
+    padding: 0.9em 1.35em;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .primario {
+    background: var(--tinta);
+    color: var(--papel);
+  }
+  .secundario {
+    color: var(--tinta);
+    border: 1px solid var(--tinta-suave);
+  }
+  .acciones a:focus-visible {
+    outline: 2px solid var(--tinta);
+    outline-offset: 3px;
+  }
+  /* teléfono: el texto arriba y la lámina debajo, entera */
+  @media (max-width: 900px) {
+    .hero {
+      display: block;
+      padding: 92px var(--margen) 28px;
+    }
+    .lado {
+      width: auto;
+      max-width: 560px;
+      margin-top: 36px;
+    }
+    .coordenadas {
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-size: clamp(40px, 11.5vw, 60px);
+      max-width: none;
+    }
+    .bajada {
+      margin-top: 16px;
+      font-size: 17px;
+      max-width: 36ch;
+    }
+    .acciones {
+      margin-top: 22px;
+    }
+  }
+</style>
