@@ -9,10 +9,15 @@ import MaquetaMision from './MaquetaMision.astro';
 import MaquetaTorre from './MaquetaTorre.astro';
 import MaquetaBaliza from './MaquetaBaliza.astro';
 const { capas: c, cabo, bloque, agua, fundidos: fu, franja, lugares } = m;
+// encuadre opcional (en unidades de la maqueta) para mostrar solo una parte, p. ej. de cerca sobre el cabo
+interface Props {
+  encuadre?: { x: number; y: number; w: number; h: number };
+}
+const { encuadre: e = { x: 0, y: 0, w: m.ancho, h: m.alto } } = Astro.props;
 const lineasMar = [4, 9, 15, 22, 30, 39, 49, 60, 72].map((d, i, a) => ({ d, w: 1.2 - (i / a.length) * 0.6, o: 1 - (i / a.length) * 0.8 }));
 const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }));
 ---
-<svg class="maqueta" viewBox={`0 0 ${m.ancho} ${m.alto}`} aria-hidden="true">
+<svg class="maqueta" viewBox={`${e.x} ${e.y} ${e.w} ${e.h}`} aria-hidden="true">
   <defs>
     <clipPath id="q-franja"><rect x={franja.x} y={franja.y} width={franja.w} height={franja.h} /></clipPath>
     <clipPath id="q-mar"><path d={agua.mar} clip-path="url(#q-franja)" /></clipPath>
