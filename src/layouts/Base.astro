@@ -72,14 +72,18 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     background: var(--papel);
     padding: 8px 12px;
   }
-  /* la letra entra después del mapa: cada pieza con su demora (--d) */
+  /* la letra entra después del mapa, cada pieza con su demora (--d): baja apenas y se apoya,
+     lenta y sin rebote, mientras aparece */
   .entra {
-    animation: entrar 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0s) backwards;
+    animation: entrar 1.8s cubic-bezier(0.16, 0.6, 0.2, 1) var(--d, 0s) backwards;
   }
   @keyframes entrar {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(-7px);
+    }
+    40% {
+      opacity: 0.85;
     }
   }
   .sin-intro .entra {
