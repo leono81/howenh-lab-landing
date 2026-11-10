@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-10T10:20:00-03:00",
+  "generatedAt": "2026-11-10T10:28:00-03:00",
   "title": "Design System: Howenh Labs",
   "extensions": {
     "colorMeta": {
@@ -47,6 +47,21 @@
           "#b5bedb",
           "#dbdfed",
           "#f2f3f9"
+        ]
+      },
+      "magenta-de-carta": {
+        "role": "tertiary",
+        "displayName": "Magenta de carta",
+        "canonical": "#b02a78",
+        "tonalRamp": [
+          "#2c0b1e",
+          "#4f1336",
+          "#7b1d54",
+          "#b02a78",
+          "#c6699f",
+          "#d899bd",
+          "#ebcade",
+          "#f8ecf3"
         ]
       }
     },
@@ -115,9 +130,9 @@
       "name": "Botón primario",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "La acción principal (agendar una reunión): tinta llena, letra papel, esquinas rectas.",
+      "description": "La acción principal (agendar una reunión): magenta de carta lleno, letra papel, esquinas rectas. Una por pantalla.",
       "html": "<a class=\"ds-btn-primario\" href=\"#\">Agendar una reunión →</a>",
-      "css": ".ds-btn-primario{display:inline-block;background:#1f3a8f;color:#f6f7fb;font:600 17px Archivo,sans-serif;padding:.9em 1.35em;text-decoration:none;border-radius:0}.ds-btn-primario:hover{background:#162964}.ds-btn-primario:focus-visible{outline:2px solid #1f3a8f;outline-offset:3px}"
+      "css": ".ds-btn-primario{display:inline-block;background:#b02a78;color:#f6f7fb;font:600 17px Archivo,sans-serif;padding:.9em 1.35em;text-decoration:none;border-radius:0}.ds-btn-primario:hover{background:#7b1d54}.ds-btn-primario:focus-visible{outline:2px solid #1f3a8f;outline-offset:3px}"
     },
     {
       "name": "Botón secundario",
@@ -162,9 +177,9 @@
   ],
   "narrative": {
     "northStar": "La lámina grabada",
-    "overview": "Toda la página se lee como una lámina de atlas impresa en una sola tinta azul sobre papel frío. El dibujo es de línea: rayados, líneas de agua paralelas a la costa, volúmenes isométricos rayados según la luz. La imagen no es decorado; es el territorio de verdad (Río Grande, la Misión, el Cabo Domingo) dibujado a partir de datos reales y de fotografías, con la precisión de una carta y el oficio de un grabador. La letra se apoya sobre el papel limpio, con aire, y deja que la lámina haga el primer impacto.\n\nLa densidad está en el dibujo, no en la interfaz: la interfaz es escasa, rectangular y tipográfica. Donde el dibujo termina no hay un borde: se apaga en el papel con un contorno irregular, como una viñeta de grabado. La luz se dibuja quitando tinta, nunca agregando color. Lo que se mueve (la luz de la baliza, un barco, camiones, un avión, un satélite, olas) se mueve despacio y con propósito, como si la lámina estuviera viva.\n\nRechazos confirmados: el hero oscuro con brillo de \"startup de IA\", la grilla de tarjetas, las imágenes generadas con IA para la geografía, el bloque de tierra recortado como un cuadrado y cualquier borde geométrico donde el dibujo se termina.",
+    "overview": "Toda la página se lee como una lámina de atlas impresa en una tinta azul sobre papel frío, con una segunda tinta magenta, la de las luces en las cartas náuticas, reservada para lo que tiene que encenderse. El dibujo es de línea: rayados, líneas de agua paralelas a la costa, volúmenes isométricos rayados según la luz. La imagen no es decorado; es el territorio de verdad (Río Grande, la Misión, el Cabo Domingo) dibujado a partir de datos reales y de fotografías, con la precisión de una carta y el oficio de un grabador. La letra se apoya sobre el papel limpio, con aire, y deja que la lámina haga el primer impacto.\n\nLa densidad está en el dibujo, no en la interfaz: la interfaz es escasa, rectangular y tipográfica. Donde el dibujo termina no hay un borde: se apaga en el papel con un contorno irregular, como una viñeta de grabado. La luz se dibuja quitando tinta, nunca agregando color. Lo que se mueve (la luz de la baliza, un barco, camiones, un avión, un satélite, olas) se mueve despacio y con propósito, como si la lámina estuviera viva.\n\nRechazos confirmados: el hero oscuro con brillo de \"startup de IA\", la grilla de tarjetas, las imágenes generadas con IA para la geografía, el bloque de tierra recortado como un cuadrado y cualquier borde geométrico donde el dibujo se termina.",
     "keyCharacteristics": [
-      "Una sola tinta (azul de grabado) y su versión lavada, sobre papel frío. Nada más.",
+      "Una tinta (azul de grabado) y su versión lavada sobre papel frío, y una segunda tinta (magenta de carta) solo para la luz, las señales y la acción principal.",
       "Dibujo de línea en proyección isométrica, con los mismos ejes para todo volumen.",
       "Geometría real (OpenStreetMap, Copernicus DEM); hitos dibujados a partir de fotos.",
       "Sin nombres de lugares en el dibujo: solo coordenadas, en mono.",
@@ -174,7 +189,12 @@
     "rules": [
       {
         "name": "The One Ink Rule",
-        "body": "No hay otro color que el azul de grabado, su versión lavada y el papel. Los gradientes solo existen como opacidad de esas mismas tintas o del papel (para apagar y para dar luz), nunca como mezcla de colores.",
+        "body": "No hay otro color que el azul de grabado, su versión lavada, el magenta de carta y el papel. Los gradientes solo existen como opacidad de esas mismas tintas o del papel (para apagar y para dar luz), nunca como mezcla de colores.",
+        "section": "colors"
+      },
+      {
+        "name": "The Second Ink Rule",
+        "body": "El magenta es escaso a propósito: luces, señales, los hitos que el ojo tiene que encontrar y la acción principal; nunca superficies grandes, fondos ni texto corrido. Si en una pantalla hay más de unos pocos toques de magenta, sobra alguno.",
         "section": "colors"
       },
       {
@@ -219,7 +239,7 @@
       }
     ],
     "dos": [
-      "Do usar solo papel frío (#f6f7fb), azul de grabado (#1f3a8f) y azul lavado (#5b6fae).",
+      "Do usar solo papel frío (#f6f7fb), azul de grabado (#1f3a8f), azul lavado (#5b6fae) y, para lo que se enciende, magenta de carta (#b02a78).",
       "Do dibujar todo volumen en los ejes isométricos de `src/data/iso.ts`.",
       "Do sacar la geometría de datos reales y los hitos de fotografías, con su fuente.",
       "Do ubicar con coordenadas en mono, no con nombres.",
@@ -230,6 +250,7 @@
     ],
     "donts": [
       "Don't usar otro color, gradientes de color, sombras, brillos ni desenfoques.",
+      "Don't usar el magenta en fondos, superficies grandes o texto corrido.",
       "Don't cortar el dibujo con un borde recto o un bloque de tierra recortado.",
       "Don't usar imágenes generadas con IA para la geografía ni mover un lugar de donde está.",
       "Don't poner nombres de lugares dentro del dibujo.",

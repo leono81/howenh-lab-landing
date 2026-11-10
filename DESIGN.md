@@ -5,6 +5,7 @@ colors:
   papel-frio: "#f6f7fb"
   azul-de-grabado: "#1f3a8f"
   azul-lavado: "#5b6fae"
+  magenta-de-carta: "#b02a78"
 typography:
   display:
     fontFamily: "EB Garamond, serif"
@@ -46,7 +47,7 @@ spacing:
   nav: "30px"
 components:
   button-primary:
-    backgroundColor: "{colors.azul-de-grabado}"
+    backgroundColor: "{colors.magenta-de-carta}"
     textColor: "{colors.papel-frio}"
     typography: "{typography.button}"
     rounded: "{rounded.none}"
@@ -77,14 +78,14 @@ components:
 
 **Creative North Star: "La lámina grabada"**
 
-Toda la página se lee como una lámina de atlas impresa en una sola tinta azul sobre papel frío. El dibujo es de línea: rayados, líneas de agua paralelas a la costa, volúmenes isométricos rayados según la luz. La imagen no es decorado; es el territorio de verdad (Río Grande, la Misión, el Cabo Domingo) dibujado a partir de datos reales y de fotografías, con la precisión de una carta y el oficio de un grabador. La letra se apoya sobre el papel limpio, con aire, y deja que la lámina haga el primer impacto.
+Toda la página se lee como una lámina de atlas impresa en una tinta azul sobre papel frío, con una segunda tinta magenta, la de las luces en las cartas náuticas, reservada para lo que tiene que encenderse. El dibujo es de línea: rayados, líneas de agua paralelas a la costa, volúmenes isométricos rayados según la luz. La imagen no es decorado; es el territorio de verdad (Río Grande, la Misión, el Cabo Domingo) dibujado a partir de datos reales y de fotografías, con la precisión de una carta y el oficio de un grabador. La letra se apoya sobre el papel limpio, con aire, y deja que la lámina haga el primer impacto.
 
 La densidad está en el dibujo, no en la interfaz: la interfaz es escasa, rectangular y tipográfica. Donde el dibujo termina no hay un borde: se apaga en el papel con un contorno irregular, como una viñeta de grabado. La luz se dibuja quitando tinta, nunca agregando color. Lo que se mueve (la luz de la baliza, un barco, camiones, un avión, un satélite, olas) se mueve despacio y con propósito, como si la lámina estuviera viva.
 
 Rechazos confirmados: el hero oscuro con brillo de "startup de IA", la grilla de tarjetas, las imágenes generadas con IA para la geografía, el bloque de tierra recortado como un cuadrado y cualquier borde geométrico donde el dibujo se termina.
 
 **Key Characteristics:**
-- Una sola tinta (azul de grabado) y su versión lavada, sobre papel frío. Nada más.
+- Una tinta (azul de grabado) y su versión lavada sobre papel frío, y una segunda tinta (magenta de carta) solo para la luz, las señales y la acción principal.
 - Dibujo de línea en proyección isométrica, con los mismos ejes para todo volumen.
 - Geometría real (OpenStreetMap, Copernicus DEM); hitos dibujados a partir de fotos.
 - Sin nombres de lugares en el dibujo: solo coordenadas, en mono.
@@ -93,7 +94,7 @@ Rechazos confirmados: el hero oscuro con brillo de "startup de IA", la grilla de
 
 ## Colors
 
-Una sola tinta y el papel: el color existe solo como tinta, más llena o más lavada.
+Una tinta, su lavado, una segunda tinta para lo que se enciende, y el papel: el color existe solo como tinta.
 
 ### Primary
 - **Azul de grabado** (#1f3a8f): la tinta. Toda línea principal del dibujo (costa, contornos, viñetas, rayados), la letra, el botón primario lleno y los filetes de la barra.
@@ -101,11 +102,16 @@ Una sola tinta y el papel: el color existe solo como tinta, más llena o más la
 ### Secondary
 - **Azul lavado** (#5b6fae): la tinta diluida. Lo secundario y lejano: estepa, rayados suaves, olas, órbitas, el borde del botón secundario y los rótulos de coordenadas.
 
+### Tertiary
+- **Magenta de carta** (#b02a78): la segunda tinta, como las luces de los faros en las cartas náuticas. Solo lo que se enciende o llama: el haz, el destello y la linterna de la baliza; los techos de chapa de la Misión; la cornisa, el reloj y el frontón de la Torre de Agua; la luz y la huella del satélite; y el botón de la acción principal (con letra papel, contraste 5.7:1).
+
 ### Neutral
 - **Papel frío** (#f6f7fb): el fondo y la luz. El fondo de la página, el relleno de los volúmenes (paredes blancas de la capilla, el cuerpo del satélite), el texto sobre el botón primario y la niebla donde el dibujo se apaga.
 
 ### Named Rules
-**The One Ink Rule.** No hay otro color que el azul de grabado, su versión lavada y el papel. Los gradientes solo existen como opacidad de esas mismas tintas o del papel (para apagar y para dar luz), nunca como mezcla de colores.
+**The One Ink Rule.** No hay otro color que el azul de grabado, su versión lavada, el magenta de carta y el papel. Los gradientes solo existen como opacidad de esas mismas tintas o del papel (para apagar y para dar luz), nunca como mezcla de colores.
+
+**The Second Ink Rule.** El magenta es escaso a propósito: luces, señales, los hitos que el ojo tiene que encontrar y la acción principal; nunca superficies grandes, fondos ni texto corrido. Si en una pantalla hay más de unos pocos toques de magenta, sobra alguno.
 
 **The Paper-Is-Light Rule.** La luz se dibuja con papel: el haz de la baliza aclara el mar que pisa, los destellos son estrellas de rayitas, los halos son papel. Nunca un color claro, un brillo o un glow.
 
@@ -164,7 +170,7 @@ Esquinas rectas en todo (0 px). Bordes de 1 px: en tinta llena para el botón de
 ### Buttons
 Tipográficos y rectos, como una etiqueta impresa.
 - **Shape:** esquinas rectas (0 px).
-- **Primary:** tinta llena con letra papel (padding 0.9em × 1.35em). Es la acción principal: agendar una reunión.
+- **Primary:** magenta de carta lleno con letra papel (padding 0.9em × 1.35em). Es la acción principal: agendar una reunión. Uno por pantalla.
 - **Secondary:** papel con letra en tinta y borde de 1 px en azul lavado; misma medida.
 - **Focus:** contorno de 2 px en tinta, separado 3 px.
 
@@ -195,7 +201,7 @@ Capilla de la Misión, Torre de Agua, baliza, barco, camiones, avión y satélit
 ## Do's and Don'ts
 
 ### Do:
-- **Do** usar solo papel frío (#f6f7fb), azul de grabado (#1f3a8f) y azul lavado (#5b6fae).
+- **Do** usar solo papel frío (#f6f7fb), azul de grabado (#1f3a8f), azul lavado (#5b6fae) y, para lo que se enciende, magenta de carta (#b02a78).
 - **Do** dibujar todo volumen en los ejes isométricos de `src/data/iso.ts`.
 - **Do** sacar la geometría de datos reales y los hitos de fotografías, con su fuente.
 - **Do** ubicar con coordenadas en mono, no con nombres.
@@ -206,6 +212,7 @@ Capilla de la Misión, Torre de Agua, baliza, barco, camiones, avión y satélit
 
 ### Don't:
 - **Don't** usar otro color, gradientes de color, sombras, brillos ni desenfoques.
+- **Don't** usar el magenta en fondos, superficies grandes o texto corrido.
 - **Don't** cortar el dibujo con un borde recto o un bloque de tierra recortado.
 - **Don't** usar imágenes generadas con IA para la geografía ni mover un lugar de donde está.
 - **Don't** poner nombres de lugares dentro del dibujo.
