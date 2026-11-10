@@ -2,12 +2,11 @@
 // Opción A · «Maqueta a sangre». La maqueta isométrica es la gran imagen del hero: se va a
 // sangre por la derecha (pasando el cabo), por abajo (la esquina del bloque) y, cuando el ancho
 // alcanza, por la izquierda (la ciudad); el texto vive en el papel de arriba a la izquierda y
-// en el mar va la vista del cabo desde la playa, como los perfiles de costa de las cartas.
+// el resto es mar abierto.
 // Encima de la maqueta, sin tocarla, van tres piezas que se mueven: el destello de la
 // linterna, el haz que barre el mar y un barco que llega a la boca del río.
 // Todo se ubica en unidades de la maqueta: --u es cuántos px mide una unidad.
 import Maqueta from '../../Maqueta.astro';
-import Vista from '../../Vista.astro';
 import m from '../../../data/maqueta.json';
 import { iso, pol, lin } from '../../../data/iso';
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
@@ -175,17 +174,6 @@ const orbita = 'M700 70 Q1380 120 1700 820';
     </div>
   </div>
 
-  <div class="lamina">
-    <div role="img" aria-label="El Cabo Domingo visto desde la playa, al sudeste: meseta que sube hacia la punta, borde de roca y la baliza encendida en lo más alto.">
-      <Vista />
-    </div>
-    <!-- la misma luz, en la linterna de la vista (está en 507,8 × 10,9 de su dibujo de 960 de ancho) -->
-    <svg class="destello" aria-hidden="true" viewBox="-12 -12 24 24">
-      <path d={destello} fill="none" stroke="var(--tinta)" stroke-width="0.9" stroke-linecap="round" />
-    </svg>
-    <!-- posición de la baliza (nodo de OpenStreetMap, docs/lugar/mapa-rio-grande.md) -->
-    <p class="cota">53°41′14″ S · 67°50′51″ O</p>
-  </div>
 </section>
 
 <script>
@@ -544,43 +532,6 @@ const orbita = 'M700 70 Q1380 120 1700 820';
     outline: 2px solid var(--tinta);
     outline-offset: 3px;
   }
-  .lamina {
-    --lw: calc(var(--w) * 0.38);
-    position: absolute;
-    right: var(--margen);
-    bottom: calc(var(--w) * 0.022);
-    width: var(--lw);
-    isolation: isolate;
-  }
-  /* la vista flota sobre el mar abierto: un claro de papel para que las líneas de agua no la crucen */
-  .lamina::before {
-    content: '';
-    position: absolute;
-    inset: -14% -6% -8% -10%;
-    z-index: -1;
-    background: radial-gradient(closest-side, var(--papel) 72%, transparent);
-  }
-  /* cuando el epígrafe de la vista no entra en un renglón, que parta parejo */
-  .lamina :global(figcaption) {
-    text-wrap: balance;
-  }
-  .lamina .destello {
-    left: calc(var(--lw) * 0.529);
-    top: calc(var(--lw) * 0.0114);
-    width: calc(var(--lw) * 0.034);
-    height: calc(var(--lw) * 0.034);
-    margin: calc(var(--lw) * -0.017) 0 0 calc(var(--lw) * -0.017);
-  }
-  .cota {
-    position: absolute;
-    left: calc(var(--lw) * 0.56);
-    top: calc(var(--lw) * 0.0114);
-    transform: translateY(-50%);
-    font: 400 max(9px, var(--lw) * 0.0188) var(--mono);
-    letter-spacing: 0.1em;
-    white-space: nowrap;
-    color: var(--tinta-suave);
-  }
 
   /* pantallas angostas: el texto arriba; abajo, una ventana de la maqueta sobre el cabo,
      con la baliza y el haz. El barco queda lejos, en la boca: no se muestra. */
@@ -629,7 +580,6 @@ const orbita = 'M700 70 Q1380 120 1700 820';
     .barco,
     .avion,
     .sombra-avion,
-    .lamina,
     .ventana::after {
       display: none;
     }
