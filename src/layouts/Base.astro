@@ -16,8 +16,8 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
   <body>
     <a class="saltar" href="#contenido">Saltar al contenido</a>
     <header class="barra">
-      <a class="marca" href="/"><span class="logo" aria-hidden="true"></span>HOWENH LABS</a>
-      <nav aria-label="Principal">
+      <a class="marca entra" href="/" style="--d: 3.55s"><span class="logo" aria-hidden="true"></span>HOWENH LABS</a>
+      <nav class="entra" aria-label="Principal" style="--d: 3.75s">
         <a href="#laboratorio">Laboratorio</a>
         <a href="#proyectos">Proyectos</a>
         <a href="#productos">Productos</a>
@@ -28,6 +28,16 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     <main id="contenido">
       <slot />
     </main>
+    <script is:inline>
+      // primero el mapa: la letra entra después (.entra, ~3,5 s). Si la persona ya hace algo
+      // (scroll, tecla, toque), se muestra todo enseguida: no se la hace esperar.
+      (function () {
+        var raiz = document.documentElement, ya = function () { raiz.classList.add('sin-intro'); quitar(); };
+        var eventos = ['wheel', 'keydown', 'pointerdown', 'touchstart'];
+        function quitar() { eventos.forEach(function (n) { removeEventListener(n, ya); }); }
+        eventos.forEach(function (n) { addEventListener(n, ya, { passive: true, once: true }); });
+      })();
+    </script>
   </body>
 </html>
 
@@ -61,6 +71,24 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     z-index: 10;
     background: var(--papel);
     padding: 8px 12px;
+  }
+  /* la letra entra después del mapa: cada pieza con su demora (--d) */
+  .entra {
+    animation: entrar 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0s) backwards;
+  }
+  @keyframes entrar {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+  .sin-intro .entra {
+    animation: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .entra {
+      animation: none;
+    }
   }
   .barra {
     position: absolute;
