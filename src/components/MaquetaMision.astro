@@ -13,7 +13,7 @@ interface Props {
 }
 const { x, y, escala = 1.15 } = Astro.props;
 
-type Pieza = { d: string; w?: number; papel?: boolean; tinta?: boolean; suave?: boolean };
+type Pieza = { d: string; w?: number; papel?: boolean; tinta?: boolean; suave?: boolean; techo?: boolean };
 // casa con techo a dos aguas; eje = dirección de la cumbrera. Devuelve las piezas de atrás para adelante.
 function casa(x0: number, x1: number, y0: number, y1: number, h: number, c: number, eje: 'x' | 'y', chapas: number): Pieza[] {
   const xm = (x0 + x1) / 2, ym = (y0 + y1) / 2;
@@ -22,7 +22,7 @@ function casa(x0: number, x1: number, y0: number, y1: number, h: number, c: numb
       { d: pol(iso(x0, y0, h), iso(x0, y1, h), iso(xm, y1, c), iso(xm, y0, c)), papel: true },
       { d: pol(iso(x1, y0, 0), iso(x1, y1, 0), iso(x1, y1, h), iso(x1, y0, h)), papel: true },
       { d: pol(iso(x1, y0, h), iso(x1, y1, h), iso(xm, y1, c), iso(xm, y0, c)), papel: true },
-      { d: rayas(iso(x1, y0, h), iso(xm, y0, c), iso(x1, y1, h), iso(xm, y1, c), chapas), w: 0.45 },
+      { d: rayas(iso(x1, y0, h), iso(xm, y0, c), iso(x1, y1, h), iso(xm, y1, c), chapas), w: 0.45, techo: true },
       { d: pol(iso(x0, y0, 0), iso(x1, y0, 0), iso(x1, y0, h), iso(xm, y0, c), iso(x0, y0, h)), papel: true },
     ];
   return [
@@ -30,7 +30,7 @@ function casa(x0: number, x1: number, y0: number, y1: number, h: number, c: numb
     { d: pol(iso(x1, y0, 0), iso(x1, y1, 0), iso(x1, y1, h), iso(x1, ym, c), iso(x1, y0, h)), papel: true },
     { d: pol(iso(x0, y0, 0), iso(x1, y0, 0), iso(x1, y0, h), iso(x0, y0, h)), papel: true },
     { d: pol(iso(x0, y0, h), iso(x1, y0, h), iso(x1, ym, c), iso(x0, ym, c)), papel: true },
-    { d: rayas(iso(x0, y0, h), iso(x0, ym, c), iso(x1, y0, h), iso(x1, ym, c), chapas), w: 0.45 },
+    { d: rayas(iso(x0, y0, h), iso(x0, ym, c), iso(x1, y0, h), iso(x1, ym, c), chapas), w: 0.45, techo: true },
   ];
 }
 // hueco con arco de medio punto en una pared que mira al mar (plano y = cte) o a la ciudad (plano x = cte)
@@ -70,9 +70,9 @@ const piezas: Pieza[] = [
   { d: arco('y', TY0, 0, 14.6, 16.4, 0.95) + arco('x', 1.8, TC, 14.6, 16.4, 0.95), tinta: true },
   { d: lin(iso(-1.9, TY0, 13.6), iso(1.9, TY0, 13.6), iso(1.9, TY1, 13.6)) + lin(iso(-2, TY0, 19), iso(2, TY0, 19), iso(2, TY1, 19)), w: 0.9 },
   { d: pol(iso(2.1, TY0 - 0.3, 19), iso(2.1, TY1 + 0.3, 19), iso(0, TC, 25)), papel: true },
-  { d: rayas(iso(2.1, TY0 - 0.3, 19), iso(0, TC, 25), iso(2.1, TY1 + 0.3, 19), iso(0, TC, 25), 5), w: 0.45 },
+  { d: rayas(iso(2.1, TY0 - 0.3, 19), iso(0, TC, 25), iso(2.1, TY1 + 0.3, 19), iso(0, TC, 25), 5), w: 0.45, techo: true },
   { d: pol(iso(-2.1, TY0 - 0.3, 19), iso(2.1, TY0 - 0.3, 19), iso(0, TC, 25)), papel: true },
-  { d: rayas(iso(-2.1, TY0 - 0.3, 19), iso(0, TC, 25), iso(2.1, TY0 - 0.3, 19), iso(0, TC, 25), 5), w: 0.45 },
+  { d: rayas(iso(-2.1, TY0 - 0.3, 19), iso(0, TC, 25), iso(2.1, TY0 - 0.3, 19), iso(0, TC, 25), 5), w: 0.45, techo: true },
   { d: lin(iso(0, TC, 25), iso(0, TC, 28.4)) + lin(iso(-0.9, TC, 27.2), iso(0.9, TC, 27.2)), w: 0.8 },
   // frente: molduras del frontón (las verdes, en tinta llena), puerta bajo el abanico
   { d: pol(iso(-4, F, 7.4), iso(0, F, 11), iso(4, F, 7.4)), papel: true },
@@ -86,6 +86,6 @@ const piezas: Pieza[] = [
 ---
 <g class="maqueta-mision" transform={`translate(${x} ${y}) scale(${escala})`} fill="none" stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round">
   {piezas.map((p) => (
-    <path d={p.d} fill={p.tinta ? 'var(--tinta)' : p.papel && p.w === undefined ? 'var(--papel)' : 'none'} stroke={p.tinta ? 'none' : p.suave ? 'var(--tinta-suave)' : p.papel && p.w !== undefined ? 'var(--papel)' : 'var(--tinta)'} stroke-width={p.w ?? 0.7} />
+    <path d={p.d} fill={p.tinta ? 'var(--tinta)' : p.papel && p.w === undefined ? 'var(--papel)' : 'none'} stroke={p.tinta ? 'none' : p.techo ? 'var(--acento)' : p.suave ? 'var(--tinta-suave)' : p.papel && p.w !== undefined ? 'var(--papel)' : 'var(--tinta)'} stroke-width={p.w ?? 0.7} />
   ))}
 </g>

@@ -218,9 +218,9 @@ const olas = Array.from({ length: 34 }, () => {
             <stop offset="1" style="stop-color:var(--papel)" stop-opacity="0" />
           </radialGradient>
           <radialGradient id="a-rayo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r={R}>
-            <stop offset="0" style="stop-color:var(--tinta)" />
-            <stop offset="0.5" style="stop-color:var(--tinta)" stop-opacity="0.5" />
-            <stop offset="1" style="stop-color:var(--tinta)" stop-opacity="0" />
+            <stop offset="0" style="stop-color:var(--acento)" />
+            <stop offset="0.5" style="stop-color:var(--acento)" stop-opacity="0.5" />
+            <stop offset="1" style="stop-color:var(--acento)" stop-opacity="0" />
           </radialGradient>
           <radialGradient id="a-aura">
             <stop offset="0" style="stop-color:var(--papel)" />
@@ -323,7 +323,7 @@ const olas = Array.from({ length: 34 }, () => {
             </g>
           </g>
           <circle r="20" fill="url(#a-aura)" />
-          <g fill="none" stroke="var(--tinta)" stroke-linecap="round">
+          <g fill="none" stroke="var(--acento)" stroke-linecap="round">
             <path d={estrella(24, 4.2, 9, 15)} stroke-width="0.65" />
             <animate attributeName="opacity" values="0.4;0.4;1;0.4;0.4" keyTimes="0;0.83;0.875;0.92;1" dur={`${VUELTA}s`} begin={`${f1(FASE)}s`} repeatCount="indefinite" />
             <animateTransform attributeName="transform" type="scale" values="0.7;0.7;1.8;0.7;0.7" keyTimes="0;0.83;0.875;0.92;1" dur={`${VUELTA}s`} begin={`${f1(FASE)}s`} repeatCount="indefinite" />
@@ -338,12 +338,12 @@ const olas = Array.from({ length: 34 }, () => {
             <!-- la línea al suelo y la huella, que se enciende cada tanto -->
             <path d={`M0 ${f1(sat.pie[1] * ESC_SAT + 2)}V150`} stroke="var(--tinta-suave)" stroke-width="0.6" stroke-dasharray="1 3.5" opacity="0.7" />
             <g transform="translate(0 150)">
-              <ellipse rx="18" ry="10.4" fill="none" stroke="var(--tinta)" stroke-width="0.7">
+              <ellipse rx="18" ry="10.4" fill="none" stroke="var(--acento)" stroke-width="0.7">
                 <animate attributeName="rx" values="4;26" dur="2.8s" repeatCount="indefinite" />
                 <animate attributeName="ry" values="2.3;15" dur="2.8s" repeatCount="indefinite" />
                 <animate attributeName="opacity" values="0.9;0" dur="2.8s" repeatCount="indefinite" />
               </ellipse>
-              <ellipse rx="3" ry="1.7" fill="var(--tinta)" />
+              <ellipse rx="3" ry="1.7" fill="var(--acento)" />
             </g>
             <!-- el satélite, en tres dimensiones: de atrás hacia adelante -->
             <g stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round" transform={`scale(${ESC_SAT})`}>
@@ -372,11 +372,11 @@ const olas = Array.from({ length: 34 }, () => {
               <!-- mástil con la luz que parpadea -->
               <path d={sat.mastil} fill="none" stroke-width="0.5" />
               <g transform={`translate(${f1(sat.luz[0])} ${f1(sat.luz[1])})`}>
-                <circle r="3" fill="none" stroke-width="0.4" opacity="0">
+                <circle r="3" fill="none" stroke="var(--acento)" stroke-width="0.4" opacity="0">
                   <animate attributeName="r" values="0.8;0.8;4.2;4.2" keyTimes="0;0.06;0.4;1" dur="1.9s" repeatCount="indefinite" />
                   <animate attributeName="opacity" values="0;0.9;0;0" keyTimes="0;0.06;0.4;1" dur="1.9s" repeatCount="indefinite" />
                 </circle>
-                <circle r="0.95" fill="var(--tinta)" stroke="none" opacity="0.25">
+                <circle r="0.95" fill="var(--acento)" stroke="none" opacity="0.25">
                   <animate attributeName="opacity" values="0.25;1;0.25;0.25" keyTimes="0;0.05;0.22;1" dur="1.9s" repeatCount="indefinite" />
                 </circle>
               </g>
@@ -506,7 +506,7 @@ const olas = Array.from({ length: 34 }, () => {
     white-space: nowrap;
   }
   .primario {
-    background: var(--tinta);
+    background: var(--accion);
     color: var(--papel);
   }
   .secundario {

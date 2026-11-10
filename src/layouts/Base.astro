@@ -29,6 +29,36 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
       <slot />
     </main>
     <script is:inline>
+      // prueba de la segunda tinta: /?acentos muestra un selector (se borra cuando se elija)
+      (function () {
+        if (!/acentos/.test(location.search)) return;
+        var raiz = document.documentElement;
+        var opciones = [
+          ['Sin acento', '', ''],
+          ['Bermellón', '#c8432a', '#c8432a'],
+          ['Ocre de faro', '#c9921c', ''],
+          ['Magenta de carta', '#b02a78', '#b02a78'],
+        ];
+        var panel = document.createElement('div');
+        panel.style.cssText = 'position:fixed;z-index:20;left:16px;bottom:16px;display:flex;gap:6px;flex-wrap:wrap;font:500 11px Martian Mono,monospace;letter-spacing:.06em';
+        function elegir(o, b) {
+          o[1] ? raiz.style.setProperty('--acento', o[1]) : raiz.style.removeProperty('--acento');
+          o[2] ? raiz.style.setProperty('--accion', o[2]) : raiz.style.removeProperty('--accion');
+          panel.querySelectorAll('button').forEach(function (x) { x.style.background = 'var(--papel)'; x.style.color = 'var(--tinta)'; });
+          b.style.background = 'var(--tinta)'; b.style.color = 'var(--papel)';
+        }
+        opciones.forEach(function (o, i) {
+          var b = document.createElement('button');
+          b.textContent = o[0];
+          b.style.cssText = 'border:1px solid var(--tinta);padding:7px 10px;cursor:pointer;font:inherit;letter-spacing:inherit';
+          if (o[1]) { var m = document.createElement('span'); m.style.cssText = 'display:inline-block;width:9px;height:9px;margin-right:7px;vertical-align:-1px;background:' + o[1]; b.prepend(m); }
+          b.onclick = function () { elegir(o, b); };
+          panel.appendChild(b);
+          var pedida = (location.search.match(/acentos=(\w+)/) || [])[1];
+          if (pedida ? o[0].toLowerCase().indexOf(pedida) === 0 : i === 1) setTimeout(function () { elegir(o, b); });
+        });
+        addEventListener('DOMContentLoaded', function () { document.body.appendChild(panel); });
+      })();
       // primero el mapa: la letra entra después (.entra, ~3,5 s). Si la persona ya hace algo
       // (scroll, tecla, toque), se muestra todo enseguida: no se la hace esperar.
       (function () {
@@ -46,6 +76,9 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     --papel: #f6f7fb;
     --tinta: #1f3a8f;
     --tinta-suave: #5b6fae;
+    /* segunda tinta: la luz y las señales (y, según la opción, la acción principal). En prueba */
+    --acento: var(--tinta);
+    --accion: var(--tinta);
     --serif: 'EB Garamond', serif;
     --sans: 'Archivo', sans-serif;
     --mono: 'Martian Mono', monospace;
