@@ -14,6 +14,7 @@
 - Hero = maqueta isométrica grabada en una tinta (#1f3a8f sobre #f6f7fb) de la costa norte de Río Grande, vista desde el mar: la ciudad adelante con la Torre de Agua, la Misión al medio, el Cabo Domingo arriba a la derecha con la baliza en el filo. Sin bordes de bloque: el mar abierto llena la pantalla.
 - Al cargar se imprime (costa, mar, cabo, ruta, la ciudad crece desde la plaza de la torre, viñetas); después: haz de la baliza, barco que entra a la boca, avión que aterriza y despega hacia el oeste en la pista real, satélite en órbita.
 - Sin nombres de lugares en el dibujo; solo las coordenadas de Río Grande.
+- Color (2026-11-10): segunda tinta **magenta de carta** (#b02a78) para luces, señales, hitos (techos de la Misión, cornisa/reloj/frontón de la torre, linterna) y el botón principal; **aguadas de bruma austral** bajo el grabado (mar #d6e4f1, tierra #e9eaee, ciudad #efdde8). Reglas en `DESIGN.md`.
 
 ## Cómo está armado
 - `scripts/mapa.mjs`: GeoJSON de OpenStreetMap (`docs/lugar/`, `docs/lugar/osm/`) → `src/data/mapa.json` (planta girada, costa horizontal, 100 unidades = 1 km).

@@ -56,8 +56,7 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
   </defs>
 
   <g>
-    <!-- aguadas: lavados de color bajo el grabado, como las láminas iluminadas a mano (en prueba;
-         sin elegir, transparentes) -->
+    <!-- aguadas (bruma austral): lavados de color bajo el grabado, como las láminas iluminadas a mano -->
     <path class="capa-campo" d={silueta[0].d} fill="var(--aguada-tierra)" />
     <path class="capa-mar" d={agua.mar} transform={m.matriz} fill="var(--aguada-mar)" />
     <!-- mar: líneas de agua paralelas a la costa -->

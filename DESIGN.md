@@ -6,6 +6,9 @@ colors:
   azul-de-grabado: "#1f3a8f"
   azul-lavado: "#5b6fae"
   magenta-de-carta: "#b02a78"
+  celeste-de-bruma: "#d6e4f1"
+  gris-bruma: "#e9eaee"
+  rosa-lavado: "#efdde8"
 typography:
   display:
     fontFamily: "EB Garamond, serif"
@@ -78,7 +81,7 @@ components:
 
 **Creative North Star: "La lámina grabada"**
 
-Toda la página se lee como una lámina de atlas impresa en una tinta azul sobre papel frío, con una segunda tinta magenta, la de las luces en las cartas náuticas, reservada para lo que tiene que encenderse. El dibujo es de línea: rayados, líneas de agua paralelas a la costa, volúmenes isométricos rayados según la luz. La imagen no es decorado; es el territorio de verdad (Río Grande, la Misión, el Cabo Domingo) dibujado a partir de datos reales y de fotografías, con la precisión de una carta y el oficio de un grabador. La letra se apoya sobre el papel limpio, con aire, y deja que la lámina haga el primer impacto.
+Toda la página se lee como una lámina de atlas impresa en una tinta azul sobre papel frío, iluminada a mano con aguadas claras de bruma austral, y con una segunda tinta magenta, la de las luces en las cartas náuticas, reservada para lo que tiene que encenderse. El dibujo es de línea: rayados, líneas de agua paralelas a la costa, volúmenes isométricos rayados según la luz. La imagen no es decorado; es el territorio de verdad (Río Grande, la Misión, el Cabo Domingo) dibujado a partir de datos reales y de fotografías, con la precisión de una carta y el oficio de un grabador. La letra se apoya sobre el papel limpio, con aire, y deja que la lámina haga el primer impacto.
 
 La densidad está en el dibujo, no en la interfaz: la interfaz es escasa, rectangular y tipográfica. Donde el dibujo termina no hay un borde: se apaga en el papel con un contorno irregular, como una viñeta de grabado. La luz se dibuja quitando tinta, nunca agregando color. Lo que se mueve (la luz de la baliza, un barco, camiones, un avión, un satélite, olas) se mueve despacio y con propósito, como si la lámina estuviera viva.
 
@@ -86,6 +89,7 @@ Rechazos confirmados: el hero oscuro con brillo de "startup de IA", la grilla de
 
 **Key Characteristics:**
 - Una tinta (azul de grabado) y su versión lavada sobre papel frío, y una segunda tinta (magenta de carta) solo para la luz, las señales y la acción principal.
+- Aguadas de bruma austral (celeste, gris, rosa lavado) como lavados planos bajo el grabado.
 - Dibujo de línea en proyección isométrica, con los mismos ejes para todo volumen.
 - Geometría real (OpenStreetMap, Copernicus DEM); hitos dibujados a partir de fotos.
 - Sin nombres de lugares en el dibujo: solo coordenadas, en mono.
@@ -94,7 +98,7 @@ Rechazos confirmados: el hero oscuro con brillo de "startup de IA", la grilla de
 
 ## Colors
 
-Una tinta, su lavado, una segunda tinta para lo que se enciende, y el papel: el color existe solo como tinta.
+Una tinta, su lavado, una segunda tinta para lo que se enciende, tres aguadas de bruma austral y el papel: el color es tinta o es aguada, nunca otra cosa.
 
 ### Primary
 - **Azul de grabado** (#1f3a8f): la tinta. Toda línea principal del dibujo (costa, contornos, viñetas, rayados), la letra, el botón primario lleno y los filetes de la barra.
@@ -105,11 +109,19 @@ Una tinta, su lavado, una segunda tinta para lo que se enciende, y el papel: el 
 ### Tertiary
 - **Magenta de carta** (#b02a78): la segunda tinta, como las luces de los faros en las cartas náuticas. Solo lo que se enciende o llama: el haz, el destello y la linterna de la baliza; los techos de chapa de la Misión; la cornisa, el reloj y el frontón de la Torre de Agua; la luz y la huella del satélite; y el botón de la acción principal (con letra papel, contraste 5.7:1).
 
+### Aguadas (bruma austral)
+Lavados claros, como la acuarela que se daba a mano bajo el grabado. Pintan superficies grandes por debajo de las líneas y se apagan con el papel.
+- **Celeste de bruma** (#d6e4f1): el mar, el estuario y las lagunas; entre las líneas de agua.
+- **Gris bruma** (#e9eaee): la tierra, la estepa.
+- **Rosa lavado** (#efdde8): la ciudad (las manzanas), el magenta muy diluido.
+
 ### Neutral
 - **Papel frío** (#f6f7fb): el fondo y la luz. El fondo de la página, el relleno de los volúmenes (paredes blancas de la capilla, el cuerpo del satélite), el texto sobre el botón primario y la niebla donde el dibujo se apaga.
 
 ### Named Rules
 **The One Ink Rule.** No hay otro color que el azul de grabado, su versión lavada, el magenta de carta y el papel. Los gradientes solo existen como opacidad de esas mismas tintas o del papel (para apagar y para dar luz), nunca como mezcla de colores.
+
+**The Wash Rule.** Las aguadas solo son lavados planos y grandes debajo del grabado (mar, tierra, ciudad; en las secciones, fondos de bandas o de piezas): nunca líneas, texto, íconos ni toques chicos, y siempre bajo la tinta, nunca encima. Se apagan con el papel igual que el dibujo.
 
 **The Second Ink Rule.** El magenta es escaso a propósito: luces, señales, los hitos que el ojo tiene que encontrar y la acción principal; nunca superficies grandes, fondos ni texto corrido. Si en una pantalla hay más de unos pocos toques de magenta, sobra alguno.
 
@@ -201,7 +213,7 @@ Capilla de la Misión, Torre de Agua, baliza, barco, camiones, avión y satélit
 ## Do's and Don'ts
 
 ### Do:
-- **Do** usar solo papel frío (#f6f7fb), azul de grabado (#1f3a8f), azul lavado (#5b6fae) y, para lo que se enciende, magenta de carta (#b02a78).
+- **Do** usar solo papel frío (#f6f7fb), azul de grabado (#1f3a8f), azul lavado (#5b6fae), las aguadas de bruma austral (#d6e4f1, #e9eaee, #efdde8) y, para lo que se enciende, magenta de carta (#b02a78).
 - **Do** dibujar todo volumen en los ejes isométricos de `src/data/iso.ts`.
 - **Do** sacar la geometría de datos reales y los hitos de fotografías, con su fuente.
 - **Do** ubicar con coordenadas en mono, no con nombres.
@@ -213,6 +225,7 @@ Capilla de la Misión, Torre de Agua, baliza, barco, camiones, avión y satélit
 ### Don't:
 - **Don't** usar otro color, gradientes de color, sombras, brillos ni desenfoques.
 - **Don't** usar el magenta en fondos, superficies grandes o texto corrido.
+- **Don't** usar las aguadas para líneas, texto o detalles chicos, ni encima del grabado.
 - **Don't** cortar el dibujo con un borde recto o un bloque de tierra recortado.
 - **Don't** usar imágenes generadas con IA para la geografía ni mover un lugar de donde está.
 - **Don't** poner nombres de lugares dentro del dibujo.
