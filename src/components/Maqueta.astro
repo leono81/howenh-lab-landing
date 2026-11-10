@@ -112,9 +112,9 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
         <path d={c.pista} stroke="var(--papel)" stroke-width="0.6" stroke-dasharray="6 6" stroke-linecap="butt" />
       </g>
 
-      <!-- Ruta 3: doble línea -->
-      <path class="capa-ruta" d={c.ruta} stroke="var(--tinta)" stroke-width="3.2" pathLength="1" />
-      <path class="capa-ruta" d={c.ruta} stroke="var(--papel)" stroke-width="1.7" pathLength="1" />
+      <!-- Ruta 3 y Acceso Norte: doble línea -->
+      <path class="capa-ruta" d={c.ruta + c.acceso} stroke="var(--tinta)" stroke-width="3.2" pathLength="1" />
+      <path class="capa-ruta" d={c.ruta + c.acceso} stroke="var(--papel)" stroke-width="1.7" pathLength="1" />
 
       <!-- la costa -->
       <path class="capa-costa" d={c.costa} stroke="var(--tinta)" stroke-width="1.9" pathLength="1" />

@@ -388,8 +388,16 @@ const silueta = (() => {
   });
 })();
 
-// --- recorrido de la Ruta 3 para los camiones: del oeste (pasando el cabo) a la rotonda y por la
-// circunvalación hasta la ciudad. Se encadenan los tramos de mapa.json por sus puntas. ---
+// --- recorrido de los camiones: la Ruta 3 desde el oeste (pasando el cabo) hasta la rotonda, y de
+// ahí por el Acceso Norte y las avenidas hasta la plaza de la torre. ---
+// la misma proyección de scripts/mapa.mjs (lon/lat → marco), para leer las avenidas de OSM
+const T = (() => {
+  const { LAT0, LON0, KX, KY, ANG, U, X0, Y0 } = mapa.proy, c = Math.cos(ANG), s = Math.sin(ANG);
+  return ([lon, lat]) => {
+    const x = (lon - LON0) * KX, y = -(lat - LAT0) * KY;
+    return [(x * c - y * s) * U - X0, (x * s + y * c) * U - Y0];
+  };
+})();
 const recorrido = (() => {
   const tramos = leer(capas.ruta).map((p) => p.pts);
   const cerca = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]) < 3;
@@ -406,12 +414,57 @@ const recorrido = (() => {
     cadena.push(...t.slice(1));
     cola = t[t.length - 1];
   }
-  // lo visible: desde que la ruta sale de detrás del cabo hasta que entra a la ciudad
-  const pts = densificar(cadena.filter(([x]) => x > 395), 3)
+  // en la rotonda (la última vez que la ruta pasa cerca) se deja la Ruta 3 y se entra a la ciudad
+  const R3 = T([-67.7768, -53.7371]);
+  let corte = 0;
+  cadena.forEach((p, i) => { if (Math.hypot(p[0] - R3[0], p[1] - R3[1]) < 12) corte = i; });
+  const hastaRotonda = cadena.slice(0, corte + 1);
+  // por las avenidas (OSM) hasta la plaza de la torre: el camino más corto, prefiriendo las principales
+  const peso = { trunk: 1, primary: 1, secondary: 1.15, tertiary: 1.5 };
+  const nodos = new Map(), aristas = new Map();
+  const clave = ([lon, lat]) => `${lon.toFixed(6)},${lat.toFixed(6)}`;
+  const unir = (coords, w) => {
+    for (let i = 1; i < coords.length; i++) {
+      const [ka, kb] = [clave(coords[i - 1]), clave(coords[i])];
+      nodos.set(ka, coords[i - 1]); nodos.set(kb, coords[i]);
+      const [pa, pb] = [T(coords[i - 1]), T(coords[i])], l = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]) * w;
+      for (const [x, y] of [[ka, kb], [kb, ka]]) { if (!aristas.has(x)) aristas.set(x, []); aristas.get(x).push([y, l]); }
+    }
+  };
+  for (const f of JSON.parse(readFileSync(new URL('../docs/lugar/avenidas.geojson', import.meta.url), 'utf8')).features) {
+    const w = peso[f.properties.highway];
+    if (w && f.geometry.type === 'LineString') unir(f.geometry.coordinates, w);
+  }
+  for (const e of JSON.parse(readFileSync(new URL('../docs/lugar/osm/calles.json', import.meta.url), 'utf8')).elements) {
+    const w = peso[e.tags?.highway];
+    if (w && e.geometry) unir(e.geometry.map((g) => [g.lon, g.lat]), w);
+  }
+  const masCerca = (ll) => [...nodos.keys()].reduce((m, k) => { const p = T(nodos.get(k)), q = T(ll), d = Math.hypot(p[0] - q[0], p[1] - q[1]); return d < m.d ? { k, d } : m; }, { k: null, d: Infinity }).k;
+  const desde = masCerca([-67.7768, -53.7371]), hasta = masCerca([-67.69634, -53.78634]);
+  const dist = new Map([[desde, 0]]), previo = new Map(), hechos = new Set();
+  for (;;) {
+    let u = null, du = Infinity;
+    for (const [k, d] of dist) if (!hechos.has(k) && d < du) (u = k), (du = d);
+    if (u === null || u === hasta) break;
+    hechos.add(u);
+    for (const [v, l] of aristas.get(u) || []) if (du + l < (dist.get(v) ?? Infinity)) dist.set(v, du + l), previo.set(v, u);
+  }
+  assert(dist.has(hasta), 'los camiones tienen que poder llegar a la plaza por las avenidas');
+  const enCiudad = [];
+  for (let k = hasta; k; k = previo.get(k)) enCiudad.unshift(T(nodos.get(k)));
+  // lo visible: desde que la ruta sale de detrás del cabo, por la rotonda, hasta la plaza
+  const pts = densificar([...hastaRotonda, ...enCiudad].filter(([x]) => x > 395), 3)
     .map(([x, y]) => [W(x), y])
     .filter(([a, y]) => enBloque(a, y))
     .map(([a, y]) => iso(a, y, alt(a, y) + 0.6));
   return trazo(simplificar(pts, 0.3));
+})();
+
+// --- el Acceso Norte: de la rotonda de la Ruta 3 a la ciudad (fuera de la trama de calles no estaba
+// dibujado y los camiones andaban por el campo) ---
+const acceso = (() => {
+  const ways = JSON.parse(readFileSync(new URL('../docs/lugar/avenidas.geojson', import.meta.url), 'utf8')).features.filter((f) => f.properties.name === 'Acceso Norte' && f.geometry.type === 'LineString');
+  return lineas(ways.map((f) => 'M' + f.geometry.coordinates.map((c) => T(c).map((v) => v.toFixed(1)).join(' ')).join('L')).join(''), { sobre: 0.2 });
 })();
 
 // --- lugares, ya proyectados (pie de cada viñeta) ---
@@ -445,6 +498,7 @@ const salida = {
     playa: poligonos(capas.playa + capas.arenas),
     humedal: poligonos(capas.humedal),
     ruta: lineas(capas.ruta, { sobre: 0.2 }),
+    acceso,
     trama: lineas(capas.trama, { max: 4, tol: 0.25 }),
     avenidas: lineas(capas.avenidas, { max: 4, tol: 0.25 }),
     pista: lineas(capas.pista, { max: 6, tol: 0.5 }),

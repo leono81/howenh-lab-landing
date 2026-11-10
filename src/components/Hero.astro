@@ -77,7 +77,10 @@ const barcos = [
 const CICLO_MAR = 130;
 
 // ---------- camiones por la Ruta 3 ----------
-// Del oeste, pasando el cabo, por la costa hasta la rotonda y la circunvalación: llegan a la ciudad.
+// Del oeste, pasando el cabo, por la costa hasta la rotonda; de ahí por el Acceso Norte y las
+// avenidas hasta la plaza de la torre (scripts/maqueta.mjs). Entra uno cada 15 s y cada uno tarda
+// 30 s: nunca hay más de dos en pantalla. El dibujo va girado para que, con rotate="auto",
+// quede derecho cuando el camión avanza hacia la ciudad (+a, a 150° en pantalla).
 // Caja y cabina en los ejes de la maqueta (metros, ×1,7), mirando a +a.
 const T = 1.7;
 const tq = (x: number, y: number, z: number) => iso(x * T, y * T, z * T);
@@ -91,11 +94,8 @@ const camion = {
   vidrio: pol(tq(7.6, -1, 2.3), tq(7.6, 1, 2.3), tq(7.6, 1, 3.1), tq(7.6, -1, 3.1)),
   ruedas: [-6.5, -4.6, 1.8, 6.4].map((x) => `M${tq(x, -1.35, 0.55).map(f1).join(' ')}h0`).join(''),
 };
-const camiones = [
-  { empieza: 4.2, dur: 34 },
-  { empieza: 15.5, dur: 38 },
-  { empieza: 27, dur: 31 },
-];
+const camiones = [{ empieza: 4.5 }, { empieza: 19.5 }];
+const VIAJE = 30;
 
 // ---------- el avión ----------
 // Aterriza y despega en la pista real, hacia el oeste (contra el viento del oeste). La sombra lo
@@ -228,6 +228,7 @@ const olas = Array.from({ length: 34 }, () => {
         <!-- camiones por la Ruta 3, llegando a la ciudad -->
         {camiones.map((k) => (
           <g opacity="0" stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round">
+            <g transform="rotate(-150)">
             <path d={camion.cajaTecho} fill="var(--papel)" stroke-width="0.45" />
             <path d={camion.caja} fill="var(--papel)" stroke-width="0.5" />
             <path d={camion.cajaFrente} fill="var(--tinta)" stroke-width="0.4" />
@@ -236,10 +237,11 @@ const olas = Array.from({ length: 34 }, () => {
             <path d={camion.cabinaFrente} fill="var(--papel)" stroke-width="0.45" />
             <path d={camion.vidrio} fill="var(--tinta)" stroke="none" />
             <path d={camion.ruedas} fill="none" stroke-width="1.4" />
-            <animateMotion dur={`${k.dur}s`} begin={`${k.empieza}s`} repeatCount="indefinite">
+            </g>
+            <animateMotion dur={`${VIAJE}s`} begin={`${k.empieza}s`} repeatCount="indefinite" rotate="auto">
               <mpath href="#a-ruta" />
             </animateMotion>
-            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.9;1" dur={`${k.dur}s`} begin={`${k.empieza}s`} repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.9;1" dur={`${VIAJE}s`} begin={`${k.empieza}s`} repeatCount="indefinite" />
           </g>
         ))}
 
