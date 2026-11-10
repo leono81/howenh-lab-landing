@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T10:20:00-03:00",
+  "title": "Design System: Howenh Labs",
+  "extensions": {
+    "colorMeta": {
+      "papel-frio": {
+        "role": "neutral",
+        "displayName": "Papel frío",
+        "canonical": "#f6f7fb",
+        "tonalRamp": [
+          "#3e3e3f",
+          "#6f6f71",
+          "#acadb0",
+          "#f6f7fb",
+          "#f9f9fc",
+          "#fbfbfd",
+          "#fdfdfe",
+          "#fefeff"
+        ]
+      },
+      "azul-de-grabado": {
+        "role": "primary",
+        "displayName": "Azul de grabado",
+        "canonical": "#1f3a8f",
+        "tonalRamp": [
+          "#080e24",
+          "#0e1a40",
+          "#162964",
+          "#1f3a8f",
+          "#6275b1",
+          "#9aa6cd",
+          "#ced4e6",
+          "#edeff6"
+        ]
+      },
+      "azul-lavado": {
+        "role": "secondary",
+        "displayName": "Azul lavado",
+        "canonical": "#5b6fae",
+        "tonalRamp": [
+          "#171c2c",
+          "#29324e",
+          "#404e7a",
+          "#5b6fae",
+          "#8c9ac6",
+          "#b5bedb",
+          "#dbdfed",
+          "#f2f3f9"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "El titular del hero, medido con la unidad del dibujo."
+      },
+      "body": {
+        "displayName": "Cuerpo",
+        "purpose": "Bajadas y texto corrido, máximo 46ch."
+      },
+      "title": {
+        "displayName": "Marca",
+        "purpose": "HOWENH LABS junto al logo, en la barra."
+      },
+      "label": {
+        "displayName": "Rótulo",
+        "purpose": "Coordenadas y rótulos en azul lavado."
+      },
+      "label-nav": {
+        "displayName": "Rótulo de barra",
+        "purpose": "Enlaces y botón de la barra, en mayúsculas."
+      },
+      "button": {
+        "displayName": "Botón",
+        "purpose": "Acciones del hero."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "entrar",
+        "value": "1.8s cubic-bezier(0.16, 0.6, 0.2, 1), translateY(-7px) → 0, opacidad 0 → 0.85 al 40 %",
+        "purpose": "La letra baja apenas y se asienta después de que se imprimió el dibujo."
+      },
+      {
+        "name": "impresion",
+        "value": "costa 0.15 s (1.1 s), mar 0.9 s, cabo y relieve 1.3 s, ruta 1.6 s, ciudad 1.9 s (2.6 s), viñetas hasta 3.4 s",
+        "purpose": "El dibujo se imprime al cargar, una sola vez."
+      },
+      {
+        "name": "vuelta-del-haz",
+        "value": "12 s por vuelta, visible de 190° a 350°, destello a 315°",
+        "purpose": "La luz de la baliza barre el mar."
+      },
+      {
+        "name": "ciclo-del-mar",
+        "value": "barcos 130 s, camiones 30 s cada 15 s, avión 44 s, satélite 52 s, olas 6–11 s",
+        "purpose": "La lámina viva, sin apuro."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "apilado",
+        "value": "900px"
+      },
+      {
+        "name": "barra-compacta",
+        "value": "820px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "La acción principal (agendar una reunión): tinta llena, letra papel, esquinas rectas.",
+      "html": "<a class=\"ds-btn-primario\" href=\"#\">Agendar una reunión →</a>",
+      "css": ".ds-btn-primario{display:inline-block;background:#1f3a8f;color:#f6f7fb;font:600 17px Archivo,sans-serif;padding:.9em 1.35em;text-decoration:none;border-radius:0}.ds-btn-primario:hover{background:#162964}.ds-btn-primario:focus-visible{outline:2px solid #1f3a8f;outline-offset:3px}"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acción secundaria: papel, letra en tinta, borde de 1 px en azul lavado.",
+      "html": "<a class=\"ds-btn-secundario\" href=\"#\">Conocer el laboratorio ↓</a>",
+      "css": ".ds-btn-secundario{display:inline-block;background:#f6f7fb;color:#1f3a8f;font:600 17px Archivo,sans-serif;padding:.9em 1.35em;border:1px solid #5b6fae;text-decoration:none;border-radius:0}.ds-btn-secundario:hover{border-color:#1f3a8f}.ds-btn-secundario:focus-visible{outline:2px solid #1f3a8f;outline-offset:3px}"
+    },
+    {
+      "name": "Barra",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Logo y marca a la izquierda; enlaces en mono mayúscula y botón con filete a la derecha.",
+      "html": "<nav class=\"ds-barra\"><a class=\"ds-marca\" href=\"#\">HOWENH LABS</a><span class=\"ds-enlaces\"><a href=\"#\">Laboratorio</a><a href=\"#\">Productos</a><a class=\"ds-cta\" href=\"#\">Agendar reunión</a></span></nav>",
+      "css": ".ds-barra{display:flex;align-items:center;gap:30px;padding:28px 48px;background:#f6f7fb;font:500 12px 'Martian Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ds-barra a{color:#1f3a8f;text-decoration:none}.ds-marca{font:800 15px Archivo,sans-serif;font-stretch:125%;letter-spacing:.1em}.ds-enlaces{margin-left:auto;display:flex;gap:30px;align-items:center}.ds-cta{border:1px solid #1f3a8f;padding:9px 16px;background:#f6f7fb}.ds-barra a:hover{text-decoration:underline;text-underline-offset:4px}.ds-cta:hover{background:#1f3a8f;color:#f6f7fb!important;text-decoration:none!important}"
+    },
+    {
+      "name": "Coordenadas",
+      "kind": "chip",
+      "refersTo": "coordenadas",
+      "description": "Ubicar sin nombrar: mono 11 px en azul lavado.",
+      "html": "<p class=\"ds-coordenadas\">53°47′09″ S · 67°42′07″ O</p>",
+      "css": ".ds-coordenadas{font:400 11px 'Martian Mono',monospace;letter-spacing:.12em;color:#5b6fae;margin:0}"
+    },
+    {
+      "name": "Titular",
+      "kind": "custom",
+      "refersTo": "display",
+      "description": "La voz: EB Garamond 400, interlínea 1.",
+      "html": "<h1 class=\"ds-titular\">Un laboratorio en el borde del continente</h1>",
+      "css": ".ds-titular{font:400 64px/1 'EB Garamond',serif;letter-spacing:-.01em;color:#1f3a8f;max-width:14em;text-wrap:balance;margin:0}"
+    },
+    {
+      "name": "Viñeta isométrica",
+      "kind": "custom",
+      "refersTo": "azul-de-grabado",
+      "description": "Un volumen en los ejes comunes: techo papel, cara al mar rayada, cara a la ciudad en sombra.",
+      "html": "<svg class=\"ds-vineta\" viewBox=\"-30 -40 60 60\"><path d=\"M-17.3 -10L0 -20L17.3 -10L0 0Z\" fill=\"#f6f7fb\" stroke=\"#1f3a8f\"/><path d=\"M0 0L17.3 -10V10L0 20Z\" fill=\"#f6f7fb\" stroke=\"#1f3a8f\"/><path d=\"M-17.3 -10L0 0V20L-17.3 10Z\" fill=\"#1f3a8f\" stroke=\"#1f3a8f\"/><path d=\"M3 2V18M7 0V16M11 -2V14M15 -5V12\" stroke=\"#1f3a8f\" stroke-width=\".6\"/></svg>",
+      "css": ".ds-vineta{width:96px;height:96px;display:block}"
+    }
+  ],
+  "narrative": {
+    "northStar": "La lámina grabada",
+    "overview": "Toda la página se lee como una lámina de atlas impresa en una sola tinta azul sobre papel frío. El dibujo es de línea: rayados, líneas de agua paralelas a la costa, volúmenes isométricos rayados según la luz. La imagen no es decorado; es el territorio de verdad (Río Grande, la Misión, el Cabo Domingo) dibujado a partir de datos reales y de fotografías, con la precisión de una carta y el oficio de un grabador. La letra se apoya sobre el papel limpio, con aire, y deja que la lámina haga el primer impacto.\n\nLa densidad está en el dibujo, no en la interfaz: la interfaz es escasa, rectangular y tipográfica. Donde el dibujo termina no hay un borde: se apaga en el papel con un contorno irregular, como una viñeta de grabado. La luz se dibuja quitando tinta, nunca agregando color. Lo que se mueve (la luz de la baliza, un barco, camiones, un avión, un satélite, olas) se mueve despacio y con propósito, como si la lámina estuviera viva.\n\nRechazos confirmados: el hero oscuro con brillo de \"startup de IA\", la grilla de tarjetas, las imágenes generadas con IA para la geografía, el bloque de tierra recortado como un cuadrado y cualquier borde geométrico donde el dibujo se termina.",
+    "keyCharacteristics": [
+      "Una sola tinta (azul de grabado) y su versión lavada, sobre papel frío. Nada más.",
+      "Dibujo de línea en proyección isométrica, con los mismos ejes para todo volumen.",
+      "Geometría real (OpenStreetMap, Copernicus DEM); hitos dibujados a partir de fotos.",
+      "Sin nombres de lugares en el dibujo: solo coordenadas, en mono.",
+      "Esquinas rectas, filetes de 1 px, sin sombras.",
+      "Al cargar, primero se imprime el dibujo y después se asienta la letra."
+    ],
+    "rules": [
+      {
+        "name": "The One Ink Rule",
+        "body": "No hay otro color que el azul de grabado, su versión lavada y el papel. Los gradientes solo existen como opacidad de esas mismas tintas o del papel (para apagar y para dar luz), nunca como mezcla de colores.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paper-Is-Light Rule",
+        "body": "La luz se dibuja con papel: el haz de la baliza aclara el mar que pisa, los destellos son estrellas de rayitas, los halos son papel. Nunca un color claro, un brillo o un glow.",
+        "section": "colors"
+      },
+      {
+        "name": "The Coordinates Not Names Rule",
+        "body": "En el dibujo no hay nombres de lugares; donde haría falta ubicar algo van coordenadas en Martian Mono, en azul lavado. Los nombres viven en el texto alternativo y en la prosa.",
+        "section": "typography"
+      },
+      {
+        "name": "The Scale-With-The-Plate Rule",
+        "body": "En el hero la letra se mide con la misma unidad que el dibujo (`--w`), así titular, bajada y botones guardan su proporción con la lámina en cualquier pantalla.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Paper Rule",
+        "body": "Ninguna superficie se levanta del papel con sombras, brillos ni desenfoques. Lo que está adelante lo dice el dibujo.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Real Ground Rule",
+        "body": "La costa, la ruta, el río, las calles, la pista y el relieve salen de datos reales (OpenStreetMap y Copernicus DEM, procesados por `scripts/`). Los hitos (cabo, capilla, torre, baliza) se dibujan a partir de fotografías. Nada se inventa ni se mueve de lugar.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Same Axes Rule",
+        "body": "Todo lo que tiene volumen (viñetas, vehículos, satélite) se dibuja en los ejes isométricos comunes, nunca de frente ni en otra perspectiva.",
+        "section": "shapes"
+      },
+      {
+        "name": "The No-Mask Rule",
+        "body": "Sobre el dibujo grande no se usan máscaras (ni SVG ni CSS) ni animaciones CSS de elementos encima: el navegador las pinta como capas enteras fuera de pantalla y en pantallas de 2x y 3x la lámina desaparece. Los apagados son papel pintado encima, los recortes son `clipPath`, y todo lo que se mueve va con SMIL en un svg propio, en su capa.",
+        "section": "components"
+      },
+      {
+        "name": "The Print-First Rule",
+        "body": "El primer impacto es el dibujo. La letra llega después, despacio, y nunca hace esperar a quien ya está leyendo.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do usar solo papel frío (#f6f7fb), azul de grabado (#1f3a8f) y azul lavado (#5b6fae).",
+      "Do dibujar todo volumen en los ejes isométricos de `src/data/iso.ts`.",
+      "Do sacar la geometría de datos reales y los hitos de fotografías, con su fuente.",
+      "Do ubicar con coordenadas en mono, no con nombres.",
+      "Do apagar el dibujo en el papel con un contorno irregular.",
+      "Do dibujar la luz con papel (aclarando el grabado), los destellos con rayitas.",
+      "Do mover las cosas despacio y con SMIL, en un svg aparte, y dejarlas quietas con movimiento reducido.",
+      "Do mantener esquinas rectas y filetes de 1 px."
+    ],
+    "donts": [
+      "Don't usar otro color, gradientes de color, sombras, brillos ni desenfoques.",
+      "Don't cortar el dibujo con un borde recto o un bloque de tierra recortado.",
+      "Don't usar imágenes generadas con IA para la geografía ni mover un lugar de donde está.",
+      "Don't poner nombres de lugares dentro del dibujo.",
+      "Don't usar máscaras SVG o CSS sobre la lámina ni animar con CSS elementos encima de ella.",
+      "Don't armar grillas de tarjetas genéricas ni el hero oscuro con brillo de \"startup de IA\".",
+      "Don't usar material ceremonial selk'nam (fotos del Hain, cuerpos pintados, espíritus) como decoración."
+    ]
+  }
+}

@@ -25,6 +25,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 ## Pendientes
 
-- Foto del acantilado en alta resolución con permiso (la actual tiene 399 px y origen desconocido).
-- Segunda sección: el laboratorio como atlas (carta de FitzRoy + índice). Las tarjetas de productos toman el formato de la dirección D, en tinta azul.
+- Hero: terminado (2026-11-10). Sistema de diseño en `DESIGN.md` y `.impeccable/design.json`.
+- Definir las secciones de abajo del hero: laboratorio (líneas de trabajo), productos (Penon primero), en desarrollo, nosotros y contacto. Los enlaces de la barra y «Conocer el laboratorio» ya apuntan a `#laboratorio`, `#proyectos`, `#productos` y `#nosotros`.
 - Nombrar o no al organismo de gobierno en Penon: lo decide Leono después del 26.
