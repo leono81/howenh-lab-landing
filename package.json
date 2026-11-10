@@ -6,7 +6,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "mapa": "node scripts/mapa.mjs",
+    "mapa": "node scripts/mapa.mjs && node scripts/maqueta.mjs",
     "maqueta": "node scripts/maqueta.mjs"
   },
   "dependencies": {

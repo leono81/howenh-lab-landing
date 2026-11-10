@@ -360,31 +360,6 @@ const cabo = { cara: '', filo: '', capas: '', base: '', grietas: '', alero: '', 
   }
 }
 
-// --- los dos cortes del bloque que dan al frente (el este y el del mar), con sus estratos ---
-const bloque = { corte: '', perfil: '', estratos: '', frente: '', estratosFrente: '', borde: '' };
-{
-  const ys = rango(FRENTE, FONDO, Math.round((FONDO - FRENTE) / 1.5));
-  const zs = ys.map((y) => alt(AMAX, y));
-  const tope = ys.map((y, i) => iso(AMAX, y, zs[i]));
-  bloque.corte = trazo([...tope, iso(AMAX, FONDO, -ZOCALO), iso(AMAX, FRENTE, -ZOCALO)], true);
-  bloque.perfil = trazo(simplificar(tope, 0.12));
-  // estratos horizontales: bajo el nivel del mar corren de punta a punta; arriba, solo donde hay tierra
-  for (let L = -ZOCALO + 3; L < ALT_MAX; L += L < 0 ? 4 : 3.2) {
-    let tramo = [];
-    ys.forEach((y, i) => {
-      if (zs[i] > L + 0.9 || L < 0) tramo.push(iso(AMAX, y, L));
-      else {
-        if (tramo.length > 1) bloque.estratos += trazo([tramo[0], tramo[tramo.length - 1]]);
-        tramo = [];
-      }
-    });
-    if (tramo.length > 1) bloque.estratos += trazo([tramo[0], tramo[tramo.length - 1]]);
-  }
-  bloque.frente = trazo([iso(0, FRENTE, 0), iso(AMAX, FRENTE, 0), iso(AMAX, FRENTE, -ZOCALO), iso(0, FRENTE, -ZOCALO)], true);
-  for (let L = -ZOCALO + 3; L < 0; L += 4) bloque.estratosFrente += trazo([iso(0, FRENTE, L), iso(AMAX, FRENTE, L)]);
-  bloque.borde = trazo([iso(0, FRENTE, 0), iso(AMAX, FRENTE, 0), iso(AMAX, FRENTE, -ZOCALO), iso(0, FRENTE, -ZOCALO)]) + trazo([iso(AMAX, FRENTE, -ZOCALO), iso(AMAX, FONDO, -ZOCALO)]);
-}
-
 // --- fundidos (degradés de opacidad en pantalla, perpendiculares a los ejes) ---
 // tierra adentro: de opaco en FONDO-FUNDE a nada en FONDO; al oeste: de a=45 a a=0
 const degrade = ([x, y], [nx_, ny_], largo) => ({ x1: +f1(x), y1: +f1(y), x2: +f1(x + nx_ * largo * 2 * C * S), y2: +f1(y + ny_ * largo * 2 * C * S) });
@@ -442,7 +417,6 @@ const salida = {
     estepa,
   },
   cabo,
-  bloque,
   lugares: Object.fromEntries(Object.entries(lugares).map(([k, p]) => [k, pie(p)])),
 };
 
