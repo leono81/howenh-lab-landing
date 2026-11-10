@@ -55,12 +55,53 @@ const barco = {
 };
 // recorrido del barco, en unidades de la maqueta: entra por el borde de mar y fondea frente a la boca
 const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
+
+// --- avión: aterriza y despega en la pista real, hacia el oeste (contra el viento del oeste) ---
+// El suelo de la maqueta viene de scripts/maqueta.mjs: proyección y cabeceras de la pista en (a, y, z).
+const { OX, OY, costaY, pista } = m.suelo;
+const C = Math.cos(Math.PI / 6), S = 0.5;
+const enPantalla = (a: number, y: number, z = 0): [number, number] => [OX - C * (a + y - costaY), OY + S * (a - y + costaY) - z];
+const [este, oeste] = pista;
+const largoPista = Math.hypot(oeste[0] - este[0], oeste[1] - este[1]);
+const fa = (oeste[0] - este[0]) / largoPista, fy = (oeste[1] - este[1]) / largoPista; // hacia adelante
+const sobrePista = (k: number, z: number) => {
+  // k: unidades desde la cabecera este (negativo: antes de la pista); z: altura sobre la pista
+  const zs = este[2] + ((oeste[2] - este[2]) * Math.min(1, Math.max(0, k / largoPista)));
+  return { aire: enPantalla(este[0] + fa * k, este[1] + fy * k, zs + z), suelo: enPantalla(este[0] + fa * k, este[1] + fy * k, zs) };
+};
+// recorrido: aproximación sobre la ciudad, toque, carrera hasta frenar; después despegue y trepada
+const tramos = [sobrePista(-300, 78), sobrePista(22, 0), sobrePista(150, 0), sobrePista(8, 0), sobrePista(128, 0), sobrePista(470, 92)];
+const varsAvion = tramos
+  .map((t, i) => `--ax${i}:${t.aire[0].toFixed(1)};--ay${i}:${t.aire[1].toFixed(1)};--sx${i}:${t.suelo[0].toFixed(1)};--sy${i}:${t.suelo[1].toFixed(1)}`)
+  .join(';');
+// el dibujo, en metros, en ejes del avión (x hacia la nariz, y hacia el ala izquierda), llevado a
+// los ejes de la maqueta y proyectado sin desplazamiento (el centro del avión en 0,0)
+const ESC = 1.35;
+const la = -fy, ly = fa; // hacia el ala
+const pa = (x: number, y: number, z = 0): [number, number] => {
+  const a = (fa * x + la * y) * ESC, b = (fy * x + ly * y) * ESC;
+  return [-C * (a + b), S * (a - b) - z * ESC];
+};
+const poly = (...p: [number, number][]) => 'M' + p.map(([u, v]) => `${u.toFixed(1)} ${v.toFixed(1)}`).join('L') + 'Z';
+const avion = {
+  fuselaje: poly(pa(17, 0), pa(15.6, 1.2), pa(13, 1.9), pa(-13, 1.9), pa(-17, 0.6), pa(-17.6, 0), pa(-17, -0.6), pa(-13, -1.9), pa(13, -1.9), pa(15.6, -1.2)),
+  alas: poly(pa(4, 1.8), pa(-5, 16.5), pa(-8, 16.5), pa(-4.5, 1.8)) + poly(pa(4, -1.8), pa(-5, -16.5), pa(-8, -16.5), pa(-4.5, -1.8)),
+  cola: poly(pa(-13.5, 1.4), pa(-16.6, 6.2), pa(-18, 6.2), pa(-17, 1)) + poly(pa(-13.5, -1.4), pa(-16.6, -6.2), pa(-18, -6.2), pa(-17, -1)),
+  motores: [6, -6].map((y) => poly(pa(2.6, y + 0.9), pa(2.6, y - 0.9), pa(-1.2, y - 0.9), pa(-1.2, y + 0.9))).join(''),
+  deriva: poly(pa(-12, 0, 0.4), pa(-16.6, 0, 7.6), pa(-18.2, 0, 7.6), pa(-17.4, 0, 0.4)),
+  ventanillas: 'M' + [pa(11, 1.1), pa(-11, 1.1)].map(([u, v]) => `${u.toFixed(1)} ${v.toFixed(1)}`).join('L'),
+};
+const sombra = avion.fuselaje + avion.alas + avion.cola;
+
+// --- satélite: cruza el cielo por una órbita punteada, de la estepa hacia el mar abierto ---
+// en unidades de la maqueta (el cielo es lo que queda arriba y a la derecha del bloque)
+const orbita = 'M700 70 Q1380 120 1700 820';
 ---
 <section class="hero-a" aria-labelledby="hero-titulo">
   <div class="ventana">
     <div class="plano">
       <div role="img" aria-label="Maqueta grabada de la costa norte de Río Grande, Tierra del Fuego, vista desde el mar: adelante la ciudad con la Torre de Agua junto a la desembocadura del río Grande; detrás el aeropuerto, la Ruta 3 y la Misión Salesiana; al fondo, el Cabo Domingo con su baliza encendida sobre el acantilado. Un barco chico llega a la boca del río.">
-        <Maqueta />
+        <Maqueta abierto imprimir />
       </div>
       <div class="barco" aria-hidden="true" style={`--x:${llegada.x};--y:${llegada.y};--dx:${salida.x - llegada.x};--dy:${salida.y - llegada.y}`}>
         <svg viewBox="-24 -27 74 38">
@@ -74,6 +115,35 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
             <path d={barco.techo} fill="var(--tinta)" stroke-width="0.4" />
             <path d={barco.palo} stroke-width="0.5" />
             <path d={barco.jarcia} stroke-width="0.25" />
+          </g>
+        </svg>
+      </div>
+      <svg class="cielo" aria-hidden="true" viewBox={`0 0 ${m.ancho} ${m.alto}`}>
+        <path id="a-orbita" d={orbita} fill="none" stroke="var(--tinta-suave)" stroke-width="0.9" stroke-dasharray="1.5 5" stroke-linecap="round" />
+        <g class="satelite">
+          <g transform="scale(1.6)" fill="var(--papel)" stroke="var(--tinta)" stroke-width="0.7" stroke-linejoin="round">
+            <path d="M-16 -3.2h10v6.4h-10zM6 -3.2h10v6.4h-10z" />
+            <path d="M-13.5 -3.2v6.4M-11 -3.2v6.4M-8.5 -3.2v6.4M8.5 -3.2v6.4M11 -3.2v6.4M13.5 -3.2v6.4M-16 0h10M6 0h10" fill="none" stroke-width="0.4" />
+            <path d="M-6 0h2.6M6 0h-2.6" fill="none" />
+            <path d="M-3.4 -3.6h6.8v7.2h-6.8z" fill="var(--tinta)" />
+            <path d="M0 3.6v3M-2.4 8.6a2.6 1.4 0 0 1 4.8 0" fill="none" stroke-width="0.6" />
+          </g>
+          <animateMotion class="vuelo" dur="70s" begin="4.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="linear">
+            <mpath href="#a-orbita" />
+          </animateMotion>
+        </g>
+      </svg>
+      <div class="sombra-avion" aria-hidden="true" style={varsAvion}>
+        <svg viewBox="-30 -30 60 60"><path d={sombra} fill="var(--tinta)" /></svg>
+      </div>
+      <div class="avion" aria-hidden="true" style={varsAvion}>
+        <svg viewBox="-30 -30 60 60">
+          <g stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round">
+            <path d={avion.alas + avion.cola} fill="var(--tinta)" stroke-width="0.4" />
+            <path d={avion.motores} fill="var(--papel)" stroke-width="0.5" />
+            <path d={avion.fuselaje} fill="var(--papel)" stroke-width="0.7" />
+            <path d={avion.ventanillas} fill="none" stroke-width="0.6" stroke-dasharray="0.6 1" />
+            <path d={avion.deriva} fill="var(--papel)" stroke-width="0.6" />
           </g>
         </svg>
       </div>
@@ -121,7 +191,18 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
 <script>
   // lo que no está en pantalla no se anima
   const hero = document.querySelector('.hero-a');
-  if (hero) new IntersectionObserver(([e]) => hero.classList.toggle('fuera', !e.isIntersecting)).observe(hero);
+  const cielo = hero?.querySelector<SVGSVGElement>('.cielo');
+  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (cielo && quieto) {
+    // SMIL no escucha a CSS: el satélite queda a mitad de órbita
+    cielo.pauseAnimations();
+    cielo.setCurrentTime(4.5 + 35);
+  }
+  if (hero)
+    new IntersectionObserver(([e]) => {
+      hero.classList.toggle('fuera', !e.isIntersecting);
+      if (cielo && !quieto) e.isIntersecting ? cielo.unpauseAnimations() : cielo.pauseAnimations();
+    }).observe(hero);
 </script>
 
 <style>
@@ -172,7 +253,7 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
     width: calc(var(--u) * 24);
     height: calc(var(--u) * 24);
     margin: calc(var(--u) * -12) 0 0 calc(var(--u) * -12);
-    animation: a-encender 0.9s 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation: a-encender 0.9s 3.3s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
   }
   @keyframes a-encender {
     from {
@@ -187,7 +268,7 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
     width: 0;
     height: 0;
     transform: matrix(-0.866025, 0.5, -0.866025, -0.5, 0, 0);
-    animation: a-asomar 1.2s 1s backwards;
+    animation: a-asomar 1.2s 3.8s backwards;
   }
   @keyframes a-asomar {
     from {
@@ -227,7 +308,7 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
     width: calc(var(--u) * 74);
     height: calc(var(--u) * 38);
     margin: calc(var(--u) * -27) 0 0 calc(var(--u) * -24);
-    animation: a-llegar 26s cubic-bezier(0.25, 0.5, 0.3, 1) 0.8s backwards;
+    animation: a-llegar 26s cubic-bezier(0.25, 0.5, 0.3, 1) 3.4s backwards;
   }
   .barco svg {
     display: block;
@@ -238,7 +319,7 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
   }
   .estela {
     opacity: 0;
-    animation: a-estela 26s linear 0.8s backwards;
+    animation: a-estela 26s linear 3.4s backwards;
   }
   @keyframes a-llegar {
     from {
@@ -263,7 +344,132 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
       transform: translateY(0.7px) rotate(0.8deg);
     }
   }
-  .fuera :is(.destello, .haz, .haz svg, .barco, .barco svg, .estela) {
+  /* el avión: aterriza, frena, se va a la plataforma; después despega y trepa hacia el oeste.
+     La sombra lo sigue por el suelo: cuanto más alto vuela, más lejos queda. */
+  .avion,
+  .sombra-avion {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(var(--u) * 60);
+    height: calc(var(--u) * 60);
+    margin: calc(var(--u) * -30) 0 0 calc(var(--u) * -30);
+    opacity: 0;
+    animation: a-volar 44s linear 5.5s infinite;
+  }
+  .sombra-avion {
+    animation-name: a-sombra;
+  }
+  .avion svg,
+  .sombra-avion svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  @keyframes a-volar {
+    0% {
+      transform: translate(calc(var(--u) * var(--ax0)), calc(var(--u) * var(--ay0)));
+      opacity: 0;
+    }
+    2% {
+      opacity: 1;
+    }
+    16% {
+      transform: translate(calc(var(--u) * var(--ax1)), calc(var(--u) * var(--ay1)));
+      animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+    }
+    25%,
+    31% {
+      transform: translate(calc(var(--u) * var(--ax2)), calc(var(--u) * var(--ay2)));
+      opacity: 1;
+    }
+    33%,
+    55% {
+      transform: translate(calc(var(--u) * var(--ax2)), calc(var(--u) * var(--ay2)));
+      opacity: 0;
+    }
+    56% {
+      transform: translate(calc(var(--u) * var(--ax3)), calc(var(--u) * var(--ay3)));
+      opacity: 0;
+    }
+    58% {
+      transform: translate(calc(var(--u) * var(--ax3)), calc(var(--u) * var(--ay3)));
+      opacity: 1;
+      animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.6);
+    }
+    67% {
+      transform: translate(calc(var(--u) * var(--ax4)), calc(var(--u) * var(--ay4)));
+      animation-timing-function: cubic-bezier(0.3, 0.2, 0.6, 1);
+    }
+    80% {
+      opacity: 1;
+    }
+    84%,
+    100% {
+      transform: translate(calc(var(--u) * var(--ax5)), calc(var(--u) * var(--ay5)));
+      opacity: 0;
+    }
+  }
+  @keyframes a-sombra {
+    0% {
+      transform: translate(calc(var(--u) * var(--sx0)), calc(var(--u) * var(--sy0)));
+      opacity: 0;
+    }
+    2% {
+      opacity: 0.12;
+    }
+    16% {
+      transform: translate(calc(var(--u) * var(--sx1)), calc(var(--u) * var(--sy1)));
+      opacity: 0.28;
+      animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+    }
+    25%,
+    31% {
+      transform: translate(calc(var(--u) * var(--sx2)), calc(var(--u) * var(--sy2)));
+      opacity: 0.28;
+    }
+    33%,
+    55% {
+      transform: translate(calc(var(--u) * var(--sx2)), calc(var(--u) * var(--sy2)));
+      opacity: 0;
+    }
+    56% {
+      transform: translate(calc(var(--u) * var(--sx3)), calc(var(--u) * var(--sy3)));
+      opacity: 0;
+    }
+    58% {
+      transform: translate(calc(var(--u) * var(--sx3)), calc(var(--u) * var(--sy3)));
+      opacity: 0.28;
+      animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.6);
+    }
+    67% {
+      transform: translate(calc(var(--u) * var(--sx4)), calc(var(--u) * var(--sy4)));
+      opacity: 0.28;
+      animation-timing-function: cubic-bezier(0.3, 0.2, 0.6, 1);
+    }
+    84%,
+    100% {
+      transform: translate(calc(var(--u) * var(--sx5)), calc(var(--u) * var(--sy5)));
+      opacity: 0;
+    }
+  }
+
+  /* el satélite y su órbita, en el cielo de la maqueta */
+  .cielo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  #a-orbita {
+    opacity: 0.55;
+    animation: a-asomar 1.5s 4s backwards;
+  }
+
+  .fuera :is(.destello, .haz, .haz svg, .barco, .barco svg, .estela, .avion, .sombra-avion) {
     animation-play-state: paused;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -272,8 +478,17 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
     .haz svg,
     .barco,
     .barco svg,
-    .estela {
+    .estela,
+    #a-orbita {
       animation: none;
+    }
+    /* quietos: el avión en la plataforma y el satélite a mitad de órbita */
+    .avion,
+    .sombra-avion {
+      animation: a-volar 44s linear -11s paused;
+    }
+    .sombra-avion {
+      animation-name: a-sombra;
     }
   }
 
@@ -335,6 +550,15 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
     right: var(--margen);
     bottom: calc(var(--w) * 0.022);
     width: var(--lw);
+    isolation: isolate;
+  }
+  /* la vista flota sobre el mar abierto: un claro de papel para que las líneas de agua no la crucen */
+  .lamina::before {
+    content: '';
+    position: absolute;
+    inset: -14% -6% -8% -10%;
+    z-index: -1;
+    background: radial-gradient(closest-side, var(--papel) 72%, transparent);
   }
   /* cuando el epígrafe de la vista no entra en un renglón, que parta parejo */
   .lamina :global(figcaption) {
@@ -403,6 +627,8 @@ const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
       top: calc(38% - var(--u) * 324);
     }
     .barco,
+    .avion,
+    .sombra-avion,
     .lamina,
     .ventana::after {
       display: none;

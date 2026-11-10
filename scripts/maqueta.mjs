@@ -399,10 +399,20 @@ const fundidos = {
   fondo: degrade(iso(0, FONDO - FUNDE), [-S, -C], FUNDE),
   sesgo,
   oeste: degrade(iso(45, costaY), [S, -C], 45),
+  // sin el corte del bloque (mar abierto): la tierra se apaga pasando la boca, hacia el borde de la lámina
+  este: degrade(iso(AMAX - 80, costaY), [-S, C], 80),
 };
 
 // --- lugares, ya proyectados (pie de cada viñeta) ---
 const pie = ([x, y]) => iso(W(x), y, alt(W(x), y)).map((v) => +f1(v));
+// el suelo para lo que se mueve encima (avión, barco): la proyección y la pista en (a, y, z),
+// con la cabecera este primero (se aterriza y se despega hacia el oeste, contra el viento)
+const suelo = (() => {
+  const pts = leer(capas.pista)[0].pts;
+  const [este, oeste] = [pts[0], pts[pts.length - 1]].sort((p, q) => q[0] - p[0]);
+  const enSuelo = ([x, y]) => [+f1(W(x)), +f1(y), +f1(alt(W(x), y))];
+  return { OX: +f1(OX), OY: +f1(OY), costaY, pista: [enSuelo(este), enSuelo(oeste)] };
+})();
 const salida = {
   fuente: mapa.fuente,
   ancho: ANCHO,
@@ -412,6 +422,7 @@ const salida = {
   matriz: `matrix(${-C} ${S} ${-C} ${-S} ${f1(OX + C * costaY)} ${f1(OY + S * costaY)})`,
   franja: { x: 0, y: FRENTE, w: +f1(AMAX), h: FONDO - FRENTE },
   fundidos,
+  suelo,
   agua: { mar: enPlanta(capas.mar), costa: enPlanta(capas.lineaCosta), estuario: enPlanta(capas.estuario) },
   capas: {
     costa: lineas(capas.lineaCosta, { ocultar: false }),
