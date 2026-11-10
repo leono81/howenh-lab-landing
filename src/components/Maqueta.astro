@@ -56,13 +56,17 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
   </defs>
 
   <g>
+    <!-- aguadas: lavados de color bajo el grabado, como las láminas iluminadas a mano (en prueba;
+         sin elegir, transparentes) -->
+    <path class="capa-campo" d={silueta[0].d} fill="var(--aguada-tierra)" />
+    <path class="capa-mar" d={agua.mar} transform={m.matriz} fill="var(--aguada-mar)" />
     <!-- mar: líneas de agua paralelas a la costa -->
     <g class="capa-mar" transform={m.matriz}>
       <g clip-path="url(#q-mar)" fill="none" stroke-linejoin="round" stroke-linecap="round">
         {[...lineasMar].reverse().map((l) => (
           <>
             <path d={agua.costa} stroke="var(--tinta)" stroke-opacity={l.o} stroke-width={l.d * 2 + l.w} />
-            <path d={agua.costa} stroke="var(--papel)" stroke-width={Math.max(0.1, l.d * 2 - l.w)} />
+            <path d={agua.costa} stroke="var(--aguada-mar)" stroke-width={Math.max(0.1, l.d * 2 - l.w)} />
           </>
         ))}
       </g>
@@ -75,12 +79,12 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
 
       <!-- estuario del río Grande -->
       <g class="capa-agua" transform={m.matriz}>
-        <path d={agua.estuario} fill="var(--papel)" fill-rule="evenodd" clip-path="url(#q-franja)" />
+        <path d={agua.estuario} fill="var(--aguada-mar)" fill-rule="evenodd" clip-path="url(#q-franja)" />
         <g clip-path="url(#q-estuario)">
           {[...lineasChicas].reverse().map((l) => (
             <>
               <path d={agua.estuario} stroke="var(--tinta)" stroke-opacity={l.o} stroke-width={l.d * 2 + l.w} />
-              <path d={agua.estuario} stroke="var(--papel)" stroke-width={l.d * 2 - l.w} />
+              <path d={agua.estuario} stroke="var(--aguada-mar)" stroke-width={l.d * 2 - l.w} />
             </>
           ))}
         </g>
@@ -92,10 +96,12 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
       <!-- relieve y estepa -->
       {c.hachures.map((g) => <path class="capa-relieve" d={g.d} stroke-width={g.w} stroke={g.suave ? 'var(--tinta-suave)' : 'var(--tinta)'} />)}
       <path class="capa-campo" d={c.estepa} stroke="var(--tinta-suave)" stroke-width="0.5" />
+      <path class="capa-campo" d={c.lagunas} fill="var(--aguada-mar)" />
       <path class="capa-campo" d={c.lagunas} fill="url(#q-agua)" stroke="var(--tinta)" stroke-width="1" />
 
       <!-- ciudad: manzanas rayadas, calles en blanco -->
       <g class="capa-ciudad" clip-path="url(#q-crece)">
+        <path d={c.trama} stroke="var(--aguada-ciudad)" stroke-width="15" />
         <path d={c.trama} stroke="url(#q-rayado)" stroke-width="9" />
         <path d={c.trama} stroke="var(--papel)" stroke-width="1.4" />
         <path d={c.avenidas} stroke="var(--papel)" stroke-width="2.6" />

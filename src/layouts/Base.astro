@@ -29,6 +29,37 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
       <slot />
     </main>
     <script is:inline>
+      // prueba de las aguadas: /?aguadas muestra un selector (se borra cuando se elija)
+      (function () {
+        if (!/aguadas/.test(location.search)) return;
+        var raiz = document.documentElement;
+        var opciones = [
+          ['Sin aguadas', null],
+          ['Atlas iluminado', ['#d9ebe6', '#f2e8cf', '#f3d9d3']],
+          ['Otoño de lengas', ['#d8e6ea', '#f1dfc4', '#eccbc0']],
+          ['Bruma austral', ['#d6e4f1', '#e9eaee', '#efdde8']],
+        ];
+        var panel = document.createElement('div');
+        panel.style.cssText = 'position:fixed;z-index:20;left:16px;bottom:16px;display:flex;gap:6px;flex-wrap:wrap;font:500 11px Martian Mono,monospace;letter-spacing:.06em';
+        function elegir(o, b) {
+          ['mar', 'tierra', 'ciudad'].forEach(function (k, i) {
+            o[1] ? raiz.style.setProperty('--aguada-' + k, o[1][i]) : raiz.style.removeProperty('--aguada-' + k);
+          });
+          panel.querySelectorAll('button').forEach(function (x) { x.style.background = 'var(--papel)'; x.style.color = 'var(--tinta)'; });
+          b.style.background = 'var(--tinta)'; b.style.color = 'var(--papel)';
+        }
+        opciones.forEach(function (o, i) {
+          var b = document.createElement('button');
+          b.style.cssText = 'border:1px solid var(--tinta);padding:7px 10px;cursor:pointer;font:inherit;letter-spacing:inherit;display:flex;align-items:center;gap:7px';
+          if (o[1]) { var m = document.createElement('span'); m.style.cssText = 'display:inline-flex;gap:2px'; o[1].forEach(function (c) { var q = document.createElement('i'); q.style.cssText = 'width:9px;height:9px;border:1px solid rgba(31,58,143,.35);background:' + c; m.appendChild(q); }); b.appendChild(m); }
+          b.appendChild(document.createTextNode(o[0]));
+          b.onclick = function () { elegir(o, b); };
+          panel.appendChild(b);
+          var pedida = (location.search.match(/aguadas=(\w+)/) || [])[1];
+          if (pedida ? o[0].toLowerCase().indexOf(pedida) === 0 : i === 1) setTimeout(function () { elegir(o, b); });
+        });
+        addEventListener('DOMContentLoaded', function () { document.body.appendChild(panel); });
+      })();
       // primero el mapa: la letra entra después (.entra, ~3,5 s). Si la persona ya hace algo
       // (scroll, tecla, toque), se muestra todo enseguida: no se la hace esperar.
       (function () {
@@ -49,6 +80,10 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     /* segunda tinta (magenta de carta): la luz, las señales y la acción principal */
     --acento: #b02a78;
     --accion: var(--acento);
+    /* aguadas (en prueba): lavados de color para el mar, la tierra y la ciudad; sin elegir, papel */
+    --aguada-mar: var(--papel);
+    --aguada-tierra: var(--papel);
+    --aguada-ciudad: var(--papel);
     --serif: 'EB Garamond', serif;
     --sans: 'Archivo', sans-serif;
     --mono: 'Martian Mono', monospace;

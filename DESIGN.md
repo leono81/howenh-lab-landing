@@ -194,7 +194,7 @@ Capilla de la Misión, Torre de Agua, baliza, barco, camiones, avión y satélit
 - **Movimiento reducido:** todo quieto desde el primer cuadro, en un buen momento (el avión en la pista, el haz sobre el mar).
 
 ### Named Rules
-**The No-Mask Rule.** Sobre el dibujo grande no se usan máscaras (ni SVG ni CSS) ni animaciones CSS de elementos encima: el navegador las pinta como capas enteras fuera de pantalla y en pantallas de 2x y 3x la lámina desaparece. Los apagados son papel pintado encima, los recortes son `clipPath`, y todo lo que se mueve va con SMIL en un svg propio, en su capa.
+**The No-Mask Rule.** Sobre el dibujo grande no se usan máscaras (ni SVG ni CSS) ni animaciones CSS de elementos encima: las máscaras se pintan como capas enteras fuera de pantalla y lo que se anima encima obliga a repintar la lámina en cada cuadro, y en pantallas de 2x y 3x el dibujo tarda en aparecer. Los apagados son papel pintado encima, los recortes son `clipPath`, y todo lo que se mueve va con SMIL en un svg propio, en su capa.
 
 **The Print-First Rule.** El primer impacto es el dibujo. La letra llega después, despacio, y nunca hace esperar a quien ya está leyendo.
 

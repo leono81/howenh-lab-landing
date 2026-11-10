@@ -21,7 +21,7 @@
 - `scripts/maqueta.mjs`: mapa.json + DEM → `src/data/maqueta.json` (proyección isométrica horneada, relieve ×7, tramos sin accidentes comprimidos, el cabo como sólido diseñado según las fotos, ocultamiento). Tiene `assert` de geografía (baliza al filo, ruta detrás de la baliza, misión del lado de tierra, orden a lo largo de la costa).
 - `npm run mapa` corre los dos scripts de Node.
 - `src/components/Maqueta.astro` (estilo, impresión y niebla de papel), `MaquetaBaliza/Mision/Torre.astro` (viñetas en ejes isométricos), `Hero.astro` (texto y, en el svg `.cielo`, todo lo que se mueve con SMIL: haz, barcos, camiones, avión, satélite, olas). `src/layouts/Base.astro`: barra con logo y entrada de la letra.
-- Ojo (rendimiento): nada de máscaras SVG/CSS sobre la maqueta ni animaciones CSS encima; en pantallas de 2x/3x la página desaparecía. Ver The No-Mask Rule en `DESIGN.md`. Para verificar: capturas a `--force-device-scale-factor=2` y `3` contra `npx astro preview`.
+- Ojo (rendimiento): nada de máscaras SVG/CSS sobre la maqueta ni animaciones CSS encima (The No-Mask Rule en `DESIGN.md`). Para capturar con Chrome headless a 2x/3x usar `--run-all-compositor-stages-before-draw`: sin esa opción la captura sale a veces en blanco porque el dibujo todavía no terminó de pintarse (es un efecto de la captura, no de la página).
 - Fotos de referencia en `flow/` (fuera de git): `ref-cabo-*`, `ref-mision-*`, `3-torre-de-agua-*`.
 
 ## Lo que se descartó (no volver)
