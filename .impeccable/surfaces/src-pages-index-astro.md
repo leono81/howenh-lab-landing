@@ -11,15 +11,15 @@ Modo: Persuade. Audiencia principal: gobierno (reunión con el ministro de Tierr
 
 ## Direction contract
 
-THESIS: Howenh es un laboratorio en el borde del continente, contado como una lámina grabada del viaje al sur: el Cabo Domingo en tinta azul, la baliza que vigila y un barco que llega. Rechaza el hero oscuro con brillo de "startup de IA" y la grilla de cards.
+THESIS: Howenh es un laboratorio en el borde del continente, contado como una maqueta grabada de su propia costa: Río Grande, la Misión y el Cabo Domingo con la baliza que vigila, el mar abierto, un barco que llega, un avión que aterriza y un satélite que pasa. Rechaza el hero oscuro con brillo de "startup de IA" y la grilla de cards.
 
-OWN-WORLD: Papel blanco frío (#f6f7fb) y una sola tinta azul cobalto (#1f3a8f, con #5b6fae como tinta suave). Imágenes reales pasadas a grabado de línea en código. Serif clásica para titulares (EB Garamond), grotesca para la interfaz (Archivo), mono para rótulos (Martian Mono). Sin gradientes ni sombras; el color solo existe como tinta.
+OWN-WORLD: Papel blanco frío (#f6f7fb) y una sola tinta azul cobalto (#1f3a8f, con #5b6fae como tinta suave). La geometría sale de datos reales (OpenStreetMap y Copernicus DEM, ver docs/lugar/); los hitos (cabo, capilla, torre, baliza) se dibujan a partir de fotografías. Serif clásica para titulares (EB Garamond), grotesca para la interfaz (Archivo), mono para rótulos (Martian Mono). Sin gradientes de color ni sombras; el color solo existe como tinta. Sin nombres de lugares en el dibujo: solo coordenadas.
 
 STORY: El visitante entiende en una pantalla que Howenh hace inteligencia artificial, satélites y software en producción desde Tierra del Fuego. Cree que es serio porque lo ve trabajando en su territorio y con productos reales. Agenda una reunión.
 
-FIRST VIEWPORT: A la izquierda, kicker de coordenadas, titular serif enorme "Un laboratorio en el borde del continente", bajada y dos acciones (Agendar una reunión, primaria en tinta llena). A la derecha, 58% del ancho: el Cabo Domingo grabado a sangre. Abajo a la izquierda, un índice en tres columnas: Laboratorio, Productos, En desarrollo.
+FIRST VIEWPORT: Arriba a la izquierda, sobre papel limpio: coordenadas, titular serif "Un laboratorio en el borde del continente", bajada y dos acciones (Agendar una reunión, primaria en tinta llena). El resto, a sangre: la maqueta isométrica vista desde el mar (la ciudad adelante, la Misión al medio, el cabo arriba a la derecha) sin bordes de bloque; el mar abierto llena la pantalla. En el teléfono, una ventana de la maqueta sobre el cabo.
 
-FORM: Estampa grabada (fusión de las direcciones A, B y J elegidas por Leono el 2026-11-09). Interacción firma: el grabado se imprime de arriba hacia abajo, atardece cargando de líneas el cielo, la baliza se enciende y su haz barre del horizonte al barco que se acerca al cabo. seed: 5cca6e152ba801c9
+FORM: Maqueta isométrica grabada (opción A, elegida por Leono el 2026-11-10). Interacción firma: la maqueta se imprime al cargar (la costa se traza, aparece el mar, se levanta el cabo, se traza la Ruta 3 y la ciudad crece desde la plaza de la torre); después la baliza se enciende y su haz barre el mar, un barco entra a la boca del río, un avión aterriza y despega hacia el oeste en la pista real y un satélite cruza el cielo. Todo quieto con prefers-reduced-motion. seed: 5cca6e152ba801c9
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 

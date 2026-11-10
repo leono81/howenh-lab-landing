@@ -375,7 +375,7 @@ const fundidos = {
   sesgo,
   oeste: degrade(iso(45, costaY), [S, -C], 45),
   // sin el corte del bloque (mar abierto): la tierra se apaga pasando la boca, hacia el borde de la lámina
-  este: degrade(iso(AMAX - 80, costaY), [-S, C], 80),
+  este: degrade(iso(AMAX - 40, costaY), [-S, C], 40),
 };
 
 // --- lugares, ya proyectados (pie de cada viñeta) ---
