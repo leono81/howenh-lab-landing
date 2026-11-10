@@ -7,7 +7,7 @@
 // re-rasteriza en cada cuadro y en pantallas de 2x la maqueta desaparece; con SMIL no pasa.
 import Maqueta from './Maqueta.astro';
 import m from '../data/maqueta.json';
-import { iso, pol, lin, type P } from '../data/iso';
+import { iso, pol, lin, rayas, type P } from '../data/iso';
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
 
 const { OX, OY, costaY, AMAX, pista } = m.suelo;
@@ -142,13 +142,57 @@ const sombraAvion = avion.fuselaje + avion.alas + avion.cola;
 const [mx, my] = m.lugares.mision;
 const O0: P = [bx + 126, by + 305], O1: P = [bx - 176, by - 314], O2: P = [mx - 196, my - 202];
 const orbita = `M${f1(O0[0])} ${f1(O0[1])} Q${f1(O1[0])} ${f1(O1[1])} ${f1(O2[0])} ${f1(O2[1])}`;
-const panel = (s: number) => {
-  // un ala de paneles: 3 × 2 celdas, en el plano del satélite
-  const x0 = s * 6, x1 = s * 24;
-  let d = `M${x0} -4.5H${x1}V4.5H${x0}Z`;
-  for (let i = 1; i < 6; i++) d += `M${f1(x0 + ((x1 - x0) * i) / 6)} -4.5V4.5`;
-  return d + `M${x0} 0H${x1}`;
-};
+// En los ejes de la maqueta, como el camión y la torre: x a lo largo de la costa, y tierra
+// adentro, z arriba. Se ven el techo, la cara que da al mar (-y) y la que da a la ciudad (+x).
+// Cuerpo con aislante rayado (más oscuro en la cara a la sombra), dos alas de paneles con su
+// canto, antena parabólica que mira a la tierra, cámara, mástil y una luz que parpadea.
+const sat = (() => {
+  const X = 4, Y = 5, Z = 4; // medio cuerpo
+  const caja = {
+    techo: pol(iso(-X, -Y, Z), iso(X, -Y, Z), iso(X, Y, Z), iso(-X, Y, Z)),
+    frente: pol(iso(-X, -Y, -Z), iso(X, -Y, -Z), iso(X, -Y, Z), iso(-X, -Y, Z)),
+    lado: pol(iso(X, -Y, -Z), iso(X, Y, -Z), iso(X, Y, Z), iso(X, -Y, Z)),
+  };
+  // aislante: rayas diagonales en el frente, apretadas en el lado (a la sombra)
+  const aislante = rayas(iso(-X, -Y, -Z), iso(-X, -Y, Z), iso(X, -Y, -Z), iso(X, -Y, Z), 7);
+  const sombra = rayas(iso(X, -Y, -Z), iso(X, -Y, Z), iso(X, Y, -Z), iso(X, Y, Z), 12);
+  const costuras = lin(iso(-X, -Y, 0), iso(X, -Y, 0), iso(X, Y, 0));
+  // un ala: de x0 a x1, ancho ±6, espesor ±0,6; celdas de 5 × 2
+  const ala = (x0: number, x1: number) => {
+    const W = 6, E = 0.6;
+    let celdas = '';
+    for (let i = 1; i < 5; i++) {
+      const x = x0 + ((x1 - x0) * i) / 5;
+      celdas += lin(iso(x, -W, E), iso(x, W, E));
+    }
+    celdas += lin(iso(x0, 0, E), iso(x1, 0, E));
+    const [a, b] = [Math.min(x0, x1), Math.max(x0, x1)];
+    return {
+      cara: pol(iso(a, -W, E), iso(b, -W, E), iso(b, W, E), iso(a, W, E)),
+      canto: pol(iso(a, -W, -E), iso(b, -W, -E), iso(b, -W, E), iso(a, -W, E)) + (b > 0 ? pol(iso(b, -W, -E), iso(b, W, -E), iso(b, W, E), iso(b, -W, E)) : ''),
+      celdas,
+      brazo: lin(iso(x0 > 0 ? X : -X, 0, 0), iso(x0, 0, 0)),
+    };
+  };
+  // antena parabólica abajo, mirando a la tierra; la cámara al frente, también hacia abajo
+  const aro = (cx: number, cy: number, z: number, r: number) => pol(...Array.from({ length: 28 }, (_, i) => iso(cx + r * Math.cos((i * Math.PI) / 14), cy + r * Math.sin((i * Math.PI) / 14), z)));
+  return {
+    caja,
+    aislante,
+    sombra,
+    costuras,
+    lejos: ala(-8, -30),
+    cerca: ala(8, 30),
+    plato: aro(0, 1, -Z - 3.2, 4.2),
+    hondo: aro(0, 1, -Z - 2.4, 2.4),
+    sosten: lin(iso(0, 1, -Z), iso(0, 1, -Z - 2.4)) + lin(iso(0, 1, -Z - 3.2), iso(0, 1, -Z - 6)),
+    camara: pol(iso(1.2, -Y, -Z + 1.2), iso(3.4, -Y, -Z + 1.2), iso(3.4, -Y - 1.6, -Z + 1.2), iso(1.2, -Y - 1.6, -Z + 1.2)) + pol(iso(1.2, -Y - 1.6, -Z + 1.2), iso(3.4, -Y - 1.6, -Z + 1.2), iso(3.4, -Y - 1.6, -Z - 1), iso(1.2, -Y - 1.6, -Z - 1)),
+    mastil: lin(iso(-1.5, -1.5, Z), iso(-1.5, -1.5, Z + 6.5)),
+    luz: iso(-1.5, -1.5, Z + 7.3),
+    pie: iso(0, 1, -Z - 6),
+  };
+})();
+const ESC_SAT = 1.45;
 
 // ---------- el mar ----------
 // Olas sueltas, cortas y paralelas a la costa, que aparecen, avanzan un poco hacia la orilla y se
@@ -292,7 +336,7 @@ const olas = Array.from({ length: 34 }, () => {
           <use href="#a-orbita" fill="none" stroke="url(#a-orbita-g)" stroke-width="0.9" stroke-dasharray="1.5 5" stroke-linecap="round" />
           <g opacity="0">
             <!-- la línea al suelo y la huella, que se enciende cada tanto -->
-            <path d="M0 8V150" stroke="var(--tinta-suave)" stroke-width="0.6" stroke-dasharray="1 3.5" opacity="0.7" />
+            <path d={`M0 ${f1(sat.pie[1] * ESC_SAT + 2)}V150`} stroke="var(--tinta-suave)" stroke-width="0.6" stroke-dasharray="1 3.5" opacity="0.7" />
             <g transform="translate(0 150)">
               <ellipse rx="18" ry="10.4" fill="none" stroke="var(--tinta)" stroke-width="0.7">
                 <animate attributeName="rx" values="4;26" dur="2.8s" repeatCount="indefinite" />
@@ -301,14 +345,41 @@ const olas = Array.from({ length: 34 }, () => {
               </ellipse>
               <ellipse rx="3" ry="1.7" fill="var(--tinta)" />
             </g>
-            <!-- el satélite: cuerpo con aislante rayado, dos alas de paneles, antena y sensor -->
-            <g stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round" transform="scale(1.5)">
-              <path d={panel(-1) + panel(1)} fill="var(--papel)" stroke-width="0.6" />
-              <path d="M-6 0H-3.5M6 0H3.5" fill="none" stroke-width="0.8" />
-              <path d="M-3.5 -4.5H3.5V4.5H-3.5Z" fill="var(--papel)" stroke-width="0.7" />
-              <path d="M-3.5 -2.5L-1.5 -4.5M-3.5 0L1 -4.5M-3.5 2.5L3.5 -4.5M-1.5 4.5L3.5 -0.5M1 4.5L3.5 2" fill="none" stroke-width="0.4" />
-              <path d="M0 -4.5V-7.5M-2.6 -9.4Q0 -6.6 2.6 -9.4Z" fill="var(--tinta)" stroke-width="0.5" />
-              <path d="M-1.2 4.5H1.2V6.4H-1.2Z" fill="var(--tinta)" stroke-width="0.4" />
+            <!-- el satélite, en tres dimensiones: de atrás hacia adelante -->
+            <g stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round" transform={`scale(${ESC_SAT})`}>
+              <!-- ala de atrás -->
+              <path d={sat.lejos.brazo} fill="none" stroke-width="0.8" />
+              <path d={sat.lejos.canto} fill="var(--tinta)" stroke-width="0.4" />
+              <path d={sat.lejos.cara} fill="var(--papel)" stroke-width="0.6" />
+              <path d={sat.lejos.celdas} fill="none" stroke-width="0.35" />
+              <!-- antena parabólica, abajo -->
+              <path d={sat.sosten} fill="none" stroke-width="0.5" />
+              <path d={sat.plato} fill="var(--papel)" stroke-width="0.6" />
+              <path d={sat.hondo} fill="none" stroke-width="0.35" />
+              <!-- cuerpo -->
+              <path d={sat.caja.frente} fill="var(--papel)" stroke-width="0.6" />
+              <path d={sat.aislante} fill="none" stroke-width="0.35" />
+              <path d={sat.caja.lado} fill="var(--papel)" stroke-width="0.6" />
+              <path d={sat.sombra} fill="none" stroke-width="0.45" />
+              <path d={sat.caja.techo} fill="var(--papel)" stroke-width="0.6" />
+              <path d={sat.costuras} fill="none" stroke-width="0.35" />
+              <path d={sat.camara} fill="var(--tinta)" stroke-width="0.4" />
+              <!-- ala de adelante -->
+              <path d={sat.cerca.brazo} fill="none" stroke-width="0.8" />
+              <path d={sat.cerca.canto} fill="var(--tinta)" stroke-width="0.4" />
+              <path d={sat.cerca.cara} fill="var(--papel)" stroke-width="0.6" />
+              <path d={sat.cerca.celdas} fill="none" stroke-width="0.35" />
+              <!-- mástil con la luz que parpadea -->
+              <path d={sat.mastil} fill="none" stroke-width="0.5" />
+              <g transform={`translate(${f1(sat.luz[0])} ${f1(sat.luz[1])})`}>
+                <circle r="3" fill="none" stroke-width="0.4" opacity="0">
+                  <animate attributeName="r" values="0.8;0.8;4.2;4.2" keyTimes="0;0.06;0.4;1" dur="1.9s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0;0.9;0;0" keyTimes="0;0.06;0.4;1" dur="1.9s" repeatCount="indefinite" />
+                </circle>
+                <circle r="0.95" fill="var(--tinta)" stroke="none" opacity="0.25">
+                  <animate attributeName="opacity" values="0.25;1;0.25;0.25" keyTimes="0;0.05;0.22;1" dur="1.9s" repeatCount="indefinite" />
+                </circle>
+              </g>
             </g>
             <!-- cruza en 40 s y vuelve a subir 12 s después; arranca adelantado para verse ya al cargar -->
             <animateMotion dur="52s" begin="-14s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;0.77;1" calcMode="linear">
@@ -342,6 +413,10 @@ const olas = Array.from({ length: 34 }, () => {
     // SMIL no escucha a CSS: queda el avión parado en la pista, el haz sobre el mar, un barco y los camiones en la ruta
     cielo.pauseAnimations();
     cielo.setCurrentTime(5.5 + 0.28 * 44);
+    // y la ciudad de la maqueta, ya crecida
+    const maqueta = hero?.querySelector<SVGSVGElement>('.maqueta');
+    maqueta?.pauseAnimations();
+    maqueta?.setCurrentTime(10);
   }
   if (hero && cielo && !quieto)
     new IntersectionObserver(([e]) => (e.isIntersecting ? cielo.unpauseAnimations() : cielo.pauseAnimations())).observe(hero);
@@ -357,14 +432,20 @@ const olas = Array.from({ length: 34 }, () => {
     height: var(--alto);
     overflow: hidden;
   }
-  /* el papel del titular queda limpio: un claro ovalado alrededor del texto, sin rectas */
+  /* el papel del titular queda limpio: un claro ovalado alrededor del texto, sin rectas.
+     Es papel pintado encima y no una máscara: una máscara CSS sobre .ventana obliga a redibujar
+     la maqueta entera en cada cuadro de animación, y en pantallas de 2x la maqueta desaparece. */
   .ventana {
-    --claro: radial-gradient(calc(var(--w) * 0.43) calc(var(--w) * 0.27) at calc(var(--margen) + var(--w) * 0.19) calc(var(--w) * 0.17), transparent 62%, #000 100%);
     position: absolute;
     inset: 0;
     overflow: hidden;
-    -webkit-mask-image: var(--claro);
-    mask-image: var(--claro);
+  }
+  .ventana::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(calc(var(--w) * 0.43) calc(var(--w) * 0.27) at calc(var(--margen) + var(--w) * 0.19) calc(var(--w) * 0.17), var(--papel) 62%, transparent 100%);
   }
   /* el plano de la maqueta; lo que se mueve va en .cielo, con sus mismas unidades */
   .plano {
@@ -374,6 +455,7 @@ const olas = Array.from({ length: 34 }, () => {
     width: calc(var(--u) * 1935);
     height: calc(var(--u) * 1229);
   }
+  /* en su propia capa: lo que se mueve no obliga a redibujar la maqueta */
   .cielo {
     position: absolute;
     inset: 0;
@@ -381,6 +463,7 @@ const olas = Array.from({ length: 34 }, () => {
     height: 100%;
     overflow: visible;
     pointer-events: none;
+    will-change: transform;
   }
 
   .texto {
@@ -471,8 +554,9 @@ const olas = Array.from({ length: 34 }, () => {
       position: relative;
       inset: auto;
       flex: 1 0 clamp(340px, 100vw, 70svh);
-      -webkit-mask-image: linear-gradient(transparent, #000 24%);
-      mask-image: linear-gradient(transparent, #000 24%);
+    }
+    .ventana::after {
+      background: linear-gradient(var(--papel), transparent 24%);
     }
     .plano {
       right: auto;
