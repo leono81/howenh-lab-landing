@@ -25,8 +25,8 @@ const { capas, lugares, costaY } = mapa;
 
 const EXAG = 7; // exageración vertical
 const A0 = 20; // fin oeste del bloque (x del marco): se funde con el papel
-const A1 = 1900; // corte este, pasando la boca del río
-const FONDO = costaY + 345; // tierra adentro hasta ~3,4 km (la pista del aeropuerto termina a 3 km)
+const A1 = 2040; // fin este, pasando la boca del río (se funde con el papel)
+const FONDO = costaY + 440; // tierra adentro hasta ~4,4 km (se funde antes, con borde irregular)
 const FUNDE = 50; // los últimos 500 m se funden con el papel
 const FRENTE = costaY - 118; // borde del bloque en el mar
 const ZOCALO = 15; // espesor del bloque bajo el nivel del mar
@@ -360,23 +360,59 @@ const cabo = { cara: '', filo: '', capas: '', base: '', grietas: '', alero: '', 
   }
 }
 
-// --- fundidos (degradés de opacidad en pantalla, perpendiculares a los ejes) ---
-// tierra adentro: de opaco en FONDO-FUNDE a nada en FONDO; al oeste: de a=45 a a=0
-const degrade = ([x, y], [nx_, ny_], largo) => ({ x1: +f1(x), y1: +f1(y), x2: +f1(x + nx_ * largo * 2 * C * S), y2: +f1(y + ny_ * largo * 2 * C * S) });
-// detrás del cabo no hace falta tanta tierra (la ruta pasa a 600 m): ahí el fondo se acerca en
-// diagonal, de 3,4 km a la altura del aeropuerto a 2,1 km en el extremo oeste
-const sesgo = (() => {
-  const A = iso(W(1300), FONDO), B = iso(0, costaY + 215), l = Math.hypot(B[0] - A[0], B[1] - A[1]);
-  const n = [(B[1] - A[1]) / l, -(B[0] - A[0]) / l]; // normal hacia tierra adentro
-  return { x1: +f1(A[0] - n[0] * 75), y1: +f1(A[1] - n[1] * 75), x2: +f1(A[0]), y2: +f1(A[1]) };
+// --- silueta: dónde se ve la maqueta y dónde se apaga en el papel ---
+// Un contorno irregular (sin rectas ni ejes), en el suelo (a, y): tierra adentro el borde ondula y
+// se acerca a la costa detrás del cabo (la ruta pasa a 600 m) y en las dos puntas; hacia el mar
+// sigue lejos, fuera de la pantalla. El fundido son capas del mismo contorno, cada vez más
+// adentro y más opacas (sin filtros: el desenfoque costaría memoria en pantallas de 2x).
+const silueta = (() => {
+  const ruido = (t, fase) => 0.55 * Math.sin(t / 97 + fase) + 0.3 * Math.sin(t / 41 + 2.1 * fase) + 0.15 * Math.sin(t / 19 + 3.7 * fase);
+  const YMAR = costaY - 900;
+  const A_LO = (y) => 6 + 18 * ruido(y, 1.3);
+  const A_HI = (y) => AMAX - 4 + 22 * ruido(y, 4.1);
+  const tope = (a) => {
+    const detrasDelCabo = mezcla(costaY + 175, FONDO - 25, suave(a / W(1300)));
+    const hombros = 150 * (1 - suave((a - 10) / 260)) + 130 * (1 - suave((AMAX - a) / 240));
+    return detrasDelCabo - hombros + 30 * ruido(a, 0.4);
+  };
+  const PASO = 11, CAPAS = [0.05, 0.08, 0.12, 0.17, 0.25, 0.36, 0.52, 1];
+  const z = (a, y) => (y > costaY - 40 ? alt(Math.min(AMAX, Math.max(0, a)), Math.min(FONDO, y)) : 0);
+  return CAPAS.map((o, k) => {
+    const d = k * PASO, pts = [];
+    const lo = (y) => A_LO(y) + d, hi = (y) => A_HI(y) - d, yt = (a) => tope(a) - d;
+    for (let y = YMAR; y < yt(lo(y)); y += 12) pts.push([lo(y), y]);
+    for (let a = lo(yt(0)); a < hi(yt(AMAX)); a += 8) pts.push([a, yt(a)]);
+    for (let y = yt(hi(yt(AMAX))); y > YMAR; y -= 12) pts.push([hi(y), y]);
+    const enPantalla = pts.map(([a, y]) => iso(a, y, z(a, y)));
+    return { o, d: trazo(simplificar(enPantalla, 0.4), true) };
+  });
 })();
-const fundidos = {
-  fondo: degrade(iso(0, FONDO - FUNDE), [-S, -C], FUNDE),
-  sesgo,
-  oeste: degrade(iso(45, costaY), [S, -C], 45),
-  // sin el corte del bloque (mar abierto): la tierra se apaga pasando la boca, hacia el borde de la lámina
-  este: degrade(iso(AMAX - 40, costaY), [-S, C], 40),
-};
+
+// --- recorrido de la Ruta 3 para los camiones: del oeste (pasando el cabo) a la rotonda y por la
+// circunvalación hasta la ciudad. Se encadenan los tramos de mapa.json por sus puntas. ---
+const recorrido = (() => {
+  const tramos = leer(capas.ruta).map((p) => p.pts);
+  const cerca = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]) < 3;
+  // arranca en la punta más al oeste y en cada cruce sigue el tramo que más avanza hacia la ciudad
+  let cola = tramos.flatMap((t) => [t[0], t[t.length - 1]]).reduce((m, p) => (p[0] < m[0] ? p : m));
+  const usados = new Set(), cadena = [cola];
+  for (;;) {
+    const opciones = tramos.map((t, i) => ({ t, i })).filter(({ t, i }) => !usados.has(i) && (cerca(t[0], cola) || cerca(t[t.length - 1], cola)));
+    if (!opciones.length) break;
+    const orientado = ({ t }) => (cerca(t[0], cola) ? t : [...t].reverse());
+    const mejor = opciones.reduce((m, o) => { const f = orientado(o).at(-1), g = orientado(m).at(-1); return f[0] + f[1] > g[0] + g[1] ? o : m; });
+    usados.add(mejor.i);
+    const t = orientado(mejor);
+    cadena.push(...t.slice(1));
+    cola = t[t.length - 1];
+  }
+  // lo visible: desde que la ruta sale de detrás del cabo hasta que entra a la ciudad
+  const pts = densificar(cadena.filter(([x]) => x > 395), 3)
+    .map(([x, y]) => [W(x), y])
+    .filter(([a, y]) => enBloque(a, y))
+    .map(([a, y]) => iso(a, y, alt(a, y) + 0.6));
+  return trazo(simplificar(pts, 0.3));
+})();
 
 // --- lugares, ya proyectados (pie de cada viñeta) ---
 const pie = ([x, y]) => iso(W(x), y, alt(W(x), y)).map((v) => +f1(v));
@@ -386,7 +422,7 @@ const suelo = (() => {
   const pts = leer(capas.pista)[0].pts;
   const [este, oeste] = [pts[0], pts[pts.length - 1]].sort((p, q) => q[0] - p[0]);
   const enSuelo = ([x, y]) => [+f1(W(x)), +f1(y), +f1(alt(W(x), y))];
-  return { OX: +f1(OX), OY: +f1(OY), costaY, pista: [enSuelo(este), enSuelo(oeste)] };
+  return { OX: +f1(OX), OY: +f1(OY), costaY, AMAX: +f1(AMAX), pista: [enSuelo(este), enSuelo(oeste)] };
 })();
 const salida = {
   fuente: mapa.fuente,
@@ -396,7 +432,8 @@ const salida = {
   // matriz que lleva la planta comprimida (a, y) a la pantalla: solo para las líneas de agua
   matriz: `matrix(${-C} ${S} ${-C} ${-S} ${f1(OX + C * costaY)} ${f1(OY + S * costaY)})`,
   franja: { x: 0, y: FRENTE, w: +f1(AMAX), h: FONDO - FRENTE },
-  fundidos,
+  silueta,
+  recorrido,
   suelo,
   agua: { mar: enPlanta(capas.mar), costa: enPlanta(capas.lineaCosta), estuario: enPlanta(capas.estuario) },
   capas: {

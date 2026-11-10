@@ -9,10 +9,10 @@ import MaquetaMision from './MaquetaMision.astro';
 import MaquetaTorre from './MaquetaTorre.astro';
 import MaquetaBaliza from './MaquetaBaliza.astro';
 // Sin bordes: el mar sigue hasta el borde de la pantalla (el svg deja ver lo que queda fuera de su
-// marco) y la tierra se apaga tierra adentro, al oeste pasando el cabo y al este pasando la boca.
+// marco) y la tierra se apaga en el papel con un contorno irregular (la silueta de maqueta.mjs).
 // Al cargar se imprime: la costa, el mar, el relieve, la ruta, la ciudad que crece desde la plaza
 // de la torre y al final las viñetas.
-const { capas: c, cabo, agua, fundidos: fu, franja, lugares } = m;
+const { capas: c, cabo, agua, silueta, franja, lugares } = m;
 // líneas de agua paralelas a la costa, cada vez más separadas y tenues mar adentro
 const lineasMar = [4, 9, 15, 22, 30, 39, 49, 60, 72, 87, 105, 127, 154, 186, 225, 272, 330].map((d, i, a) => ({ d, w: 1.2 - (i / a.length) * 0.65, o: 1 - (i / a.length) * 0.85 }));
 // zona que cubren las máscaras: el marco y un margen. No más: las capas con máscara se pintan
@@ -27,18 +27,10 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
     <clipPath id="q-franja"><rect x={franja.x} y={franja.y} width={franja.w} height={franja.h} /></clipPath>
     <clipPath id="q-mar"><path d={agua.mar} /></clipPath>
     <clipPath id="q-estuario"><path d={agua.estuario} clip-rule="evenodd" clip-path="url(#q-franja)" /></clipPath>
-    <!-- el bloque se funde con el papel tierra adentro y hacia el oeste, pasando el cabo -->
-    {Object.entries(fu).map(([k, g]) => (
-      <>
-        <linearGradient id={`q-g-${k}`} gradientUnits="userSpaceOnUse" x1={g.x1} y1={g.y1} x2={g.x2} y2={g.y2}>
-          <stop offset="0" stop-color="#fff" />
-          <stop offset="1" stop-color="#fff" stop-opacity="0" />
-        </linearGradient>
-        <mask id={`q-${k}`} maskUnits="userSpaceOnUse" x={zona.x} y={zona.y} width={zona.w} height={zona.h}>
-          <rect x={zona.x} y={zona.y} width={zona.w} height={zona.h} fill={`url(#q-g-${k})`} />
-        </mask>
-      </>
-    ))}
+    <!-- la maqueta se apaga en el papel: capas del mismo contorno irregular, cada vez más opacas -->
+    <mask id="q-silueta" maskUnits="userSpaceOnUse" x={zona.x} y={zona.y} width={zona.w} height={zona.h}>
+      {silueta.map((capa) => <path d={capa.d} fill="#fff" fill-opacity={capa.o} />)}
+    </mask>
     <!-- la ciudad crece desde la plaza de la torre -->
     <radialGradient id="q-g-crece">
       <stop offset="0.8" stop-color="#fff" />
@@ -66,7 +58,7 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
     </pattern>
   </defs>
 
-  <g mask="url(#q-este)"><g mask="url(#q-oeste)">
+  <g mask="url(#q-silueta)">
     <!-- mar: líneas de agua paralelas a la costa -->
     <g class="capa-mar" transform={m.matriz}>
       <g clip-path="url(#q-mar)" fill="none" stroke-linejoin="round" stroke-linecap="round">
@@ -79,7 +71,7 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
       </g>
     </g>
 
-    <g mask="url(#q-sesgo)"><g mask="url(#q-fondo)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
       <!-- playas, arenas y mallines de la boca -->
       <path class="capa-orilla" d={c.playa} fill="url(#q-puntos)" />
       <path class="capa-orilla" d={c.humedal} fill="url(#q-mallin)" fill-rule="evenodd" />
@@ -126,7 +118,7 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
 
       <!-- la costa -->
       <path class="capa-costa" d={c.costa} stroke="var(--tinta)" stroke-width="1.9" pathLength="1" />
-    </g></g>
+    </g>
 
     <!-- Cabo Domingo: las dos paredes (la del este y la que mira al mar) -->
     <g class="capa-cabo" fill="none" stroke="var(--tinta)" stroke-linecap="round" stroke-linejoin="round">
@@ -142,7 +134,7 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
       <path d={cabo.pie} stroke-width="0.7" />
       <path d={cabo.filo} stroke-width="1.5" />
     </g>
-  </g></g>
+  </g>
 
   <!-- viñetas, en los mismos ejes -->
   <MaquetaMision x={lugares.mision[0]} y={lugares.mision[1]} escala={1.45} />

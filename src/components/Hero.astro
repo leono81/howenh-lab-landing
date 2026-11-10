@@ -1,82 +1,116 @@
 ---
-// Opción A · «Maqueta a sangre». La maqueta isométrica es la gran imagen del hero: se va a
-// sangre por la derecha (pasando el cabo), por abajo (la esquina del bloque) y, cuando el ancho
-// alcanza, por la izquierda (la ciudad); el texto vive en el papel de arriba a la izquierda y
-// el resto es mar abierto.
-// Encima de la maqueta, sin tocarla, van tres piezas que se mueven: el destello de la
-// linterna, el haz que barre el mar y un barco que llega a la boca del río.
-// Todo se ubica en unidades de la maqueta: --u es cuántos px mide una unidad.
+// Hero: la maqueta isométrica de la costa a sangre; el texto vive en el papel de arriba a la
+// izquierda y el resto es mar abierto. La maqueta se apaga en el papel con un borde irregular.
+// Todo lo que se mueve va con SMIL dentro de un solo svg (.cielo) superpuesto a la maqueta, en sus
+// mismas unidades: la luz de la baliza, el barco, los camiones de la Ruta 3, el avión, el
+// satélite y el mar. Con animaciones CSS sobre divs encima de la maqueta enmascarada, Chrome la
+// re-rasteriza en cada cuadro y en pantallas de 2x la maqueta desaparece; con SMIL no pasa.
 import Maqueta from './Maqueta.astro';
 import m from '../data/maqueta.json';
-import { iso, pol, lin } from '../data/iso';
+import { iso, pol, lin, type P } from '../data/iso';
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
 
-// la linterna: el pie de la baliza está en lugares.baliza y MaquetaBaliza la dibuja a escala 2.1,
-// con la linterna entre 9,2 y 11,2 m
+const { OX, OY, costaY, AMAX, pista } = m.suelo;
+const C = Math.cos(Math.PI / 6), S = 0.5;
+// del suelo de la maqueta (a a lo largo de la costa, y tierra adentro, z alto) a la pantalla
+const enPantalla = (a: number, y: number, z = 0): P => [OX - C * (a + y - costaY), OY + S * (a - y + costaY) - z];
+const f1 = (v: number) => (Math.round(v * 10) / 10).toString();
+const camino = (pts: P[]) => 'M' + pts.map(([u, v]) => `${f1(u)} ${f1(v)}`).join('L');
+let semilla = 7;
+const azar = () => (semilla = (semilla * 16807) % 2147483647) / 2147483647;
+
+// ---------- la luz de la baliza ----------
+// La linterna (MaquetaBaliza a escala 2,1, linterna a 10,2 m). El haz gira en planta (una vuelta
+// cada 12 s) y la matriz isométrica lo acuesta sobre el mar: se ve mientras barre el mar (de 190°
+// a 350°, con 270° mar adentro) y se apaga sobre la tierra. Cuando apunta a quien mira (315°) la
+// linterna destella.
 const [bx, by] = m.lugares.baliza;
 const luz = { x: bx, y: by - 10.2 * 2.1 };
-
-// haz: abanico de rayas finas en planta (apunta a +x, hacia la ciudad); la matriz isométrica
-// lo acuesta sobre el mar y el giro lo hace barrer
-const R = 640;
-// cada raya arranca más lejos cuanto más vecinas tiene: cerca de la linterna hay una sola,
-// y el abanico se va poblando sin empastarse
-const rayos = [-4, -3, -2, -1, 0, 1, 2, 3, 4].map((k) => {
-  const a = (k * 1.2 * Math.PI) / 180;
-  const r0 = k === 0 ? 14 : Math.abs(k) === 4 ? 46 : k % 2 ? 150 : 84;
-  const r1 = R * (k % 2 ? 0.7 : 1);
-  const p = (r: number) => `${(r * Math.cos(a)).toFixed(1)} ${(r * Math.sin(a)).toFixed(1)}`;
-  return `M${p(r0)}L${p(r1)}`;
-}).join('');
-// destello de la linterna: estrella de rayitas, como se graba una luz
-const destello = Array.from({ length: 12 }, (_, i) => {
-  const a = (i * Math.PI) / 6, r1 = i % 2 ? 6.5 : 9.5;
-  return `M${(4 * Math.cos(a)).toFixed(1)} ${(4 * Math.sin(a)).toFixed(1)}L${(r1 * Math.cos(a)).toFixed(1)} ${(r1 * Math.sin(a)).toFixed(1)}`;
-}).join('');
-
-// barco: lancha de pesca chica, en los ejes de la maqueta, con la proa a +x (hacia la boca).
-// Medidas en metros aproximados. Se ven la banda que da al mar, la cubierta y los techos.
-const L = 11, B = 3; // media eslora, media manga
-const zc = (x: number) => 2.1 + 1.3 * Math.max(0, x / L) ** 2; // la cubierta sube hacia la proa
-const xs = [-L, -L * 0.5, L * 0.2, L * 0.65, L], an = [0.85, 1, 1, 0.62, 0];
-const borda = (lado: number) => xs.map((x, i) => iso(x, lado * B * an[i], zc(x)));
-const flot = xs.map((x, i) => iso(x * 0.94, -B * an[i] * 0.8, 0));
-const barco = {
-  casco: pol(...borda(-1), ...[...flot].reverse()),
-  cubierta: pol(...borda(-1), ...borda(1).reverse().slice(1)),
-  timonera: pol(iso(-8, -1.7, 2.1), iso(-3, -1.7, 2.1), iso(-3, -1.7, 5.1), iso(-8, -1.7, 5.1)) + pol(iso(-3, -1.7, 2.1), iso(-3, 1.7, 2.1), iso(-3, 1.7, 5.1), iso(-3, -1.7, 5.1)),
-  ventanas: lin(iso(-7.2, -1.7, 4.2), iso(-3.8, -1.7, 4.2)) + lin(iso(-3, -1.1, 4.2), iso(-3, 1.1, 4.2)),
-  techo: pol(iso(-8.4, -2.1, 5.1), iso(-2.6, -2.1, 5.1), iso(-2.6, 2.1, 5.1), iso(-8.4, 2.1, 5.1)),
-  palo: lin(iso(2, 0, zc(2)), iso(2, 0, 11)) + lin(iso(2, 0, 4.1), iso(7, 0, 6)),
-  jarcia: lin(iso(2, 0, 11), iso(L, 0, zc(L))) + lin(iso(2, 0, 11), iso(-3, 0, 5.1)),
-  agua: lin(iso(-L * 0.9, -B - 0.9, 0), iso(-L * 0.2, -B - 0.9, 0)) + lin(iso(0, -B - 1.9, 0), iso(L * 0.6, -B - 1.9, 0)),
-  estela: lin(iso(-L - 1, -1.6, 0), iso(-L - 11, -3.4, 0)) + lin(iso(-L - 1, 1.6, 0), iso(-L - 11, 3.4, 0)) + lin(iso(-L - 13, -0.6, 0), iso(-L - 18, -0.9, 0)),
+const VUELTA = 12, FASE = 3.6 - (190 / 360) * VUELTA; // a los 3,6 s el haz ya asoma sobre el mar
+const R = 620;
+const cuna = (abre: number, r0: number, r1: number) => {
+  const a = (abre * Math.PI) / 180, p = (r: number, s: number) => `${f1(r * Math.cos(s * a))} ${f1(r * Math.sin(s * a))}`;
+  return `M${p(r0, -1)}L${p(r1, -1)}A${r1} ${r1} 0 0 1 ${p(r1, 1)}L${p(r0, 1)}Z`;
 };
-// recorrido del barco, en unidades de la maqueta: entra por el borde de mar y fondea frente a la boca
-const llegada = { x: 461, y: 1004 }, salida = { x: 1054, y: 698 };
+// En una sola tinta la luz es papel: el haz aclara el grabado que pisa (el mar se ve más blanco
+// donde pasa) y lo marcan dos bordes finos de tinta, con un par de rayos tenues adentro.
+const rayo = (g: number, r0: number, r1: number) => {
+  const a = (g * Math.PI) / 180;
+  return `M${f1(r0 * Math.cos(a))} ${f1(r0 * Math.sin(a))}L${f1(r1 * Math.cos(a))} ${f1(r1 * Math.sin(a))}`;
+};
+const bordesHaz = rayo(-6.2, 12, R * 0.92) + rayo(6.2, 12, R * 0.92);
+const rayosHaz = rayo(-3.6, 40, R * 0.62) + rayo(-1.6, 26, R * 0.8) + rayo(0, 18, R) + rayo(1.6, 26, R * 0.8) + rayo(3.6, 40, R * 0.62);
+const estrella = (n: number, r0: number, r1: number, r2: number) =>
+  Array.from({ length: n }, (_, i) => {
+    const a = (i * 2 * Math.PI) / n, r = i % 2 ? r1 : r2;
+    return `M${f1(r0 * Math.cos(a))} ${f1(r0 * Math.sin(a))}L${f1(r * Math.cos(a))} ${f1(r * Math.sin(a))}`;
+  }).join('');
 
-// --- avión: aterriza y despega en la pista real, hacia el oeste (contra el viento del oeste) ---
-// El suelo de la maqueta viene de scripts/maqueta.mjs: proyección y cabeceras de la pista en (a, y, z).
-const { OX, OY, costaY, pista } = m.suelo;
-const C = Math.cos(Math.PI / 6), S = 0.5;
-const enPantalla = (a: number, y: number, z = 0): [number, number] => [OX - C * (a + y - costaY), OY + S * (a - y + costaY) - z];
+// ---------- el barco ----------
+// Lancha de pesca en los ejes de la maqueta (metros, ×1,8). Navega paralela a la costa, lento,
+// cruza todo el cuadro y sale; más adelante vuelve otro, más afuera, en sentido contrario.
+const L = 11, B = 3;
+const zc = (x: number) => 2.1 + 1.3 * Math.max(0, x / L) ** 2;
+const xs = [-L, -L * 0.5, L * 0.2, L * 0.65, L], an = [0.85, 1, 1, 0.62, 0];
+const hacerBarco = (s: number) => {
+  // s = 1: la proa a +a (hacia la ciudad); s = -1: hacia el cabo. Se ve la banda que da al mar.
+  const q = (x: number, y: number, z: number) => iso(s * x, y, z);
+  const borda = (lado: number) => xs.map((x, i) => q(x, lado * B * an[i], zc(x)));
+  const flot = xs.map((x, i) => q(x * 0.94, -B * an[i] * 0.8, 0));
+  return {
+    casco: pol(...borda(-1), ...[...flot].reverse()),
+    cubierta: pol(...borda(-1), ...borda(1).reverse().slice(1)),
+    timonera: pol(q(-8, -1.7, 2.1), q(-3, -1.7, 2.1), q(-3, -1.7, 5.1), q(-8, -1.7, 5.1)) + pol(q(-3, -1.7, 2.1), q(-3, 1.7, 2.1), q(-3, 1.7, 5.1), q(-3, -1.7, 5.1)),
+    ventanas: lin(q(-7.2, -1.7, 4.2), q(-3.8, -1.7, 4.2)) + lin(q(-3, -1.1, 4.2), q(-3, 1.1, 4.2)),
+    techo: pol(q(-8.4, -2.1, 5.1), q(-2.6, -2.1, 5.1), q(-2.6, 2.1, 5.1), q(-8.4, 2.1, 5.1)),
+    palo: lin(q(2, 0, zc(2)), q(2, 0, 11)) + lin(q(2, 0, 4.1), q(7, 0, 6)),
+    jarcia: lin(q(2, 0, 11), q(L, 0, zc(L))) + lin(q(2, 0, 11), q(-3, 0, 5.1)),
+    proa: lin(q(L + 1, -1.2, 0), q(L + 5, -2.6, 0)) + lin(q(L + 1, 1.2, 0), q(L + 4, 2.4, 0)),
+    estela: lin(q(-L - 1, -1.6, 0), q(-L - 13, -3.8, 0)) + lin(q(-L - 1, 1.6, 0), q(-L - 13, 3.8, 0)) + lin(q(-L - 15, -0.6, 0), q(-L - 22, -1, 0)) + lin(q(-L - 17, 2, 0), q(-L - 24, 2.6, 0)),
+  };
+};
+const barcos = [
+  // dur: lo que tarda en cruzar; el ciclo de 130 s deja un rato de mar sin barcos entre uno y otro
+  { dibujo: hacerBarco(1), d: camino([enPantalla(-120, costaY - 165), enPantalla(AMAX + 160, costaY - 165)]), empieza: 0.0, termina: 0.46, escala: 1.8 },
+  { dibujo: hacerBarco(-1), d: camino([enPantalla(AMAX + 160, costaY - 290), enPantalla(-120, costaY - 290)]), empieza: 0.52, termina: 0.98, escala: 1.65 },
+];
+const CICLO_MAR = 130;
+
+// ---------- camiones por la Ruta 3 ----------
+// Del oeste, pasando el cabo, por la costa hasta la rotonda y la circunvalación: llegan a la ciudad.
+// Caja y cabina en los ejes de la maqueta (metros, ×1,7), mirando a +a.
+const T = 1.7;
+const tq = (x: number, y: number, z: number) => iso(x * T, y * T, z * T);
+const camion = {
+  caja: pol(tq(-8, -1.3, 1), tq(4.5, -1.3, 1), tq(4.5, -1.3, 4.1), tq(-8, -1.3, 4.1)),
+  cajaFrente: pol(tq(4.5, -1.3, 1), tq(4.5, 1.3, 1), tq(4.5, 1.3, 4.1), tq(4.5, -1.3, 4.1)),
+  cajaTecho: pol(tq(-8, -1.3, 4.1), tq(4.5, -1.3, 4.1), tq(4.5, 1.3, 4.1), tq(-8, 1.3, 4.1)),
+  cabina: pol(tq(5, -1.2, 1), tq(7.6, -1.2, 1), tq(7.6, -1.2, 3.4), tq(5, -1.2, 3.4)),
+  cabinaFrente: pol(tq(7.6, -1.2, 1), tq(7.6, 1.2, 1), tq(7.6, 1.2, 3.4), tq(7.6, -1.2, 3.4)),
+  cabinaTecho: pol(tq(5, -1.2, 3.4), tq(7.6, -1.2, 3.4), tq(7.6, 1.2, 3.4), tq(5, 1.2, 3.4)),
+  vidrio: pol(tq(7.6, -1, 2.3), tq(7.6, 1, 2.3), tq(7.6, 1, 3.1), tq(7.6, -1, 3.1)),
+  ruedas: [-6.5, -4.6, 1.8, 6.4].map((x) => `M${tq(x, -1.35, 0.55).map(f1).join(' ')}h0`).join(''),
+};
+const camiones = [
+  { empieza: 4.2, dur: 34 },
+  { empieza: 15.5, dur: 38 },
+  { empieza: 27, dur: 31 },
+];
+
+// ---------- el avión ----------
+// Aterriza y despega en la pista real, hacia el oeste (contra el viento del oeste). La sombra lo
+// sigue por el suelo: cuanto más alto vuela, más lejos queda.
 const [este, oeste] = pista;
 const largoPista = Math.hypot(oeste[0] - este[0], oeste[1] - este[1]);
-const fa = (oeste[0] - este[0]) / largoPista, fy = (oeste[1] - este[1]) / largoPista; // hacia adelante
+const fa = (oeste[0] - este[0]) / largoPista, fy = (oeste[1] - este[1]) / largoPista;
 const sobrePista = (k: number, z: number) => {
-  // k: unidades desde la cabecera este (negativo: antes de la pista); z: altura sobre la pista
-  const zs = este[2] + ((oeste[2] - este[2]) * Math.min(1, Math.max(0, k / largoPista)));
+  const zs = este[2] + (oeste[2] - este[2]) * Math.min(1, Math.max(0, k / largoPista));
   return { aire: enPantalla(este[0] + fa * k, este[1] + fy * k, zs + z), suelo: enPantalla(este[0] + fa * k, este[1] + fy * k, zs) };
 };
-// recorrido: aproximación sobre la ciudad, toque, carrera hasta frenar; después despegue y trepada
 const tramos = [sobrePista(-300, 78), sobrePista(22, 0), sobrePista(150, 0), sobrePista(8, 0), sobrePista(128, 0), sobrePista(470, 92)];
-// El vuelo va con SMIL dentro del svg del cielo, en unidades de la maqueta. Con animaciones CSS
-// sobre divs, Chrome re-rasteriza la maqueta enmascarada en cada cuadro y en pantallas de 2x se
-// queda sin memoria: la maqueta desaparece. SMIL mueve el avión dentro del mismo svg sin eso.
-type Pt = [number, number];
-const tramo = (pts: Pt[]) => {
+const tramo = (pts: P[]) => {
   const l1 = Math.hypot(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]), l2 = Math.hypot(pts[2][0] - pts[1][0], pts[2][1] - pts[1][1]);
-  return { d: 'M' + pts.map(([u, v]) => `${u.toFixed(1)} ${v.toFixed(1)}`).join('L'), k: (l1 / (l1 + l2)).toFixed(4) };
+  return { d: camino(pts), k: (l1 / (l1 + l2)).toFixed(4) };
 };
 const llega = { aire: tramo([0, 1, 2].map((i) => tramos[i].aire)), suelo: tramo([0, 1, 2].map((i) => tramos[i].suelo)) };
 const sale = { aire: tramo([3, 4, 5].map((i) => tramos[i].aire)), suelo: tramo([3, 4, 5].map((i) => tramos[i].suelo)) };
@@ -85,72 +119,135 @@ const CICLO = '44s', ARRANQUE = '5.5s';
 const LLEGA = { keyTimes: '0;0.16;0.25;1', splines: '0 0 1 1;0.2 0.6 0.35 1;0 0 1 1', opacidad: '0;1;1;0;0', tiempos: '0;0.02;0.31;0.33;1', sombra: '0;0.12;0.28;0.28;0;0', tiemposSombra: '0;0.02;0.16;0.31;0.33;1' };
 // salida: espera (hasta 56 %), carrera acelerando (56-67 %), trepa (67-84 %)
 const SALE = { keyTimes: '0;0.56;0.67;0.84;1', splines: '0 0 1 1;0.55 0 0.9 0.6;0.3 0.2 0.6 1;0 0 1 1', opacidad: '0;0;1;1;0;0', tiempos: '0;0.555;0.58;0.8;0.84;1', sombra: '0;0;0.28;0.28;0;0', tiemposSombra: '0;0.555;0.58;0.67;0.84;1' };
-// el dibujo, en metros, en ejes del avión (x hacia la nariz, y hacia el ala izquierda), llevado a
-// los ejes de la maqueta y proyectado sin desplazamiento (el centro del avión en 0,0)
 const ESC = 1.35;
-const la = -fy, ly = fa; // hacia el ala
-const pa = (x: number, y: number, z = 0): [number, number] => {
+const la = -fy, ly = fa;
+const pa = (x: number, y: number, z = 0): P => {
   const a = (fa * x + la * y) * ESC, b = (fy * x + ly * y) * ESC;
   return [-C * (a + b), S * (a - b) - z * ESC];
 };
-const poly = (...p: [number, number][]) => 'M' + p.map(([u, v]) => `${u.toFixed(1)} ${v.toFixed(1)}`).join('L') + 'Z';
 const avion = {
-  fuselaje: poly(pa(17, 0), pa(15.6, 1.2), pa(13, 1.9), pa(-13, 1.9), pa(-17, 0.6), pa(-17.6, 0), pa(-17, -0.6), pa(-13, -1.9), pa(13, -1.9), pa(15.6, -1.2)),
-  alas: poly(pa(4, 1.8), pa(-5, 16.5), pa(-8, 16.5), pa(-4.5, 1.8)) + poly(pa(4, -1.8), pa(-5, -16.5), pa(-8, -16.5), pa(-4.5, -1.8)),
-  cola: poly(pa(-13.5, 1.4), pa(-16.6, 6.2), pa(-18, 6.2), pa(-17, 1)) + poly(pa(-13.5, -1.4), pa(-16.6, -6.2), pa(-18, -6.2), pa(-17, -1)),
-  motores: [6, -6].map((y) => poly(pa(2.6, y + 0.9), pa(2.6, y - 0.9), pa(-1.2, y - 0.9), pa(-1.2, y + 0.9))).join(''),
-  deriva: poly(pa(-12, 0, 0.4), pa(-16.6, 0, 7.6), pa(-18.2, 0, 7.6), pa(-17.4, 0, 0.4)),
-  ventanillas: 'M' + [pa(11, 1.1), pa(-11, 1.1)].map(([u, v]) => `${u.toFixed(1)} ${v.toFixed(1)}`).join('L'),
+  fuselaje: pol(pa(17, 0), pa(15.6, 1.2), pa(13, 1.9), pa(-13, 1.9), pa(-17, 0.6), pa(-17.6, 0), pa(-17, -0.6), pa(-13, -1.9), pa(13, -1.9), pa(15.6, -1.2)),
+  alas: pol(pa(4, 1.8), pa(-5, 16.5), pa(-8, 16.5), pa(-4.5, 1.8)) + pol(pa(4, -1.8), pa(-5, -16.5), pa(-8, -16.5), pa(-4.5, -1.8)),
+  cola: pol(pa(-13.5, 1.4), pa(-16.6, 6.2), pa(-18, 6.2), pa(-17, 1)) + pol(pa(-13.5, -1.4), pa(-16.6, -6.2), pa(-18, -6.2), pa(-17, -1)),
+  motores: [6, -6].map((y) => pol(pa(2.6, y + 0.9), pa(2.6, y - 0.9), pa(-1.2, y - 0.9), pa(-1.2, y + 0.9))).join(''),
+  deriva: pol(pa(-12, 0, 0.4), pa(-16.6, 0, 7.6), pa(-18.2, 0, 7.6), pa(-17.4, 0, 0.4)),
+  ventanillas: camino([pa(11, 1.1), pa(-11, 1.1)]),
 };
-const sombra = avion.fuselaje + avion.alas + avion.cola;
+const sombraAvion = avion.fuselaje + avion.alas + avion.cola;
 
-// --- satélite: cruza el cielo por una órbita punteada, de la estepa hacia el mar abierto ---
-// en unidades de la maqueta (el cielo es lo que queda arriba y a la derecha del bloque)
-const orbita = 'M700 70 Q1380 120 1700 820';
+// ---------- el satélite ----------
+// Sube desde el mar, pasa sobre el cabo y la estepa y se pone antes de llegar al texto: un arco
+// de órbita que no cruza ni la barra ni el titular (en 1440 × 900 va de (1440, 520) a (720, 200)
+// con la cima en (1100, 110)). Debajo, la línea hasta el suelo y la huella que se enciende.
+const [mx, my] = m.lugares.mision;
+const O0: P = [bx + 126, by + 305], O1: P = [bx - 176, by - 314], O2: P = [mx - 196, my - 202];
+const orbita = `M${f1(O0[0])} ${f1(O0[1])} Q${f1(O1[0])} ${f1(O1[1])} ${f1(O2[0])} ${f1(O2[1])}`;
+const panel = (s: number) => {
+  // un ala de paneles: 3 × 2 celdas, en el plano del satélite
+  const x0 = s * 6, x1 = s * 24;
+  let d = `M${x0} -4.5H${x1}V4.5H${x0}Z`;
+  for (let i = 1; i < 6; i++) d += `M${f1(x0 + ((x1 - x0) * i) / 6)} -4.5V4.5`;
+  return d + `M${x0} 0H${x1}`;
+};
+
+// ---------- el mar ----------
+// Olas sueltas, cortas y paralelas a la costa, que aparecen, avanzan un poco hacia la orilla y se
+// van; cada una a su ritmo.
+const deriva = enPantalla(0, 9).map((v, i) => v - enPantalla(0, 0)[i]);
+const olas = Array.from({ length: 34 }, () => {
+  const a = 30 + azar() * (AMAX - 60), y = costaY - 26 - azar() ** 0.75 * 330, l = 5 + azar() * 6;
+  const p0 = enPantalla(a - l, y), p1 = enPantalla(a, y + 1.4), p2 = enPantalla(a + l, y);
+  return { d: `M${f1(p0[0])} ${f1(p0[1])}Q${f1(p1[0])} ${f1(p1[1])} ${f1(p2[0])} ${f1(p2[1])}`, dur: (6 + azar() * 5).toFixed(1), desde: (azar() * 10).toFixed(1), w: (0.5 + azar() * 0.5).toFixed(2) };
+});
 ---
 <section class="hero-a" aria-labelledby="hero-titulo">
   <div class="ventana">
     <div class="plano">
-      <div role="img" aria-label="Maqueta grabada de la costa norte de Río Grande, Tierra del Fuego, vista desde el mar: adelante la ciudad con la Torre de Agua junto a la desembocadura del río Grande; detrás el aeropuerto, la Ruta 3 y la Misión Salesiana; al fondo, el Cabo Domingo con su baliza encendida sobre el acantilado. Un barco chico llega a la boca del río.">
+      <div role="img" aria-label="Maqueta grabada de la costa norte de Río Grande, Tierra del Fuego, vista desde el mar: adelante la ciudad con la Torre de Agua junto a la desembocadura del río Grande; detrás el aeropuerto, la Ruta 3 y la Misión Salesiana; al fondo, el Cabo Domingo con su baliza encendida sobre el acantilado. Por el mar pasa un barco, por la ruta llegan camiones a la ciudad, un avión aterriza y despega y un satélite cruza el cielo.">
         <Maqueta />
       </div>
-      <div class="barco" aria-hidden="true" style={`--x:${llegada.x};--y:${llegada.y};--dx:${salida.x - llegada.x};--dy:${salida.y - llegada.y}`}>
-        <svg viewBox="-24 -27 74 38">
-          <g transform="scale(1.8)" fill="none" stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round">
-            <path class="estela" d={barco.estela} stroke="var(--tinta-suave)" stroke-width="0.4" />
-            <path d={barco.agua} stroke="var(--tinta-suave)" stroke-width="0.4" />
-            <path d={barco.casco} fill="var(--tinta)" stroke-width="0.5" />
-            <path d={barco.cubierta} fill="var(--papel)" stroke-width="0.5" />
-            <path d={barco.timonera} fill="var(--papel)" stroke-width="0.45" />
-            <path d={barco.ventanas} stroke-width="0.6" />
-            <path d={barco.techo} fill="var(--tinta)" stroke-width="0.4" />
-            <path d={barco.palo} stroke-width="0.5" />
-            <path d={barco.jarcia} stroke-width="0.25" />
-          </g>
-        </svg>
-      </div>
       <svg class="cielo" aria-hidden="true" viewBox={`0 0 ${m.ancho} ${m.alto}`}>
-        <path id="a-orbita" d={orbita} fill="none" stroke="var(--tinta-suave)" stroke-width="0.9" stroke-dasharray="1.5 5" stroke-linecap="round" />
-        <g class="satelite" opacity="0">
-          <g transform="scale(1.6)" fill="var(--papel)" stroke="var(--tinta)" stroke-width="0.7" stroke-linejoin="round">
-            <path d="M-16 -3.2h10v6.4h-10zM6 -3.2h10v6.4h-10z" />
-            <path d="M-13.5 -3.2v6.4M-11 -3.2v6.4M-8.5 -3.2v6.4M8.5 -3.2v6.4M11 -3.2v6.4M13.5 -3.2v6.4M-16 0h10M6 0h10" fill="none" stroke-width="0.4" />
-            <path d="M-6 0h2.6M6 0h-2.6" fill="none" />
-            <path d="M-3.4 -3.6h6.8v7.2h-6.8z" fill="var(--tinta)" />
-            <path d="M0 3.6v3M-2.4 8.6a2.6 1.4 0 0 1 4.8 0" fill="none" stroke-width="0.6" />
-          </g>
-          <!-- arranca 30 s adelantado: aparece ya sobre la maqueta, no asomando por arriba -->
-          <animateMotion dur="70s" begin="-30s" repeatCount="indefinite" rotate="auto">
-            <mpath href="#a-orbita" />
-          </animateMotion>
-          <animate attributeName="opacity" from="0" to="1" begin="4s" dur="1.5s" fill="freeze" />
+        <defs>
+          <radialGradient id="a-luz" gradientUnits="userSpaceOnUse" cx="0" cy="0" r={R}>
+            <stop offset="0" style="stop-color:var(--papel)" stop-opacity="0.95" />
+            <stop offset="0.45" style="stop-color:var(--papel)" stop-opacity="0.6" />
+            <stop offset="1" style="stop-color:var(--papel)" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="a-rayo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r={R}>
+            <stop offset="0" style="stop-color:var(--tinta)" />
+            <stop offset="0.5" style="stop-color:var(--tinta)" stop-opacity="0.5" />
+            <stop offset="1" style="stop-color:var(--tinta)" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="a-aura">
+            <stop offset="0" style="stop-color:var(--papel)" />
+            <stop offset="0.55" style="stop-color:var(--papel)" stop-opacity="0.85" />
+            <stop offset="1" style="stop-color:var(--papel)" stop-opacity="0" />
+          </radialGradient>
+          <path id="a-orbita" d={orbita} />
+          <linearGradient id="a-orbita-g" gradientUnits="userSpaceOnUse" x1={O0[0]} y1={O0[1]} x2={O2[0]} y2={O2[1]}>
+            <stop offset="0" style="stop-color:var(--tinta-suave)" stop-opacity="0" />
+            <stop offset="0.18" style="stop-color:var(--tinta-suave)" stop-opacity="0.7" />
+            <stop offset="0.82" style="stop-color:var(--tinta-suave)" stop-opacity="0.7" />
+            <stop offset="1" style="stop-color:var(--tinta-suave)" stop-opacity="0" />
+          </linearGradient>
+          <path id="a-ruta" d={m.recorrido} />
+        </defs>
+
+        <!-- el mar: olas sueltas que van hacia la orilla -->
+        <g class="olas" fill="none" stroke="var(--tinta-suave)" stroke-linecap="round" opacity="0">
+          {olas.map((o) => (
+            <path d={o.d} stroke-width={o.w} opacity="0">
+              <animate attributeName="opacity" values="0;0.9;0" dur={`${o.dur}s`} begin={`-${o.desde}s`} repeatCount="indefinite" />
+              <animateTransform attributeName="transform" type="translate" from="0 0" to={`${f1(deriva[0])} ${f1(deriva[1])}`} dur={`${o.dur}s`} begin={`-${o.desde}s`} repeatCount="indefinite" />
+            </path>
+          ))}
+          <animate attributeName="opacity" from="0" to="1" begin="2.2s" dur="1.5s" fill="freeze" />
         </g>
-        <!-- el avión: aterriza hacia el oeste, frena y se va a la plataforma; después despega y trepa.
-             La sombra lo sigue por el suelo: cuanto más alto vuela, más lejos queda -->
+
+        <!-- barcos: uno hacia la ciudad, después otro más afuera hacia el cabo -->
+        {barcos.map((b) => (
+          <g opacity="0">
+            <g transform={`scale(${b.escala})`} fill="none" stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round">
+              <path d={b.dibujo.estela + b.dibujo.proa} stroke="var(--tinta-suave)" stroke-width="0.4" />
+              <g>
+                <path d={b.dibujo.casco} fill="var(--tinta)" stroke-width="0.5" />
+                <path d={b.dibujo.cubierta} fill="var(--papel)" stroke-width="0.5" />
+                <path d={b.dibujo.timonera} fill="var(--papel)" stroke-width="0.45" />
+                <path d={b.dibujo.ventanas} stroke-width="0.6" />
+                <path d={b.dibujo.techo} fill="var(--tinta)" stroke-width="0.4" />
+                <path d={b.dibujo.palo} stroke-width="0.5" />
+                <path d={b.dibujo.jarcia} stroke-width="0.25" />
+                <animateTransform attributeName="transform" type="rotate" values="-1;1;-1" dur="5.5s" repeatCount="indefinite" />
+              </g>
+            </g>
+            <animateMotion path={b.d} dur={`${CICLO_MAR}s`} begin="4s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes={`0;${b.empieza};${b.termina};1`} calcMode="linear" />
+            <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes={`0;${b.empieza};${(b.empieza + 0.01).toFixed(3)};${(b.termina - 0.01).toFixed(3)};${b.termina};1`} dur={`${CICLO_MAR}s`} begin="4s" repeatCount="indefinite" />
+          </g>
+        ))}
+
+        <!-- camiones por la Ruta 3, llegando a la ciudad -->
+        {camiones.map((k) => (
+          <g opacity="0" stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round">
+            <path d={camion.cajaTecho} fill="var(--papel)" stroke-width="0.45" />
+            <path d={camion.caja} fill="var(--papel)" stroke-width="0.5" />
+            <path d={camion.cajaFrente} fill="var(--tinta)" stroke-width="0.4" />
+            <path d={camion.cabinaTecho} fill="var(--papel)" stroke-width="0.4" />
+            <path d={camion.cabina} fill="var(--tinta)" stroke-width="0.4" />
+            <path d={camion.cabinaFrente} fill="var(--papel)" stroke-width="0.45" />
+            <path d={camion.vidrio} fill="var(--tinta)" stroke="none" />
+            <path d={camion.ruedas} fill="none" stroke-width="1.4" />
+            <animateMotion dur={`${k.dur}s`} begin={`${k.empieza}s`} repeatCount="indefinite">
+              <mpath href="#a-ruta" />
+            </animateMotion>
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.9;1" dur={`${k.dur}s`} begin={`${k.empieza}s`} repeatCount="indefinite" />
+          </g>
+        ))}
+
+        <!-- el avión -->
         <g class="vuelos">
           {[{ v: llega, t: LLEGA }, { v: sale, t: SALE }].map(({ v, t }) => (
             <>
-              <path d={sombra} fill="var(--tinta)" opacity="0">
+              <path d={sombraAvion} fill="var(--tinta)" opacity="0">
                 <animateMotion path={v.suelo.d} dur={CICLO} begin={ARRANQUE} repeatCount="indefinite" calcMode="spline" keyPoints={t.keyTimes.split(';').length === 4 ? `0;${v.suelo.k};1;1` : `0;0;${v.suelo.k};1;1`} keyTimes={t.keyTimes} keySplines={t.splines} />
                 <animate attributeName="opacity" values={t.sombra} keyTimes={t.tiemposSombra} dur={CICLO} begin={ARRANQUE} repeatCount="indefinite" />
               </path>
@@ -166,21 +263,59 @@ const orbita = 'M700 70 Q1380 120 1700 820';
             </>
           ))}
         </g>
-      </svg>
-      <div class="haz" aria-hidden="true" style={`--x:${luz.x};--y:${luz.y.toFixed(1)};--r:${R}`}>
-        <svg viewBox={`0 -56 ${R} 112`}>
-          <defs>
-            <radialGradient id="a-haz" gradientUnits="userSpaceOnUse" cx="0" cy="0" r={R}>
-              <stop offset="0" style="stop-color:var(--tinta)" />
-              <stop offset="0.45" style="stop-color:var(--tinta)" stop-opacity="0.55" />
-              <stop offset="1" style="stop-color:var(--tinta)" stop-opacity="0" />
-            </radialGradient>
-          </defs>
-          <path d={rayos} fill="none" stroke="url(#a-haz)" stroke-width="1" stroke-linecap="round" />
-        </svg>
-      </div>
-      <svg class="destello" aria-hidden="true" viewBox="-12 -12 24 24" style={`--x:${luz.x};--y:${luz.y.toFixed(1)}`}>
-        <path d={destello} fill="none" stroke="var(--tinta)" stroke-width="0.8" stroke-linecap="round" />
+
+        <!-- la luz de la baliza: el haz que barre el mar y el destello cuando mira hacia acá -->
+        <g transform={`translate(${f1(luz.x)} ${f1(luz.y)})`} opacity="0">
+          <g transform={`matrix(${-C} ${S} ${-C} ${-S} 0 0)`}>
+            <g opacity="0">
+              <path d={cuna(11, 6, R * 0.75)} fill="url(#a-luz)" opacity="0.55" />
+              <path d={cuna(6.2, 5, R)} fill="url(#a-luz)" />
+              <path d={bordesHaz} fill="none" stroke="url(#a-rayo)" stroke-width="0.9" stroke-linecap="round" />
+              <path d={rayosHaz} fill="none" stroke="url(#a-rayo)" stroke-width="0.45" stroke-linecap="round" opacity="0.5" />
+              <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur={`${VUELTA}s`} begin={`${f1(FASE)}s`} repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5;0.54;0.95;0.985;1" dur={`${VUELTA}s`} begin={`${f1(FASE)}s`} repeatCount="indefinite" />
+            </g>
+          </g>
+          <circle r="20" fill="url(#a-aura)" />
+          <g fill="none" stroke="var(--tinta)" stroke-linecap="round">
+            <path d={estrella(24, 4.2, 9, 15)} stroke-width="0.65" />
+            <animate attributeName="opacity" values="0.4;0.4;1;0.4;0.4" keyTimes="0;0.83;0.875;0.92;1" dur={`${VUELTA}s`} begin={`${f1(FASE)}s`} repeatCount="indefinite" />
+            <animateTransform attributeName="transform" type="scale" values="0.7;0.7;1.8;0.7;0.7" keyTimes="0;0.83;0.875;0.92;1" dur={`${VUELTA}s`} begin={`${f1(FASE)}s`} repeatCount="indefinite" />
+          </g>
+          <animate attributeName="opacity" from="0" to="1" begin="3.3s" dur="1s" fill="freeze" />
+        </g>
+
+        <!-- el satélite y su órbita -->
+        <g class="satelite" opacity="0">
+          <use href="#a-orbita" fill="none" stroke="url(#a-orbita-g)" stroke-width="0.9" stroke-dasharray="1.5 5" stroke-linecap="round" />
+          <g opacity="0">
+            <!-- la línea al suelo y la huella, que se enciende cada tanto -->
+            <path d="M0 8V150" stroke="var(--tinta-suave)" stroke-width="0.6" stroke-dasharray="1 3.5" opacity="0.7" />
+            <g transform="translate(0 150)">
+              <ellipse rx="18" ry="10.4" fill="none" stroke="var(--tinta)" stroke-width="0.7">
+                <animate attributeName="rx" values="4;26" dur="2.8s" repeatCount="indefinite" />
+                <animate attributeName="ry" values="2.3;15" dur="2.8s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.9;0" dur="2.8s" repeatCount="indefinite" />
+              </ellipse>
+              <ellipse rx="3" ry="1.7" fill="var(--tinta)" />
+            </g>
+            <!-- el satélite: cuerpo con aislante rayado, dos alas de paneles, antena y sensor -->
+            <g stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round" transform="scale(1.5)">
+              <path d={panel(-1) + panel(1)} fill="var(--papel)" stroke-width="0.6" />
+              <path d="M-6 0H-3.5M6 0H3.5" fill="none" stroke-width="0.8" />
+              <path d="M-3.5 -4.5H3.5V4.5H-3.5Z" fill="var(--papel)" stroke-width="0.7" />
+              <path d="M-3.5 -2.5L-1.5 -4.5M-3.5 0L1 -4.5M-3.5 2.5L3.5 -4.5M-1.5 4.5L3.5 -0.5M1 4.5L3.5 2" fill="none" stroke-width="0.4" />
+              <path d="M0 -4.5V-7.5M-2.6 -9.4Q0 -6.6 2.6 -9.4Z" fill="var(--tinta)" stroke-width="0.5" />
+              <path d="M-1.2 4.5H1.2V6.4H-1.2Z" fill="var(--tinta)" stroke-width="0.4" />
+            </g>
+            <!-- cruza en 40 s y vuelve a subir 12 s después; arranca adelantado para verse ya al cargar -->
+            <animateMotion dur="52s" begin="-14s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;0.77;1" calcMode="linear">
+              <mpath href="#a-orbita" />
+            </animateMotion>
+            <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.08;0.69;0.77;1" dur="52s" begin="-14s" repeatCount="indefinite" />
+          </g>
+          <animate attributeName="opacity" from="0" to="1" begin="4s" dur="1.5s" fill="freeze" />
+        </g>
       </svg>
     </div>
   </div>
@@ -194,166 +329,49 @@ const orbita = 'M700 70 Q1380 120 1700 820';
       <a class="secundario" href="#laboratorio">Conocer el laboratorio ↓</a>
     </div>
   </div>
-
 </section>
 
 <script>
-  // lo que no está en pantalla no se anima
+  // lo que no está en pantalla no se anima; con movimiento reducido, todo quieto en un buen momento
   const hero = document.querySelector('.hero-a');
   const cielo = hero?.querySelector<SVGSVGElement>('.cielo');
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (cielo && quieto) {
-    // SMIL no escucha a CSS: queda quieto con el avión parado en la pista y el satélite sobre el mar
+    // SMIL no escucha a CSS: queda el avión parado en la pista, el haz sobre el mar, un barco y los camiones en la ruta
     cielo.pauseAnimations();
     cielo.setCurrentTime(5.5 + 0.28 * 44);
   }
-  if (hero)
-    new IntersectionObserver(([e]) => {
-      hero.classList.toggle('fuera', !e.isIntersecting);
-      if (cielo && !quieto) e.isIntersecting ? cielo.unpauseAnimations() : cielo.pauseAnimations();
-    }).observe(hero);
+  if (hero && cielo && !quieto)
+    new IntersectionObserver(([e]) => (e.isIntersecting ? cielo.unpauseAnimations() : cielo.pauseAnimations())).observe(hero);
 </script>
 
 <style>
   .hero-a {
     --alto: max(680px, 100svh);
-    /* px por unidad de la maqueta: la escala la da el ancho (la ciudad se corta contra el borde
-       izquierdo) hasta donde deja el alto: el cabo debajo de la barra y la boca del río adentro */
-    --u: min(100vw * 0.00068, (var(--alto) - 100px) / 803);
-    --w: calc(var(--u) * 1443); /* el texto se mide con la misma escala que el dibujo */
+    /* px por unidad de la maqueta: la escala la da el ancho hasta donde deja el alto */
+    --u: min(100vw * 0.00076, (var(--alto) - 90px) / 760);
+    --w: calc(var(--u) * 1300); /* el texto se mide con la misma escala que el dibujo */
     position: relative;
     height: var(--alto);
     overflow: hidden;
   }
-  /* el dibujo se funde en diagonal antes de llegar al texto: el papel del titular queda limpio */
+  /* el papel del titular queda limpio: un claro ovalado alrededor del texto, sin rectas */
   .ventana {
+    --claro: radial-gradient(calc(var(--w) * 0.43) calc(var(--w) * 0.27) at calc(var(--margen) + var(--w) * 0.19) calc(var(--w) * 0.17), transparent 62%, #000 100%);
     position: absolute;
     inset: 0;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(150deg, transparent calc(var(--w) * 0.4), #000 calc(var(--w) * 0.432));
-    mask-image: linear-gradient(150deg, transparent calc(var(--w) * 0.4), #000 calc(var(--w) * 0.432));
+    -webkit-mask-image: var(--claro);
+    mask-image: var(--claro);
   }
-  /* y debajo de la barra: un velo de papel para que el relieve no le llegue a los enlaces */
-  .ventana::after {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: 104px;
-    background: linear-gradient(var(--papel) 64px, transparent);
-  }
-  /* el plano de la maqueta (1732 × 1111 unidades); lo que va encima se ubica con --x y --y */
+  /* el plano de la maqueta; lo que se mueve va en .cielo, con sus mismas unidades */
   .plano {
     position: absolute;
-    right: calc(var(--u) * -182);
-    bottom: calc(var(--u) * -52);
-    width: calc(var(--u) * 1732);
-    height: calc(var(--u) * 1111);
+    right: calc(var(--u) * -230);
+    bottom: calc(var(--u) * -175);
+    width: calc(var(--u) * 1935);
+    height: calc(var(--u) * 1229);
   }
-  .barco,
-  .haz,
-  .destello {
-    position: absolute;
-    left: calc(var(--u) * var(--x));
-    top: calc(var(--u) * var(--y));
-  }
-
-  /* la linterna se enciende */
-  .destello {
-    width: calc(var(--u) * 24);
-    height: calc(var(--u) * 24);
-    margin: calc(var(--u) * -12) 0 0 calc(var(--u) * -12);
-    animation: a-encender 0.9s 3.3s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
-  }
-  @keyframes a-encender {
-    from {
-      opacity: 0;
-      transform: scale(0.3);
-    }
-  }
-
-  /* el haz: la matriz isométrica acuesta el abanico; el giro lo lleva del horizonte a la costa.
-     Aparece cuando la linterna ya está encendida */
-  .haz {
-    width: 0;
-    height: 0;
-    transform: matrix(-0.866025, 0.5, -0.866025, -0.5, 0, 0);
-    animation: a-asomar 1.2s 3.8s backwards;
-  }
-  @keyframes a-asomar {
-    from {
-      opacity: 0;
-    }
-  }
-  .haz svg {
-    position: absolute;
-    left: 0;
-    top: calc(var(--u) * -56);
-    width: calc(var(--u) * var(--r));
-    height: calc(var(--u) * 112);
-    transform-origin: 0 50%;
-    transform: rotate(-52deg);
-    /* el ciclo arranca 10 s adelantado: la primera pasada empieza donde el haz ya se ve largo,
-       apuntando al mar de adelante, y no asomando por el borde derecho */
-    animation: a-barrer 24s linear -10s infinite;
-  }
-  @keyframes a-barrer {
-    0% {
-      transform: rotate(-110deg);
-      opacity: 0;
-    }
-    4%,
-    80% {
-      opacity: 1;
-    }
-    86%,
-    100% {
-      transform: rotate(-27deg);
-      opacity: 0;
-    }
-  }
-
-  /* el barco entra desde el borde de mar y fondea frente a la boca del río */
-  .barco {
-    width: calc(var(--u) * 74);
-    height: calc(var(--u) * 38);
-    margin: calc(var(--u) * -27) 0 0 calc(var(--u) * -24);
-    animation: a-llegar 26s cubic-bezier(0.25, 0.5, 0.3, 1) 3.4s backwards;
-  }
-  .barco svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-    animation: a-vaiven 5s ease-in-out infinite alternate;
-  }
-  .estela {
-    opacity: 0;
-    animation: a-estela 26s linear 3.4s backwards;
-  }
-  @keyframes a-llegar {
-    from {
-      transform: translate(calc(var(--u) * var(--dx)), calc(var(--u) * var(--dy)));
-      opacity: 0;
-    }
-    8% {
-      opacity: 1;
-    }
-  }
-  @keyframes a-estela {
-    0%,
-    70% {
-      opacity: 1;
-    }
-  }
-  @keyframes a-vaiven {
-    from {
-      transform: translateY(-0.7px) rotate(-0.8deg);
-    }
-    to {
-      transform: translateY(0.7px) rotate(0.8deg);
-    }
-  }
-  /* el satélite y su órbita, en el cielo de la maqueta */
   .cielo {
     position: absolute;
     inset: 0;
@@ -362,33 +380,14 @@ const orbita = 'M700 70 Q1380 120 1700 820';
     overflow: visible;
     pointer-events: none;
   }
-  #a-orbita {
-    opacity: 0.55;
-    animation: a-asomar 1.5s 4s backwards;
-  }
-
-  .fuera :is(.destello, .haz, .haz svg, .barco, .barco svg, .estela) {
-    animation-play-state: paused;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .destello,
-    .haz,
-    .haz svg,
-    .barco,
-    .barco svg,
-    .estela,
-    #a-orbita {
-      animation: none;
-    }
-  }
 
   .texto {
     position: relative;
     z-index: 2;
-    padding: max(84px, var(--w) * 0.063) var(--margen) 0;
+    padding: max(84px, var(--w) * 0.07) var(--margen) 0;
   }
   .coordenadas {
-    margin-bottom: calc(var(--w) * 0.011);
+    margin-bottom: calc(var(--w) * 0.012);
     font: 400 11px var(--mono);
     letter-spacing: 0.12em;
     color: var(--tinta-suave);
@@ -396,20 +395,20 @@ const orbita = 'M700 70 Q1380 120 1700 820';
   h1 {
     font-family: var(--serif);
     font-weight: 400;
-    font-size: calc(var(--w) * 0.045);
+    font-size: calc(var(--w) * 0.05);
     line-height: 1;
     letter-spacing: -0.01em;
     max-width: 14em;
     text-wrap: balance;
   }
   .bajada {
-    margin-top: calc(var(--w) * 0.011);
-    font-size: max(15px, var(--w) * 0.0128);
+    margin-top: calc(var(--w) * 0.012);
+    font-size: max(15px, var(--w) * 0.0142);
     line-height: 1.45;
     max-width: 46ch;
   }
   .acciones {
-    margin-top: calc(var(--w) * 0.016);
+    margin-top: calc(var(--w) * 0.018);
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -417,7 +416,7 @@ const orbita = 'M700 70 Q1380 120 1700 820';
   .acciones a {
     padding: 0.9em 1.35em;
     font-weight: 600;
-    font-size: max(14px, var(--w) * 0.011);
+    font-size: max(14px, var(--w) * 0.0122);
     text-decoration: none;
     white-space: nowrap;
   }
@@ -436,7 +435,7 @@ const orbita = 'M700 70 Q1380 120 1700 820';
   }
 
   /* pantallas angostas: el texto arriba; abajo, una ventana de la maqueta sobre el cabo,
-     con la baliza y el haz. El barco queda lejos, en la boca: no se muestra. */
+     con la baliza, la luz y la Misión. El avión y el satélite quedan afuera: no se muestran. */
   @media (max-width: 900px) {
     .hero-a {
       --u: min(100vw / 460, 1.25px);
@@ -476,12 +475,11 @@ const orbita = 'M700 70 Q1380 120 1700 820';
     .plano {
       right: auto;
       bottom: auto;
-      left: calc(47vw - var(--u) * 1375);
-      top: calc(38% - var(--u) * 324);
+      left: calc(47vw - var(--u) * 1578);
+      top: calc(38% - var(--u) * 372);
     }
-    .barco,
     .vuelos,
-    .ventana::after {
+    .satelite {
       display: none;
     }
   }
