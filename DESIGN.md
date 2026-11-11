@@ -199,6 +199,9 @@ La costa norte de Río Grande en isométrica, vista desde el mar: mar abierto co
 ### Viñetas isométricas
 Capilla de la Misión, Torre de Agua, baliza, barco, camiones, avión y satélite: dibujos de línea en los ejes comunes, más grandes que su escala real para leerse, con papel de relleno, tinta llena en techos rojos o caras a la sombra y rayado para la luz.
 
+### El cierre
+Hablemos termina con una ventana sobre el cabo de la misma maqueta del hero, reusada con `<use>` (no se dibuja dos veces) y apagada en el papel hacia el texto, arriba y abajo; el haz de la baliza es el mismo del hero y gira a su ritmo. La página abre mirando la costa y cierra con la misma luz encendida.
+
 ### Movimiento
 - **Impresión al cargar** (una vez, ~3.5 s): la costa se traza, aparece el mar, se levanta el cabo con su relieve, se traza la ruta, la ciudad crece desde la plaza de la torre y al final aparecen las viñetas.
 - **Entrada de la letra** (después del dibujo): cada pieza baja 7 px y se asienta en 1.8 s, con una curva lenta y sin rebote; primero la barra, después coordenadas, titular, bajada y botones. Si la persona hace scroll, toca o aprieta una tecla, todo aparece enseguida.

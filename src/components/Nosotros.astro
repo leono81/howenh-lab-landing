@@ -1,28 +1,45 @@
 ---
-// Nosotros (quieto, solo letra) y Contacto. Sin nombres de personas (Leono, 2026-11-10) y sin significados de
-// las palabras hasta que estén confirmados.
+// Nosotros (solo letra) y Contacto, que cierra con el cabo de la maqueta y su luz encendida
+// (elegido en el canvas, opción C, 2026-11-11). Sin nombres de personas (Leono, 2026-11-10), sin
+// significados de las palabras hasta que estén confirmados y sin nombrar la ciudad (Leono,
+// 2026-11-11): quien es de acá la reconoce.
+// El cabo no se dibuja de nuevo: es la misma lámina del hero (#maqueta-lamina) y el mismo haz
+// (#haz-baliza), reusados con <use> y vistos por una ventana sobre la baliza.
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
+const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la linterna a 154,59 del borde
 ---
 <section class="seccion nosotros" id="nosotros" aria-labelledby="nos-titulo">
-  <h2 id="nos-titulo">Desde Río Grande</h2>
+  <h2 id="nos-titulo">Desde la isla</h2>
   <div class="cuerpo">
-    <p class="dicho">Howenh Labs trabaja en Río Grande, sobre la costa atlántica de Tierra del Fuego. Hacemos software para el lugar donde vivimos y, desde acá, para el resto del país.</p>
-    <p>Los nombres del laboratorio y de sus productos vienen de las lenguas selk'nam y yámana. Es nuestra forma de decir de dónde somos.</p>
-    <p>Si te interesa trabajar con nosotros, escribinos a <a href="mailto:contacto@howenh-labs.com">contacto@howenh-labs.com</a>.</p>
+    <p class="dicho">Howenh Labs trabaja sobre la costa atlántica de Tierra del Fuego. Hacemos software para el lugar donde vivimos y, desde acá, para el resto del país.</p>
+    <p>Esta tierra tenía nombre mucho antes de llamarse Tierra del Fuego. Ahí tiene raíz nuestra identidad, y de ahí vienen nuestros nombres: de las lenguas de sus pueblos originarios, las primeras voces de la isla.</p>
   </div>
 </section>
 
 <section class="seccion contacto" id="contacto" aria-labelledby="contacto-titulo">
-  <h2 id="contacto-titulo">Hablemos</h2>
-  <p class="entrada">Contanos qué necesitás y coordinamos una reunión.</p>
-  <div class="acciones">
-    <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar una reunión →</a>
-    <a class="secundario" href="mailto:contacto@howenh-labs.com">contacto@howenh-labs.com</a>
+  <div class="texto">
+    <h2 id="contacto-titulo">Hablemos</h2>
+    <p class="entrada">Contanos qué necesitás y coordinamos una reunión. Si querés trabajar con nosotros, también es por acá.</p>
+    <div class="acciones">
+      <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar una reunión →</a>
+      <a class="secundario" href="mailto:contacto@howenh-labs.com">contacto@howenh-labs.com</a>
+    </div>
   </div>
+  <figure class="cabo">
+    <svg viewBox={ventana} role="img" aria-label="El cabo de la lámina de arriba, con la baliza encendida sobre el acantilado y el mar abajo">
+      <use href="#maqueta-lamina" />
+    </svg>
+    <!-- la luz en su propia capa, como en el hero: lo que se mueve no redibuja el grabado -->
+    <svg class="luz" viewBox={ventana} aria-hidden="true">
+      <use href="#haz-baliza" />
+    </svg>
+  </figure>
 </section>
 
 <style>
   .nosotros {
+    position: relative; /* la letra va encima del papel con que se apaga el cabo, que sube hasta acá */
+    z-index: 1;
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: 32px clamp(40px, 6vw, 112px);
@@ -32,21 +49,68 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     line-height: 1.55;
     max-width: 52ch;
   }
-  .cuerpo p + p {
-    margin-top: 16px;
-  }
   .cuerpo .dicho {
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     font: 400 clamp(24px, 2.4vw, 36px) / 1.22 var(--serif);
     max-width: 24em;
     text-wrap: pretty;
   }
+  /* Hablemos a la izquierda y, a sangre por la derecha, el cabo que se apaga en el papel */
+  .contacto {
+    padding-top: clamp(24px, 4vw, 72px);
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+    gap: 0 clamp(40px, 6vw, 112px);
+  }
+  .contacto .texto {
+    padding-top: clamp(80px, 11vw, 190px);
+  }
   .contacto .acciones {
-    margin-top: 32px;
+    margin-top: 28px;
+  }
+  .cabo {
+    position: relative;
+    justify-self: end;
+    width: min(680px, 100% + var(--margen));
+    aspect-ratio: 1;
+    margin: calc(-1 * clamp(30px, 5vw, 90px)) calc(-1 * var(--margen)) 0 0;
+  }
+  .cabo svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .cabo .luz {
+    pointer-events: none;
+    will-change: transform;
+  }
+  /* el apagado: papel pintado encima (sin máscaras), hacia el texto, hacia el pie y arriba */
+  .cabo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to right, var(--papel), rgb(246 247 251 / 0.85) 14%, transparent 38%),
+      linear-gradient(to top, var(--papel), rgb(246 247 251 / 0.8) 11%, transparent 30%),
+      linear-gradient(to bottom, var(--papel), transparent 10%);
   }
   @media (max-width: 900px) {
-    .nosotros {
+    .nosotros,
+    .contacto {
       grid-template-columns: 1fr;
+    }
+    .contacto {
+      padding-top: 72px;
+    }
+    .contacto .texto {
+      padding-top: 0;
+    }
+    /* a sangre por los dos lados en el teléfono; en tablet, contra la derecha */
+    .cabo {
+      width: min(600px, 100% + 2 * var(--margen));
+      margin-top: 8px;
     }
   }
 </style>

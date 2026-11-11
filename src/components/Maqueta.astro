@@ -56,6 +56,8 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
       <circle cx="3.7" cy="3.7" r="0.45" fill="var(--tinta-suave)" />
     </pattern>
   </defs>
+  <!-- todo el dibujo en un grupo con id: el cierre de la página lo reusa con <use>, sin repetirlo -->
+  <g id="maqueta-lamina">
 
   <g>
     <!-- aguadas (bruma austral): lavados de color bajo el grabado, como las láminas iluminadas a mano -->
@@ -149,6 +151,7 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
   <MaquetaMision x={lugares.mision[0]} y={lugares.mision[1]} escala={1.45} />
   <MaquetaTorre x={lugares.torre[0]} y={lugares.torre[1]} escala={1.75} />
   <MaquetaBaliza x={lugares.baliza[0]} y={lugares.baliza[1]} escala={2.1} />
+  </g>
 </svg>
 
 <style>

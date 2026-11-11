@@ -311,7 +311,7 @@ const olas = Array.from({ length: 34 }, () => {
         </g>
 
         <!-- la luz de la baliza: el haz que barre el mar y el destello cuando mira hacia acá -->
-        <g transform={`translate(${f1(luz.x)} ${f1(luz.y)})`} opacity="0">
+        <g id="haz-baliza" transform={`translate(${f1(luz.x)} ${f1(luz.y)})`} opacity="0">
           <g transform={`matrix(${-C} ${S} ${-C} ${-S} 0 0)`}>
             <g opacity="0">
               <path d={cuna(11, 6, R * 0.75)} fill="url(#a-luz)" opacity="0.55" />
@@ -418,8 +418,18 @@ const olas = Array.from({ length: 34 }, () => {
     maqueta?.pauseAnimations();
     maqueta?.setCurrentTime(10);
   }
-  if (hero && cielo && !quieto)
-    new IntersectionObserver(([e]) => (e.isIntersecting ? cielo.unpauseAnimations() : cielo.pauseAnimations())).observe(hero);
+  // el cierre (Nosotros.astro) muestra este mismo haz con <use>, que sigue el reloj de .cielo:
+  // corre mientras se vea el hero o el cabo del cierre
+  if (hero && cielo && !quieto) {
+    const vistos = new Set<Element>();
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => (e.isIntersecting ? vistos.add(e.target) : vistos.delete(e.target)));
+      vistos.size ? cielo.unpauseAnimations() : cielo.pauseAnimations();
+    });
+    io.observe(hero);
+    const cabo = document.querySelector('.cabo');
+    if (cabo) io.observe(cabo);
+  }
 </script>
 
 <style>
