@@ -1,14 +1,47 @@
 ---
 // Página base: cabecera, barra y estilos globales. El contenido va en el slot.
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
+// SEO: el dominio sale de `site` en astro.config.mjs. La imagen para compartir (public/og.jpg) es el
+// hero a 1200×630, sin botones; se rehace con el preview corriendo y Playwright si cambia el hero.
+const titulo = 'Howenh Labs · Laboratorio de IA en Tierra del Fuego';
+const descripcion = 'Laboratorio de inteligencia artificial de Tierra del Fuego: monitoreo de incendios con datos satelitales, una estación terrena propia y software en producción.';
+const canonica = new URL(Astro.url.pathname, Astro.site).href;
+const imagen = new URL('/og.jpg', Astro.site).href;
+// la ficha de la organización para los buscadores; sin nombrar la ciudad (Leono, 2026-11-11)
+const organizacion = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Howenh Labs',
+  url: new URL('/', Astro.site).href,
+  logo: new URL('/apple-touch-icon.png', Astro.site).href,
+  description: descripcion,
+  email: 'contacto@howenh-labs.com',
+  address: { '@type': 'PostalAddress', addressRegion: 'Tierra del Fuego', addressCountry: 'AR' },
+  sameAs: ['https://www.instagram.com/howenhlabs/', 'https://www.linkedin.com/company/howenh-labs'],
+};
 ---
 <!doctype html>
 <html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Howenh Labs · Laboratorio de inteligencia artificial en Tierra del Fuego</title>
-    <meta name="description" content="Howenh Labs es un laboratorio de inteligencia artificial, datos satelitales y software en producción en Tierra del Fuego." />
+    <title>{titulo}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={canonica} />
+    <meta name="theme-color" content="#f6f7fb" />
+    <!-- cómo se ve el enlace al compartirlo (WhatsApp, mail, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:site_name" content="Howenh Labs" />
+    <meta property="og:title" content="Howenh Labs · Un laboratorio en el borde del continente" />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={canonica} />
+    <meta property="og:image" content={imagen} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Howenh Labs: la costa de Tierra del Fuego grabada en una tinta azul, con el titular «Un laboratorio en el borde del continente»" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(organizacion)} />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- una sola página: si se suman páginas, agregarlas acá (o pasar a @astrojs/sitemap) -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://howenh-labs.com/</loc>
+    <lastmod>2026-11-11</lastmod>
+  </url>
+</urlset>
