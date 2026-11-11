@@ -94,7 +94,7 @@ Rechazos confirmados: el hero oscuro con brillo de "startup de IA", la grilla de
 - Geometría real (OpenStreetMap, Copernicus DEM); hitos dibujados a partir de fotos.
 - Sin nombres de lugares en el dibujo: solo coordenadas, en mono.
 - Esquinas rectas, filetes de 1 px, sin sombras.
-- Al cargar, primero se imprime el dibujo y después se asienta la letra.
+- Al cargar aparece el titular, enseguida se imprime el dibujo y al final se asienta el resto de la letra.
 
 ## Colors
 
@@ -204,14 +204,14 @@ Hablemos termina con una ventana sobre el cabo de la misma maqueta del hero, reu
 
 ### Movimiento
 - **Impresión al cargar** (una vez, ~3.5 s): la costa se traza, aparece el mar, se levanta el cabo con su relieve, se traza la ruta, la ciudad crece desde la plaza de la torre y al final aparecen las viñetas.
-- **Entrada de la letra** (después del dibujo): cada pieza baja 7 px y se asienta en 1.8 s, con una curva lenta y sin rebote; primero la barra, después coordenadas, titular, bajada y botones. Si la persona hace scroll, toca o aprieta una tecla, todo aparece enseguida.
+- **Entrada de la letra:** el titular entra desde el primer cuadro; el resto (barra, coordenadas, bajada y botones) llega después del dibujo. Cada pieza baja 7 px y se asienta en 1.8 s, con una curva lenta y sin rebote. Si la persona hace scroll, toca o aprieta una tecla, todo aparece enseguida.
 - **Vida de la lámina:** la baliza gira su haz cada 12 s y destella cuando mira hacia quien mira; un barco cruza el cuadro y sale; dos camiones a lo sumo en la ruta; un avión aterriza y despega hacia el oeste; un satélite cruza en arco; olas sueltas van hacia la orilla.
 - **Movimiento reducido:** todo quieto desde el primer cuadro, en un buen momento (el avión en la pista, el haz sobre el mar).
 
 ### Named Rules
 **The No-Mask Rule.** Sobre el dibujo grande no se usan máscaras (ni SVG ni CSS) ni animaciones CSS de elementos encima: las máscaras se pintan como capas enteras fuera de pantalla y lo que se anima encima obliga a repintar la lámina en cada cuadro, y en pantallas de 2x y 3x el dibujo tarda en aparecer. Los apagados son papel pintado encima, los recortes son `clipPath`, y todo lo que se mueve va con SMIL en un svg propio, en su capa.
 
-**The Print-First Rule.** El primer impacto es el dibujo. La letra llega después, despacio, y nunca hace esperar a quien ya está leyendo.
+**The Title-First Rule.** El titular está desde el primer cuadro: es lo primero que se lee y lo que Google mide como LCP (con el titular esperando al dibujo el LCP real era de ~6 s; así baja a menos de 1 s). Después se imprime el dibujo y el resto de la letra llega despacio, sin hacer esperar a quien ya está leyendo.
 
 ## Do's and Don'ts
 

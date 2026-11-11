@@ -478,13 +478,20 @@ const rayasMesa = Array.from({ length: 29 }, (_, i) => `M${(i + 1) * 2} 0v3`).jo
     gap: 4px 20px;
     padding: 16px 0 18px;
     border-top: 1px solid var(--tinta-suave);
-    transition: opacity 0.5s ease;
+    transition: color 0.5s ease;
   }
   .fila:last-child {
     border-bottom: 1px solid var(--tinta-suave);
   }
+  /* lavadas con el color y no con opacidad: el texto se sigue leyendo (azul lavado 4.5:1) */
   .al-ritmo .fila:not([data-actual]) {
-    opacity: 0.42;
+    color: var(--tinta-suave);
+  }
+  .fila .marca-producto {
+    transition: opacity 0.5s ease;
+  }
+  .al-ritmo .fila:not([data-actual]) .marca-producto {
+    opacity: 0.45;
   }
   .fila h4 {
     align-self: start;
