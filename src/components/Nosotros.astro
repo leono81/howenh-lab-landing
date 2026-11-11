@@ -1,0 +1,52 @@
+---
+// Nosotros (quieto, solo letra) y Contacto. Sin nombres de personas (Leono, 2026-11-10) y sin significados de
+// las palabras hasta que estén confirmados.
+const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
+---
+<section class="seccion nosotros" id="nosotros" aria-labelledby="nos-titulo">
+  <h2 id="nos-titulo">Desde Río Grande</h2>
+  <div class="cuerpo">
+    <p class="dicho">Howenh Labs trabaja en Río Grande, sobre la costa atlántica de Tierra del Fuego. Hacemos software para el lugar donde vivimos y, desde acá, para el resto del país.</p>
+    <p>Los nombres del laboratorio y de sus productos vienen de las lenguas selk'nam y yámana. Es nuestra forma de decir de dónde somos.</p>
+    <p>Si te interesa trabajar con nosotros, escribinos a <a href="mailto:contacto@howenh-labs.com">contacto@howenh-labs.com</a>.</p>
+  </div>
+</section>
+
+<section class="seccion contacto" id="contacto" aria-labelledby="contacto-titulo">
+  <h2 id="contacto-titulo">Hablemos</h2>
+  <p class="entrada">Contanos qué necesitás y coordinamos una reunión.</p>
+  <div class="acciones">
+    <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar una reunión →</a>
+    <a class="secundario" href="mailto:contacto@howenh-labs.com">contacto@howenh-labs.com</a>
+  </div>
+</section>
+
+<style>
+  .nosotros {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 32px clamp(40px, 6vw, 112px);
+  }
+  .cuerpo p {
+    font-size: clamp(16px, 1.25vw, 18px);
+    line-height: 1.55;
+    max-width: 52ch;
+  }
+  .cuerpo p + p {
+    margin-top: 16px;
+  }
+  .cuerpo .dicho {
+    margin-bottom: 28px;
+    font: 400 clamp(24px, 2.4vw, 36px) / 1.22 var(--serif);
+    max-width: 24em;
+    text-wrap: pretty;
+  }
+  .contacto .acciones {
+    margin-top: 32px;
+  }
+  @media (max-width: 900px) {
+    .nosotros {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

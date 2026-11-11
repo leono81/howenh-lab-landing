@@ -17,3 +17,14 @@ export const rayas = (a1: P, a2: P, b1: P, b2: P, n: number) => {
   }
   return d;
 };
+// un satélite chico (caja y dos alas) en los ejes isométricos, centrado en c, en pantalla
+export const satelite = (c: P) => {
+  const q = (x: number, y: number, z: number): P => {
+    const [a, b] = iso(x, y, z);
+    return [c[0] + a, c[1] + b];
+  };
+  return {
+    cuerpo: pol(q(-2.5, -2.5, -2.5), q(2.5, -2.5, -2.5), q(2.5, -2.5, 2.5), q(-2.5, -2.5, 2.5)) + pol(q(2.5, -2.5, -2.5), q(2.5, 2.5, -2.5), q(2.5, 2.5, 2.5), q(2.5, -2.5, 2.5)) + pol(q(-2.5, -2.5, 2.5), q(2.5, -2.5, 2.5), q(2.5, 2.5, 2.5), q(-2.5, 2.5, 2.5)),
+    alas: pol(q(-2.5, -1.5, 0), q(-13, -1.5, 0), q(-13, 1.5, 0), q(-2.5, 1.5, 0)) + pol(q(2.5, -1.5, 0), q(13, -1.5, 0), q(13, 1.5, 0), q(2.5, 1.5, 0)),
+  };
+};

@@ -445,7 +445,8 @@ const olas = Array.from({ length: 34 }, () => {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(calc(var(--w) * 0.43) calc(var(--w) * 0.27) at calc(var(--margen) + var(--w) * 0.19) calc(var(--w) * 0.17), var(--papel) 62%, transparent 100%);
+    background: radial-gradient(calc(var(--w) * 0.43) calc(var(--w) * 0.27) at calc(var(--margen) + var(--w) * 0.19) calc(var(--w) * 0.17), var(--papel) 62%, transparent 100%),
+      linear-gradient(transparent calc(100% - 140px), var(--papel)); /* abajo se apaga: sigue la página */
   }
   /* el plano de la maqueta; lo que se mueve va en .cielo, con sus mismas unidades */
   .plano {
@@ -556,7 +557,7 @@ const olas = Array.from({ length: 34 }, () => {
       flex: 1 0 clamp(340px, 100vw, 70svh);
     }
     .ventana::after {
-      background: linear-gradient(var(--papel), transparent 24%);
+      background: linear-gradient(var(--papel), transparent 24%, transparent calc(100% - 90px), var(--papel));
     }
     .plano {
       right: auto;

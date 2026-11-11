@@ -28,6 +28,29 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     <main id="contenido">
       <slot />
     </main>
+    <footer class="pie">
+      <a class="marca" href="/"><span class="logo" aria-hidden="true"></span>HOWENH LABS</a>
+      <p class="pie-coordenadas">53°47′09″ S · 67°42′07″ O · Río Grande, Tierra del Fuego</p>
+      <nav aria-label="Redes">
+        <a href="https://www.instagram.com/howenhlabs/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.linkedin.com/company/howenh-labs" target="_blank" rel="noopener">LinkedIn</a>
+      </nav>
+      <p class="pie-derechos">© 2026 Howenh Labs</p>
+    </footer>
+    <script is:inline>
+      // las láminas de abajo (svg[data-vive]) se mueven solo cuando están en pantalla; con
+      // movimiento reducido quedan quietas en el segundo que diga data-quieto
+      (function () {
+        var quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        document.querySelectorAll('svg[data-vive]').forEach(function (s) {
+          s.pauseAnimations();
+          if (quieto) return s.setCurrentTime(+s.dataset.quieto || 0);
+          new IntersectionObserver(function (e) {
+            e[0].isIntersecting ? s.unpauseAnimations() : s.pauseAnimations();
+          }).observe(s);
+        });
+      })();
+    </script>
     <script is:inline>
       // primero el mapa: la letra entra después (.entra, ~3,5 s). Si la persona ya hace algo
       // (scroll, tecla, toque), se muestra todo enseguida: no se la hace esperar.
@@ -150,9 +173,112 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     padding: 9px 16px;
     background: var(--papel);
   }
+  ::selection {
+    background: var(--aguada-mar);
+    color: var(--tinta);
+  }
+  a {
+    color: var(--tinta);
+    text-decoration-color: var(--tinta-suave);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+  }
+  a:hover {
+    text-decoration-color: var(--tinta);
+  }
+  a:focus-visible {
+    outline: 2px solid var(--tinta);
+    outline-offset: 3px;
+  }
+
+  /* las acciones: etiquetas impresas, rectas (las del hero se miden con la lámina) */
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .acciones a {
+    padding: 0.9em 1.35em;
+    font-weight: 600;
+    font-size: clamp(14px, 1.2vw, 17px);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .primario {
+    background: var(--accion);
+    color: var(--papel);
+  }
+  .primario:hover {
+    text-decoration: underline 1px;
+    text-underline-offset: 0.22em;
+  }
+  .secundario {
+    color: var(--tinta);
+    border: 1px solid var(--tinta-suave);
+    background: var(--papel);
+  }
+  .secundario:hover {
+    border-color: var(--tinta);
+  }
+
+  /* las secciones de abajo del hero: láminas sobre el papel, con aire */
+  .seccion {
+    padding: clamp(104px, 11vw, 176px) var(--margen) 0;
+    scroll-margin-top: 24px;
+  }
+  .seccion h2 {
+    font: 400 clamp(36px, 4.2vw, 64px) / 1.02 var(--serif);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    max-width: 15em;
+  }
+  .seccion h3 {
+    font: 400 clamp(30px, 3vw, 44px) / 1.05 var(--serif);
+    letter-spacing: -0.01em;
+  }
+  .entrada {
+    margin-top: 20px;
+    font-size: clamp(17px, 1.4vw, 20px);
+    line-height: 1.5;
+    max-width: 46ch;
+    text-wrap: pretty;
+  }
+  .rotulo {
+    font: 400 11px var(--mono);
+    letter-spacing: 0.12em;
+    color: var(--tinta-suave);
+  }
+
+  .pie {
+    margin-top: clamp(104px, 11vw, 176px);
+    padding: 28px var(--margen) 36px;
+    border-top: 1px solid var(--tinta-suave);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 32px;
+    font: 400 11px var(--mono);
+    letter-spacing: 0.08em;
+    color: var(--tinta-suave);
+  }
+  .pie a {
+    color: var(--tinta);
+  }
+  .pie .marca {
+    text-decoration: none;
+    margin-right: auto;
+  }
+  .pie nav {
+    display: flex;
+    gap: 24px;
+  }
+
   @media (max-width: 820px) {
     :root {
       --margen: 16px;
+    }
+    .pie .marca {
+      width: 100%;
     }
     .barra nav a:not(.cta) {
       display: none;

@@ -1,0 +1,552 @@
+---
+// Penon, contado con el scroll: el texto queda quieto a la izquierda y a la derecha la isla en
+// perspectiva. A medida que se baja, cada capa de Penon cae sobre el suelo y queda apilada con las
+// demás, con su rótulo abajo; al final pasa el satélite y, donde barre, aparecen los focos: uno en
+// el bosque da alerta, uno en un yacimiento se rotula. Los textos salen de docs/penon-hechos.md.
+import isla from '../data/isla.json';
+import { satelite, type P } from '../data/iso';
+
+// el organismo se nombra solo cuando Leono lo confirme (PRODUCT.md, después del 26/11)
+const NOMBRAR_ORGANISMO = false;
+const estado = NOMBRAR_ORGANISMO
+  ? 'En producción para la Subsecretaría de Manejo del Fuego de Tierra del Fuego. Lo usan sus brigadistas y su personal, con acceso restringido.'
+  : 'En producción. Lo usan brigadistas y personal de gobierno, con acceso restringido.';
+
+// la leyenda: una entrada por capa, en el orden en que caen (la 0 es el suelo, la 5 el satélite).
+// Cada capa tiene su color, siempre de la paleta (DESIGN.md): las tres aguadas y las dos tintas
+// azules lavadas con opacidad; el satélite, que es lo que se enciende, lleva la segunda tinta.
+const leyenda = [
+  { nombre: 'Capa territorial', desc: 'La isla, sus lagos y el bosque nativo.', color: 'var(--aguada-tierra)', cuanto: 1 },
+  { nombre: 'Capa SMN', desc: 'El peligro de incendio del día en tres zonas, con datos del Servicio Meteorológico Nacional.', color: 'var(--aguada-mar)', cuanto: 1 },
+  { nombre: 'Capa industrial y petrolera', desc: 'Lo que cae acá se rotula: no se descarta.', color: 'var(--tinta-suave)', cuanto: 0.24 },
+  { nombre: 'Capa de rayos', desc: 'Los rayos que registra el satélite GOES-19.', color: 'var(--aguada-ciudad)', cuanto: 1 },
+  { nombre: 'Capa de contexto', desc: 'Áreas protegidas y poblados: lo que hay alrededor de cada foco.', color: 'var(--tinta)', cuanto: 0.12 },
+  { nombre: 'Capa satelital', desc: 'VIIRS y MODIS pasan varias veces al día; lo detectado llega al mapa en un máximo de 30 minutos.', color: 'var(--acento)', cuanto: 1 },
+];
+
+// ---------- la isla en perspectiva ----------
+const { proy, capas, zonasD, instalaciones, poblados } = isla;
+// planta (x al este, y al sur, en km) → pantalla: la isla girada para que la costa atlántica quede
+// horizontal con el mar arriba, como en el hero, y acostada (se la mira desde el canal, desde
+// arriba). La misma cuenta como matriz, para dibujar la planta tal cual adentro de un <g>.
+const GIRO = (-28 * Math.PI) / 180, ACOSTADA = 0.42;
+const [cg, sg] = [Math.cos(GIRO), Math.sin(GIRO)];
+const pl = ([x, y]: number[], z = 0): P => [x * cg - y * sg, ACOSTADA * (x * sg + y * cg) - z];
+const MATRIZ = `matrix(${cg} ${ACOSTADA * sg} ${-sg} ${ACOSTADA * cg} 0 0)`;
+const enPlanta = (lon: number, lat: number) => [(lon - proy.LON0) * proy.KX, (proy.LAT0 - lat) * proy.KY];
+const f1 = (v: number) => (Math.round(v * 10) / 10).toString();
+const pt = (p: P) => `${f1(p[0])} ${f1(p[1])}`;
+
+// cada capa queda apilada 4 unidades arriba de la anterior; antes de caer espera CAIDA más arriba
+// ZSAT da el lugar del satélite arriba de la isla; más o menos lo mismo que mide la leyenda abajo,
+// así la isla queda en el medio de la lámina y, centrada con el texto, a la altura de su centro
+const PILA = 4, CAIDA = 150, ZSAT = 100, TOPE = 4 * PILA; // TOPE: la cara de arriba de la pila
+const hojas = ['smn', 'industria', 'rayos', 'contexto'].map((clave, i) => ({ clave, z: (i + 1) * PILA, ...leyenda[i + 1] }));
+
+const puntos = [...(capas.contorno + capas.chileIsla).matchAll(/(-?[\d.]+) (-?[\d.]+)/g)].map((m) => pl([+m[1], +m[2]]));
+const xs = puntos.map((p) => p[0]), ys = puntos.map((p) => p[1]);
+const VB = { x: Math.min(...xs) - 16, y: Math.min(...ys) - ZSAT - 24, w: Math.max(...xs) - Math.min(...xs) + 32, h: Math.max(...ys) - Math.min(...ys) + ZSAT + 30 };
+const enAlto = (z: number) => ((z / VB.h) * 100).toFixed(3); // una altura, en % del alto de la lámina
+const pct = ([x, y]: P) => `left:${(((x - VB.x) / VB.w) * 100).toFixed(2)}%;top:${(((y - VB.y) / VB.h) * 100).toFixed(2)}%`;
+
+// los rayos del dibujo son ilustrativos: muestran qué trae la capa, no un día real
+const rayos = [
+  [-67.68, -54.24],
+  [-67.05, -54.16],
+  [-68.15, -54.47],
+  [-66.75, -54.6],
+  [-68.0, -53.92],
+].map(([lo, la]) => pl(enPlanta(lo, la)));
+const rayo = ([x, y]: P) => `M${f1(x)} ${f1(y)}l2.4 -6.5l-3.2 0.6l2.6 -8`;
+
+const PASO = 14; // segundos por pasada del satélite (la pasada ocupa el 80 %; después, un respiro)
+// la pasada: de sur a norte, inclinada unos 20° hacia el oeste (NOAA-20 de día, ascendente). La
+// línea de barrido, perpendicular a la traza, cruza la isla; el satélite va ZSAT más arriba.
+const ang = (20 * Math.PI) / 180;
+const norte = [-Math.sin(ang), -Math.cos(ang)], ancho = [Math.cos(ang), -Math.sin(ang)];
+const eje = enPlanta(-67.55, -54.33); // la traza pasa por acá
+const L = 230, A = 115;
+const inicio = [eje[0] - norte[0] * L, eje[1] - norte[1] * L];
+const fin = [eje[0] + norte[0] * L, eje[1] + norte[1] * L];
+const [ini, fn] = [pl(inicio), pl(fin)];
+const o = pl([0, 0]), e = pl([ancho[0] * A, ancho[1] * A]);
+const [bx, by] = [e[0] - o[0], e[1] - o[1]];
+const sat = satelite([0, -ZSAT]);
+
+// los focos del dibujo, también ilustrativos. u: en qué punto de la pasada los barre la línea
+// (0 al empezar, 1 al terminar). Dos en el bosque dan alerta; uno en un yacimiento se rotula.
+const focos = [
+  { lon: -68.25, lat: -54.4, tipo: 'alerta', rotulo: 'alerta', izquierda: true },
+  { lon: -67.55, lat: -54.33, tipo: 'alerta', rotulo: 'alerta' },
+  { lon: -67.98, lat: -53.73, tipo: 'rotulado', rotulo: 'rotulado · yacimiento', izquierda: true },
+].map((f) => {
+  const pf = enPlanta(f.lon, f.lat);
+  const u = ((pf[0] - inicio[0]) * norte[0] + (pf[1] - inicio[1]) * norte[1]) / (2 * L);
+  const lado = Math.abs((pf[0] - inicio[0]) * ancho[0] + (pf[1] - inicio[1]) * ancho[1]);
+  if (u <= 0 || u >= 1 || lado > A) throw new Error(`el foco ${f.lon}, ${f.lat} queda fuera de la pasada`);
+  return { ...f, u: +u.toFixed(3), p: pl(pf, TOPE) };
+});
+// sin JS o con movimiento reducido, el satélite queda sobre el segundo foco
+const enU = (u: number): P => [ini[0] + (fn[0] - ini[0]) * u, ini[1] + (fn[1] - ini[1]) * u];
+const quieto = enU(focos[1].u);
+---
+<article class="penon" id="penon" aria-labelledby="penon-titulo">
+  <div class="pista" id="penon-pista">
+    <div class="panel">
+      <div class="penon-texto">
+        <h2 id="penon-titulo">Penon</h2>
+        <p class="que">Vigilancia satelital de incendios forestales en Tierra del Fuego.</p>
+        <p>
+          El 30 de noviembre de 2022 empezó un incendio a 12 km de Tolhuin, en la Reserva Corazón de la Isla. Duró unos tres meses, quemó cerca de 12.000 hectáreas y llegó a tener
+          unos 1.000 brigadistas trabajando.
+        </p>
+        <p>Penon junta en un solo mapa, capa sobre capa, lo que ven los satélites y lo que se sabe del territorio, para que quienes combaten el fuego vean cada foco con su contexto.</p>
+        <blockquote class="principio">Solo se muestra lo observado y medido. Penon no pronostica.</blockquote>
+        <p class="estado"><span class="rotulo">ESTADO</span> {estado}</p>
+      </div>
+
+      <figure class="lamina" aria-labelledby="penon-pie">
+        <div class="pila" style={`max-width: calc(64vh * ${(VB.w / VB.h).toFixed(3)})`}>
+          <!-- el suelo: la isla entera con su mar, el bosque nativo rayado, los lagos y la costa -->
+          <svg class="suelo" viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`} role="img" aria-label="La Isla Grande de Tierra del Fuego en perspectiva, con las capas de Penon apiladas encima">
+            <defs>
+              <path id="p-tierra" d={capas.tierra} />
+              <path id="p-chile" d={capas.chileIsla} />
+              <pattern id="p-bosque" width="2.4" height="2.4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <path d="M0 0.6H2.4" stroke="var(--tinta-suave)" stroke-width="0.28" />
+              </pattern>
+            </defs>
+            <g transform={MATRIZ} stroke-linejoin="round" fill="none">
+              {['#p-tierra', '#p-chile'].map((h) => <use href={h} stroke="var(--aguada-mar)" stroke-width="18" vector-effect="non-scaling-stroke" />)}
+              {
+                [7, 4.2, 2].map((d, i) => (
+                  <g>
+                    {['#p-tierra', '#p-chile'].map((h) => (
+                      <use href={h} stroke="var(--tinta-suave)" stroke-opacity={0.35 + i * 0.2} stroke-width={2 * d + 0.5} vector-effect="non-scaling-stroke" />
+                    ))}
+                    {['#p-tierra', '#p-chile'].map((h) => <use href={h} stroke="var(--aguada-mar)" stroke-width={2 * d - 0.5} vector-effect="non-scaling-stroke" />)}
+                  </g>
+                ))
+              }
+              <!-- el lado chileno, en papel: Penon trabaja del lado argentino -->
+              <use href="#p-chile" fill="var(--papel)" stroke="var(--tinta-suave)" stroke-width="0.6" vector-effect="non-scaling-stroke" />
+              <use href="#p-tierra" fill="var(--aguada-tierra)" />
+              <path d={capas.bosque} fill="url(#p-bosque)" />
+              <path d={capas.lagos} fill="var(--aguada-mar)" stroke="var(--tinta-suave)" stroke-width="0.5" vector-effect="non-scaling-stroke" />
+              <use href="#p-tierra" stroke="var(--tinta)" stroke-width="0.9" vector-effect="non-scaling-stroke" />
+            </g>
+          </svg>
+
+          <!-- las capas: cada una es la provincia otra vez, como una hoja transparente, con lo suyo.
+               Cada una es un svg aparte que se mueve entero (sin redibujar): cae sobre la pila. -->
+          {
+            hojas.map((h, i) => (
+              <svg class="hoja" viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`} aria-hidden="true" style={`--z: ${enAlto(h.z)}; --caida: ${enAlto(CAIDA)}; --lavado: ${h.color}; --cuanto: ${h.cuanto}`} data-capa={i + 1}>
+                <defs>
+                  <path id={`p-contorno-${i}`} d={capas.contorno} />
+                  {h.clave === 'smn' && (
+                    <>
+                      <clipPath id="p-isla">
+                        <use href={`#p-contorno-${i}`} />
+                      </clipPath>
+                      {[0, 60, 120].map((g, j) => (
+                        <pattern id={`p-zona-${j}`} width="3.4" height="3.4" patternUnits="userSpaceOnUse" patternTransform={`rotate(${g})`}>
+                          <path d="M0 0.8H3.4" stroke="var(--tinta-suave)" stroke-width="0.32" />
+                        </pattern>
+                      ))}
+                    </>
+                  )}
+                  {h.clave === 'industria' && (
+                    <pattern id="p-industria" width="1.2" height="1.2" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+                      <path d="M0 0.4H1.2" stroke="var(--tinta)" stroke-width="0.45" />
+                    </pattern>
+                  )}
+                  {h.clave === 'contexto' && (
+                    <pattern id="p-puntos" width="3" height="3" patternUnits="userSpaceOnUse">
+                      <circle cx="0.8" cy="0.8" r="0.42" fill="var(--tinta-suave)" />
+                      <circle cx="2.3" cy="2.3" r="0.34" fill="var(--tinta-suave)" />
+                    </pattern>
+                  )}
+                </defs>
+                <g transform={MATRIZ} stroke-linejoin="round">
+                  <use class="fondo" href={`#p-contorno-${i}`} stroke="var(--tinta-suave)" stroke-width="0.8" vector-effect="non-scaling-stroke" />
+                  {h.clave === 'smn' && (
+                    <g clip-path="url(#p-isla)">
+                      {['norte', 'centro', 'sur'].map((z, j) => (
+                        <path d={zonasD[z]} fill={`url(#p-zona-${j})`} />
+                      ))}
+                      <path d={capas.limites} fill="none" stroke="var(--tinta)" stroke-width="0.8" stroke-dasharray="4 3" vector-effect="non-scaling-stroke" />
+                    </g>
+                  )}
+                  {h.clave === 'industria' && <path d={capas.industria} fill="url(#p-industria)" stroke="var(--tinta)" stroke-width="0.7" vector-effect="non-scaling-stroke" />}
+                  {h.clave === 'contexto' && <path d={capas.protegidas} fill="url(#p-puntos)" stroke="var(--tinta-suave)" stroke-width="0.6" stroke-dasharray="2 2" vector-effect="non-scaling-stroke" />}
+                </g>
+                {h.clave === 'industria' &&
+                  instalaciones.map((p) => {
+                    const [x, y] = pl(p);
+                    return <rect x={f1(x - 1.6)} y={f1(y - 1.6)} width="3.2" height="3.2" fill="var(--tinta)" />;
+                  })}
+                {h.clave === 'rayos' && (
+                  <g fill="none" stroke="var(--tinta)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round">
+                    {rayos.map((r) => (
+                      <>
+                        <ellipse cx={f1(r[0])} cy={f1(r[1])} rx="3.4" ry="2" stroke="var(--tinta-suave)" stroke-width="0.6" />
+                        <path d={rayo(r)} />
+                      </>
+                    ))}
+                  </g>
+                )}
+                {h.clave === 'contexto' &&
+                  poblados.map((p) => {
+                    const [x, y] = pl(p);
+                    return <rect x={f1(x - 2.2)} y={f1(y - 2.2)} width="4.4" height="4.4" fill="var(--papel)" stroke="var(--tinta)" stroke-width="0.8" />;
+                  })}
+              </svg>
+            ))
+          }
+
+          <!-- arriba de la pila: la pasada del satélite y los focos que va encontrando -->
+          <svg class="cielo" viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`} aria-hidden="true" data-vive>
+            <!-- la traza, en el suelo (el satélite la sigue); se dibuja a la altura del satélite -->
+            <path class="traza paso" d={`M${pt(ini)}L${pt(fn)}`} fill="none" stroke="var(--tinta-suave)" stroke-width="0.6" stroke-dasharray="1 3" opacity="0.8" transform={`translate(0 ${-ZSAT})`} />
+            {
+              focos.map((f, i) =>
+                f.tipo === 'alerta' ? (
+                  <g class="foco" data-u={f.u}>
+                    <ellipse cx={f1(f.p[0])} cy={f1(f.p[1])} rx="2.8" ry="1.7" fill="var(--acento)" />
+                    <ellipse cx={f1(f.p[0])} cy={f1(f.p[1])} rx="4" ry="2.3" fill="none" stroke="var(--acento)" stroke-width="0.8">
+                      <animate attributeName="rx" values="3;22" dur="2.6s" begin={`${i * 0.9}s`} repeatCount="indefinite" />
+                      <animate attributeName="ry" values="1.7;12.7" dur="2.6s" begin={`${i * 0.9}s`} repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.9;0" dur="2.6s" begin={`${i * 0.9}s`} repeatCount="indefinite" />
+                    </ellipse>
+                  </g>
+                ) : (
+                  <g class="foco" data-u={f.u}>
+                    <ellipse cx={f1(f.p[0])} cy={f1(f.p[1])} rx="2.4" ry="1.4" fill="var(--tinta)" />
+                    <rect x={f1(f.p[0] - 6)} y={f1(f.p[1] - 4)} width="12" height="8" fill="none" stroke="var(--tinta)" stroke-width="0.6" stroke-dasharray="1.5 1.5" />
+                  </g>
+                ),
+              )
+            }
+            <!-- el satélite, su haz de papel y la línea que barre la isla: pasa solo, una y otra vez,
+                 cuando la pila ya está armada -->
+            <g class="satelite" id="penon-sat" transform={`translate(${pt(quieto)})`}>
+              <path d={`M0 ${-ZSAT}L${f1(bx)} ${f1(by)}L${f1(-bx)} ${f1(-by)}Z`} fill="var(--papel)" fill-opacity="0.32" />
+              <path d={`M0 ${-ZSAT}L${f1(bx)} ${f1(by)}M0 ${-ZSAT}L${f1(-bx)} ${f1(-by)}`} stroke="var(--tinta-suave)" stroke-width="0.5" opacity="0.4" />
+              <path d={`M${f1(bx)} ${f1(by)}L${f1(-bx)} ${f1(-by)}`} stroke="var(--tinta-suave)" stroke-width="0.9" />
+              <g stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round">
+                <path d={sat.alas} fill="var(--papel)" stroke-width="0.6" />
+                <path d={sat.cuerpo} fill="var(--papel)" stroke-width="0.6" />
+              </g>
+              <circle cy={-ZSAT - 4} r="1.3" fill="var(--acento)" />
+            </g>
+          </svg>
+          {focos.map((f, i) => (
+            <span class={`r-foco foco r-${f.tipo}${f.izquierda ? ' a-izquierda' : ''}`} data-u={f.u} style={pct([f.p[0] + (f.izquierda ? -9 : 9), f.p[1] - 3])}>
+              {f.rotulo}
+            </span>
+          ))}
+        </div>
+
+        <ol class="leyenda">
+          {
+            leyenda.map((c, i) => (
+              <li data-capa={i} style={`--lavado: ${c.color}; --cuanto: ${c.cuanto}`}>
+                <span class="nombre">{c.nombre}</span>
+                <span class="desc">{c.desc}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <p class="fuentes" id="penon-pie">Las capas de Penon sobre la isla real. Los focos y los rayos del dibujo son ilustrativos. Fuentes: IGN, IDE Tierra del Fuego y Penon.</p>
+      </figure>
+    </div>
+  </div>
+</article>
+
+<script>
+  // el scroll arma la pila: el panel queda quieto y, a medida que se baja, cae una capa por vez.
+  // Cuando la pila está armada, el satélite empieza a pasar solo, una y otra vez, y los focos que
+  // barre aparecen. Sin JS o con movimiento reducido, la pila queda armada, con los focos y el
+  // satélite sobre uno de ellos.
+  const pista = document.getElementById('penon-pista');
+  const satEl = document.getElementById('penon-sat');
+  const traza = pista?.querySelector<SVGPathElement>('.traza');
+  const texto = pista?.querySelector<HTMLElement>('.penon-texto');
+  if (pista && satEl && traza && texto && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const hojas = [...pista.querySelectorAll<SVGSVGElement>('.hoja')];
+    const entradas = [...pista.querySelectorAll<HTMLElement>('.leyenda li')];
+    const focos = [...pista.querySelectorAll<Element>('.foco')];
+    const pasoEls = [...pista.querySelectorAll<SVGElement>('.paso')];
+    const angosto = matchMedia('(max-width: 900px)');
+    const panel = pista.querySelector<HTMLElement>('.panel')!;
+    const lamina = pista.querySelector<HTMLElement>('.lamina')!;
+    const largo = traza.getTotalLength(); // la traza en el suelo; el satélite va más arriba en su grupo
+    const PASO = 14000;
+    const entre = (v: number) => Math.min(1, Math.max(0, v));
+    const suave = (t: number) => 1 - (1 - t) ** 3;
+
+    // el satélite: corre con el reloj, no con el scroll
+    let corre = false, enPantalla = true, t0 = 0, cuadro = 0;
+    const volar = (ahora: number) => {
+      cuadro = 0;
+      if (!corre || !enPantalla) return;
+      const t = (ahora - t0) % PASO;
+      const u = entre(t / (PASO * 0.8));
+      const p = traza.getPointAtLength(u * largo);
+      satEl.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+      satEl.style.opacity = String(entre(u / 0.06) * entre((1 - u) / 0.06));
+      // cada pasada vuelve a encontrar los focos; al final del respiro se apagan para la próxima
+      focos.forEach((f) => f.toggleAttribute('data-visto', u >= +f.getAttribute('data-u')! && t < PASO * 0.96));
+      cuadro = requestAnimationFrame(volar);
+    };
+    const arrancar = () => {
+      if (corre) return;
+      corre = true;
+      t0 = performance.now();
+      pasoEls.forEach((e) => e.setAttribute('data-ve', ''));
+      cuadro ||= requestAnimationFrame(volar);
+    };
+    const parar = () => {
+      if (!corre) return;
+      corre = false;
+      satEl.style.opacity = '0';
+      pasoEls.forEach((e) => e.removeAttribute('data-ve'));
+      focos.forEach((f) => f.removeAttribute('data-visto'));
+    };
+    new IntersectionObserver(([v]) => {
+      enPantalla = v.isIntersecting;
+      if (enPantalla && corre) cuadro ||= requestAnimationFrame(volar);
+    }).observe(pista);
+
+    satEl.style.opacity = '0'; // hasta que la pila esté armada
+
+    // las capas: con el scroll
+    let pedido = 0;
+    const pintar = () => {
+      pedido = 0;
+      const r = pista.getBoundingClientRect();
+      // lo que se queda pegado: en ancho, el panel entero; en angosto, la lámina, que va después del texto
+      const antes = angosto.matches ? texto.offsetHeight + 24 : 0;
+      // lo pegado mide lo que su contenido (no la pantalla): así, al soltarse, lo que sigue viene enseguida
+      const alto = (angosto.matches ? lamina : panel).offsetHeight;
+      // 0 cuando lo pegado llega arriba; una unidad por capa y un poco más para que asiente
+      const s = entre(-(r.top + antes) / (r.height - antes - alto)) * 4.4;
+      hojas.forEach((h) => {
+        const t = entre((s - +h.dataset.capa! + 0.85) / 0.7);
+        h.style.setProperty('--t', suave(t).toFixed(3));
+        h.style.setProperty('--o', entre(t * 4).toFixed(2));
+      });
+      entradas.forEach((e, i) => e.toggleAttribute('data-vista', i === 0 || (i < 5 ? s > i - 0.85 : s >= 3.9)));
+      if (s >= 3.9) arrancar();
+      else parar();
+    };
+    pista.classList.add('con-scroll');
+    addEventListener('scroll', () => (pedido ||= requestAnimationFrame(pintar)), { passive: true });
+    addEventListener('resize', () => (pedido ||= requestAnimationFrame(pintar)));
+    pintar();
+  }
+</script>
+
+<style>
+  /* la pista da el recorrido del scroll; el panel se queda pegado mientras tanto. Sin JS o con
+     movimiento reducido no hay recorrido: el panel va en su lugar, con la pila armada. */
+  .pista.con-scroll {
+    height: 330vh;
+  }
+  .panel {
+    padding-top: clamp(16px, 3vh, 32px);
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: clamp(32px, 4vw, 72px);
+    align-content: start;
+    align-items: center;
+  }
+  .con-scroll .panel {
+    position: sticky;
+    top: 0;
+  }
+  .penon-texto p {
+    margin-top: 14px;
+    font-size: clamp(15px, 1.15vw, 17px);
+    line-height: 1.55;
+    max-width: 50ch;
+  }
+  .penon-texto .que {
+    margin-top: 8px;
+    font-size: clamp(16px, 1.3vw, 19px);
+    font-weight: 600;
+  }
+  .principio {
+    margin-top: 22px;
+    font: italic 400 clamp(21px, 1.9vw, 28px) / 1.2 var(--serif);
+    max-width: 18em;
+    text-wrap: balance;
+  }
+  .penon-texto .estado {
+    margin-top: 20px;
+  }
+  .estado .rotulo {
+    margin-right: 10px;
+  }
+
+  .lamina {
+    margin-right: calc(var(--margen) * -1);
+  }
+  .pila {
+    position: relative;
+  }
+  .pila svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .hoja,
+  .cielo {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  /* cada hoja está a su altura en la pila (--z) y, antes de caer, CAIDA más arriba (--caida);
+     --t va de 0 (arriba) a 1 (apoyada). Sin JS, --t es 1: la pila armada. */
+  .hoja {
+    transform: translateY(calc((var(--z) + var(--caida) * (1 - var(--t, 1))) * -1%));
+    opacity: var(--o, 1);
+    will-change: transform;
+  }
+  /* el lavado de cada hoja: más cargado mientras cae, más leve ya apoyada, para que la pila deje ver
+     lo de abajo y en el borde se lean las bandas de color */
+  .fondo {
+    fill: var(--lavado);
+    fill-opacity: calc(var(--cuanto) * (0.55 + 0.45 * (1 - var(--t, 1))));
+  }
+  .foco {
+    transition: opacity 0.4s ease-out;
+  }
+  .paso {
+    transition: opacity 0.6s ease-out;
+  }
+  .con-scroll .traza:not([data-ve]) {
+    opacity: 0;
+  }
+  .con-scroll .foco:not([data-visto]) {
+    opacity: 0;
+  }
+  .r-foco {
+    position: absolute;
+    font: 500 11px var(--mono);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    transform: translateY(-50%);
+    text-shadow: 0 0 4px var(--papel), 0 0 2px var(--papel), 0 0 1px var(--papel);
+  }
+  .r-alerta {
+    color: var(--acento);
+  }
+  .a-izquierda {
+    transform: translate(-100%, -50%);
+  }
+
+  /* la leyenda, abajo de la pila: cada capa aparece cuando empieza a caer */
+  .leyenda {
+    list-style: none;
+    margin-top: 10px;
+    padding-right: var(--margen);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px clamp(16px, 2vw, 32px);
+  }
+  .leyenda li {
+    transition:
+      opacity 0.6s cubic-bezier(0.16, 0.6, 0.2, 1),
+      transform 0.9s cubic-bezier(0.16, 0.6, 0.2, 1);
+  }
+  /* la muestra del color de cada capa: una banda con su filete, como en la leyenda de una carta */
+  .leyenda li::before {
+    content: '';
+    display: block;
+    height: 7px;
+    margin-bottom: 8px;
+    background: color-mix(in srgb, var(--lavado) calc(var(--cuanto) * 100%), var(--papel));
+    box-shadow: inset 0 0 0 1px var(--tinta-suave);
+  }
+  .con-scroll .leyenda li:not([data-vista]) {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  .nombre {
+    display: block;
+    font: 500 11px var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .desc {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--tinta);
+  }
+  .fuentes {
+    margin-top: 14px;
+    padding-right: var(--margen);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--tinta-suave);
+    max-width: 72ch;
+  }
+
+  /* pantallas bajas: el texto entra si se achica un poco */
+  @media (min-width: 901px) and (max-height: 760px) {
+    .penon-texto p {
+      font-size: 15px;
+      margin-top: 10px;
+    }
+    .principio {
+      font-size: 21px;
+      margin-top: 16px;
+    }
+    .desc {
+      font-size: 12px;
+    }
+  }
+
+  /* angosto: el texto va antes, en su lugar; lo que queda pegado es la pila con la leyenda */
+  @media (max-width: 900px) {
+    .panel,
+    .con-scroll .panel {
+      position: static;
+      height: auto;
+      min-height: 0;
+      display: block;
+    }
+    .penon-texto {
+      margin-bottom: 24px;
+    }
+    .con-scroll .lamina {
+      position: sticky;
+      top: 0;
+      margin-inline: calc(var(--margen) * -1);
+      padding: 16px var(--margen) 8px;
+      background: var(--papel);
+    }
+    /* el recorrido del scroll, acá, lo da la lámina pegada dentro de una pista más alta */
+    .pista.con-scroll {
+      height: auto;
+    }
+    /* el lugar por el que se desliza la lámina pegada: tiene que estar dentro del panel (un
+       padding no cuenta para sticky) */
+    .con-scroll .panel::after {
+      content: '';
+      display: block;
+      height: 230vh;
+    }
+    .leyenda {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding-right: 0;
+    }
+    .r-foco {
+      font-size: 9px;
+    }
+  }
+</style>

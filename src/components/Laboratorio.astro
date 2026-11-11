@@ -1,0 +1,157 @@
+---
+// Laboratorio: el índice. Las cuatro líneas de trabajo, cada una con el enlace a su prueba más abajo.
+const lineas = [
+  {
+    titulo: 'Inteligencia artificial e ingeniería',
+    texto: 'Inteligencia artificial dentro de nuestras aplicaciones, e ingeniería agéntica: agentes que trabajan con el equipo para diseñar, construir y probar el software.',
+    enlaces: [],
+  },
+  {
+    titulo: 'Vigilancia de incendios',
+    texto: 'Lo que ven los satélites sobre la isla y lo que mide el Servicio Meteorológico Nacional, en un solo mapa para quienes combaten el fuego.',
+    enlaces: [['Penon', '#penon']],
+  },
+  {
+    titulo: 'Estación terrena',
+    texto: 'Una estación propia en Río Grande, armada para recibir las señales de satélites pequeños y compartirlas con una red abierta.',
+    enlaces: [['La estación', '#estacion']],
+  },
+  {
+    titulo: 'Software en producción',
+    texto: 'Sistemas para profesionales de la salud, comercios y estudios contables, en uso con clientes reales.',
+    enlaces: [['Productos', '#productos']],
+  },
+];
+---
+<section class="seccion laboratorio" id="laboratorio" aria-labelledby="lab-titulo">
+  <div class="cabeza aparece">
+    <h2 id="lab-titulo">Qué hace el laboratorio</h2>
+    <p class="entrada">Howenh Labs es un laboratorio de software e inteligencia artificial de Río Grande, Tierra del Fuego. Trabaja en cuatro líneas.</p>
+  </div>
+  <dl class="lineas">
+    {
+      lineas.map((l) => (
+        <div class="linea aparece">
+          <dt>{l.titulo}</dt>
+          <dd>
+            <p>{l.texto}</p>
+            {l.enlaces.length > 0 && (
+              <p class="ver">
+                {l.enlaces.map(([t, h]) => (
+                  <a href={h}>{t} ↓</a>
+                ))}
+              </p>
+            )}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<script>
+  // la entrada del índice, una vez, cuando llega a la pantalla: cada filete se traza de izquierda a
+  // derecha como la costa del hero y la letra se asienta igual que en el hero (baja 7 px, sin rebote).
+  // Sin JS o con movimiento reducido no hay nada que esperar: todo está visible desde el principio.
+  const piezas = document.querySelectorAll<HTMLElement>('.laboratorio .aparece');
+  if (piezas.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    piezas.forEach((p) => p.classList.add('espera'));
+    const io = new IntersectionObserver(
+      (vistas) => {
+        // las que entran juntas van en orden, una detrás de otra
+        vistas
+          .filter((v) => v.isIntersecting)
+          .forEach((v, i) => {
+            const p = v.target as HTMLElement;
+            p.style.setProperty('--n', String(i));
+            p.classList.replace('espera', 'llega');
+            io.unobserve(p);
+          });
+      },
+      { rootMargin: '0px 0px -12% 0px' },
+    );
+    piezas.forEach((p) => io.observe(p));
+  }
+</script>
+
+<style>
+  .laboratorio {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 40px clamp(40px, 6vw, 112px);
+    align-items: start;
+  }
+  .lineas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 clamp(24px, 3vw, 48px);
+  }
+  .linea {
+    position: relative;
+    padding: 18px 0 36px;
+  }
+  /* el filete de arriba, aparte, para poder trazarlo */
+  .linea::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--tinta-suave);
+    transform-origin: left;
+  }
+
+  /* la entrada: antes de llegar a la pantalla, el filete sin trazar y la letra apenas arriba */
+  .espera::before {
+    transform: scaleX(0);
+  }
+  .espera > * {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  .llega::before {
+    transition: transform 1.2s cubic-bezier(0.16, 0.6, 0.2, 1) calc(var(--n) * 140ms);
+  }
+  .llega > * {
+    transition:
+      opacity 1.4s cubic-bezier(0.16, 0.6, 0.2, 1),
+      transform 1.6s cubic-bezier(0.16, 0.6, 0.2, 1);
+    transition-delay: calc(var(--n) * 140ms + 0.25s);
+  }
+  .llega > :nth-child(2) {
+    transition-delay: calc(var(--n) * 140ms + 0.4s);
+  }
+  dt {
+    font-weight: 600;
+    font-size: clamp(17px, 1.35vw, 19px);
+    line-height: 1.3;
+  }
+  dd p:first-child {
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 1.55;
+    max-width: 40ch;
+  }
+  .ver {
+    margin-top: 14px;
+    display: flex;
+    gap: 20px;
+    font: 500 12px var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  @media (max-width: 900px) {
+    .laboratorio {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 600px) {
+    .lineas {
+      grid-template-columns: 1fr;
+    }
+    .linea {
+      padding-bottom: 28px;
+    }
+  }
+</style>

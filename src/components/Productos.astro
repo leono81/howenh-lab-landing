@@ -1,0 +1,816 @@
+---
+// Productos: Kenos con su lugar propio (es el más robusto y el de otro rubro, Leono 2026-11-10) y,
+// después, los de facturación con cómo se conectan (Teken es el motor y no se ofrece al público:
+// aparece solo en el diagrama). Tari queda afuera hasta que esté en producción.
+import { iso, pol, lin, rayas } from '../data/iso';
+
+// Kenos: CENIT no se nombra hasta que Leono lo confirme (PRODUCT.md)
+const NOMBRAR_CLIENTE = false;
+const kenosEnUso = NOMBRAR_CLIENTE
+  ? 'Lo usan profesionales con su suscripción y CENIT, un centro de kinesiología de Buenos Aires con tres sedes, donde lo implementamos en persona.'
+  : 'Lo usan profesionales con su suscripción y un centro de kinesiología de Buenos Aires con tres sedes, donde lo implementamos en persona.';
+// sin «facturación electrónica» ni «envío de la presentación»: Kenos todavía no los hace (assets/sistema/marcas/kenos.md)
+const kenosHace = ['Turnos y agenda por profesional', 'Pacientes e historia', 'Órdenes y sesiones', 'Liquidación a obras sociales y prepagas'];
+
+// la viñeta de Kenos: la agenda de la semana como un rompecabezas, en los ejes isométricos (x, las
+// horas; y, los días). Cada casilla es una pieza que cae y encaja hasta que la semana queda armada;
+// las rayadas son los turnos tomados.
+const CEL = 13, HORAS = 8, DIAS = 5, GROSOR = 3;
+const X = HORAS * CEL, Y = DIAS * CEL;
+const tomados = [[0, 0], [0, 1], [0, 3], [1, 1], [1, 2], [2, 0], [2, 4], [3, 2], [3, 3], [4, 1], [4, 4], [5, 0], [5, 2], [6, 3], [6, 4], [7, 1]];
+const tabla = {
+  techo: pol(iso(0, 0), iso(X, 0), iso(X, Y), iso(0, Y)),
+  frente: pol(iso(0, 0), iso(X, 0), iso(X, 0, -GROSOR), iso(0, 0, -GROSOR)),
+  lado: pol(iso(X, 0), iso(X, Y), iso(X, Y, -GROSOR), iso(X, 0, -GROSOR)),
+  sombra: rayas(iso(X, 0), iso(X, 0, -GROSOR), iso(X, Y), iso(X, Y, -GROSOR), 9),
+  casillas: Array.from({ length: HORAS - 1 }, (_, h) => lin(iso((h + 1) * CEL, 0), iso((h + 1) * CEL, Y))).join('') + Array.from({ length: DIAS - 1 }, (_, d) => lin(iso(0, (d + 1) * CEL), iso(X, (d + 1) * CEL))).join(''),
+};
+// en cada borde entre dos piezas, una lleva la lengüeta y la otra el hueco (al azar, pero fijo)
+let semilla = 11;
+const azar = () => (semilla = (semilla * 16807) % 2147483647) / 2147483647;
+const entreHoras = Array.from({ length: HORAS - 1 }, () => Array.from({ length: DIAS }, () => (azar() < 0.5 ? 1 : -1))); // +1: la lengüeta va hacia la hora siguiente
+const entreDias = Array.from({ length: HORAS }, () => Array.from({ length: DIAS - 1 }, () => (azar() < 0.5 ? 1 : -1))); // +1: hacia el día siguiente
+// un borde de A a B con su lengüeta: s = 1 sale (hacia n), s = -1 entra, 0 es recto
+const MEDIO = 1.56, FONDO = 1.7, R = Math.hypot(MEDIO, FONDO);
+const borde = (a: number[], b: number[], n: number[], s: number) => {
+  if (!s) return [a];
+  const u = [(b[0] - a[0]) / CEL, (b[1] - a[1]) / CEL];
+  const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  const q = [m[0] + s * n[0] * FONDO, m[1] + s * n[1] * FONDO];
+  const a1 = Math.atan2(-FONDO, -MEDIO);
+  const arco = Array.from({ length: 11 }, (_, i) => {
+    const ang = a1 - (i / 10) * ((265 * Math.PI) / 180);
+    return [q[0] + R * Math.cos(ang) * u[0] + R * Math.sin(ang) * s * n[0], q[1] + R * Math.cos(ang) * u[1] + R * Math.sin(ang) * s * n[1]];
+  });
+  return [a, ...arco];
+};
+// una pieza en coordenadas de la agenda: su contorno y, si es un turno tomado, su rayado
+const pieza = (h: number, d: number) => {
+  const [x0, x1, y0, y1] = [h * CEL, (h + 1) * CEL, d * CEL, (d + 1) * CEL];
+  const contorno = [
+    ...borde([x0, y0], [x1, y0], [0, -1], d > 0 ? -entreDias[h][d - 1] : 0),
+    ...borde([x1, y0], [x1, y1], [1, 0], h < HORAS - 1 ? entreHoras[h][d] : 0),
+    ...borde([x1, y1], [x0, y1], [0, 1], d < DIAS - 1 ? entreDias[h][d] : 0),
+    ...borde([x0, y1], [x0, y0], [-1, 0], h > 0 ? -entreHoras[h - 1][d] : 0),
+  ];
+  const tomado = tomados.some(([a, b]) => a === h && b === d);
+  const t = 3; // el rayado, adentro, lejos de las lengüetas
+  const raya = tomado ? [1, 2, 3].map((k) => [[x0 + t + (k * (CEL - 2 * t)) / 4, y0 + t], [x0 + t + (k * (CEL - 2 * t)) / 4, y1 - t]]) : [];
+  return { contorno, raya, tomado, centro: [(x0 + x1) / 2, (y0 + y1) / 2] };
+};
+// las piezas esperan al lado de la agenda, del lado de las horas de la tarde: amontonadas,
+// mezcladas y giradas. De ahí sale cada una, se levanta un poco y va a su casilla.
+const MONTON = { x0: X + 10, x1: X + 46, y0: -4, y1: Y + 4 };
+const ubicar = (pts: number[][], de: number[], a: number[], giro: number) => {
+  const [c, s] = [Math.cos(giro), Math.sin(giro)];
+  return pts.map(([x, y]) => {
+    const [dx, dy] = [x - de[0], y - de[1]];
+    return [a[0] + dx * c - dy * s, a[1] + dx * s + dy * c];
+  });
+};
+const proyectar = (pts: number[][]) => pts.map(([x, y]) => iso(x, y));
+const trazos = (segs: number[][][], z = 0) => segs.map(([a, b]) => lin(iso(a[0], a[1], z), iso(b[0], b[1], z))).join('');
+// el segundo acto: armada la semana, los turnos tomados se marcan atendidos y pasan, de a uno, a la
+// presentación para las obras sociales y prepagas: un lote prolijo delante de la agenda
+const LOTE = { x: 52, y: -66 }, CAPA = 1.3;
+const ARMADO = 24; // segundos: se arma, se atiende, se presenta, y vuelve a empezar
+const ATENDIDO = 9.3 / ARMADO;
+const tilde = (c: number[]) => [[c[0] - 3.4, c[1] + 0.4], [c[0] - 1.1, c[1] + 2.9], [c[0] + 3.8, c[1] - 3.2]];
+let enLote = 0;
+const piezas = Array.from({ length: HORAS * DIAS }, (_, i) => pieza(i % HORAS, Math.floor(i / HORAS)))
+  .map((p) => ({ p, orden: azar() }))
+  .sort((a, b) => a.orden - b.orden)
+  .map(({ p }, i) => {
+    const lugar = [MONTON.x0 + azar() * (MONTON.x1 - MONTON.x0), MONTON.y0 + azar() * (MONTON.y1 - MONTON.y0)];
+    const giro = (azar() - 0.5) * 2.2;
+    const enMonton = ubicar(p.contorno, p.centro, lugar, giro);
+    const rayaMonton = p.raya.map((seg) => ubicar(seg, p.centro, lugar, giro));
+    const a = (0.8 + i * 0.17) / ARMADO;
+    // los tomados, en el orden en que llegaron, se apilan en el lote: cada uno un poco más arriba
+    const j = p.tomado ? enLote++ : 0;
+    const z = j * CAPA;
+    const L = (10.8 + j * 0.28) / ARMADO;
+    const enElLote = ubicar(p.contorno, p.centro, [LOTE.x, LOTE.y], 0);
+    return {
+      tomado: p.tomado,
+      monton: pol(...proyectar(enMonton)),
+      casilla: pol(...proyectar(p.contorno)),
+      lote: pol(...enElLote.map(([x, y]) => iso(x, y, z))),
+      rayaMonton: trazos(rayaMonton),
+      rayaCasilla: trazos(p.raya),
+      rayaLote: trazos(p.raya.map((seg) => ubicar(seg, p.centro, [LOTE.x, LOTE.y], 0)), z),
+      tildeCasilla: lin(...tilde(p.centro).map(([x, y]) => iso(x, y))),
+      tildeLote: lin(...tilde([LOTE.x, LOTE.y]).map(([x, y]) => iso(x, y, z))),
+      a,
+      b: a + 0.7 / ARMADO,
+      L,
+      Lb: L + 0.7 / ARMADO,
+    };
+  })
+  // la que sale primero va arriba de todo, así no pasa por debajo del montón
+  .reverse();
+const k3 = (v: number) => v.toFixed(3);
+// el marco del dibujo: la agenda con sus rótulos (a la derecha) y el montón (abajo a la izquierda)
+const bordes = [iso(0, 0), iso(X, 0), iso(X, Y), iso(0, Y), iso(MONTON.x1 + 9, MONTON.y0 - 9), iso(MONTON.x1 + 9, MONTON.y1 + 9), iso(MONTON.x0 - 9, MONTON.y1 + 9), iso(LOTE.x + 16, LOTE.y - 22), iso(LOTE.x - 30, LOTE.y - 22), iso(LOTE.x + 10, LOTE.y + 8, 24)];
+// el rótulo del lote, impreso en el plano, delante de la pila
+const PRIMER_LOTE = (10.8 + 0.7) / ARMADO;
+const VB = (() => {
+  const xs = bordes.map((p) => p[0]), ys = bordes.map((p) => p[1]);
+  const [x0, x1, y0, y1] = [Math.min(...xs) - 6, Math.max(...xs) + 30, Math.min(...ys) - 30, Math.max(...ys) + 22];
+  return { x: Math.round(x0), y: Math.round(y0), w: Math.round(x1 - x0), h: Math.round(y1 - y0) };
+})();
+
+// la letra de la agenda, impresa sobre su mismo plano: los días a lo largo del borde derecho, las
+// horas a lo largo del borde de adelante. Cada matriz lleva el eje x del texto y su "abajo" a los
+// ejes de la agenda, sin espejarlo (los dos determinantes son positivos).
+const C = Math.cos(Math.PI / 6), S = 0.5, ALTO_LETRA = 2.6;
+const DIAS_NOMBRE = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
+const PRIMERA_HORA = 8;
+const r1 = (v: number) => Math.round(v * 10) / 10;
+// el texto corre hacia afuera del borde x = 0 (arriba a la derecha) y su "abajo" va hacia -y
+const enDias = ([px, py]: number[]) => `matrix(${r1(C)} ${-S} ${r1(C)} ${S} ${r1(px)} ${r1(py)})`;
+// el texto corre hacia afuera del borde y = 0 (abajo a la derecha) y su "abajo" va hacia +x
+const enHoras = ([px, py]: number[]) => `matrix(${r1(C)} ${S} ${r1(-C)} ${S} ${r1(px)} ${r1(py)})`;
+const dias = DIAS_NOMBRE.map((t, d) => ({ t: t.slice(0, 3).toUpperCase().replace('MIE', 'MIÉ'), m: enDias(iso(-4.5, d * CEL + CEL / 2 - ALTO_LETRA / 2)) }));
+const horas = Array.from({ length: HORAS }, (_, h) => ({ t: `${String(PRIMERA_HORA + h).padStart(2, '0')}:00`, m: enHoras(iso(h * CEL + CEL / 2 + ALTO_LETRA / 2, -5)) }));
+
+// el símbolo de la medicina como lo pidió Leono (2026-11-10): el caduceo, la vara con dos serpientes
+// enroscadas y alas arriba. Grabado como la antena de la estación: en los ejes isométricos, la vara es
+// un cilindro con su lado a la sombra rayado, cada serpiente una cinta con borde de tinta, y lo que
+// queda detrás de la vara se dibuja antes. Las alas van en el plano que mira a quien mira.
+const VARA = { r: 1.7, alto: 66 };
+const varaLados = lin(iso(VARA.r, -VARA.r, 0), iso(VARA.r, -VARA.r, VARA.alto)) + lin(iso(-VARA.r, VARA.r, 0), iso(-VARA.r, VARA.r, VARA.alto));
+const varaSombra = rayas(iso(0, 0, 0), iso(0, 0, VARA.alto), iso(-VARA.r, VARA.r, 0), iso(-VARA.r, VARA.r, VARA.alto), 4);
+const varaTope = iso(0, 0, VARA.alto + 2.2);
+// las dos serpientes: la misma hélice, media vuelta corridas, así se cruzan adelante y atrás
+const serpienteEn = (fase: number) => {
+  const pts = Array.from({ length: 121 }, (_, i) => {
+    const t = i / 120, a = fase + Math.PI * 4.5 * t;
+    return [5.4 * Math.cos(a), 5.4 * Math.sin(a), 5 + 46 * t] as [number, number, number];
+  });
+  // la cabeza: sube un poco más y mira hacia la vara, enfrentada con la otra
+  const [x, y] = pts[pts.length - 1];
+  pts.push([x * 0.85, y * 0.85, 54.5], [x * 0.5, y * 0.5, 57]);
+  return pts;
+};
+// en tramos de adelante (x − y > 0, la cara que mira a quien mira) y de atrás, en orden, para dibujarla subiendo
+const enTramos = (pts: [number, number, number][]) => {
+  const tramos: { d: string; adelante: boolean; k: number }[] = [];
+  let actual = [pts[0]], lado = pts[0][0] - pts[0][1] > 0;
+  for (const p of pts.slice(1)) {
+    const l = p[0] - p[1] > 0;
+    actual.push(p);
+    if (l !== lado) {
+      tramos.push({ d: lin(...actual.map((q) => iso(...q))), adelante: lado, k: tramos.length });
+      (actual = [p]), (lado = l);
+    }
+  }
+  tramos.push({ d: lin(...actual.map((q) => iso(...q))), adelante: lado, k: tramos.length });
+  return tramos;
+};
+const serpientes = [Math.PI / 4, Math.PI / 4 + Math.PI].map((fase) => serpienteEn(fase));
+const tramosSerpientes = serpientes.flatMap((sp) => enTramos(sp));
+const cabezas = serpientes.map((sp) => iso(...sp[sp.length - 1]));
+// las alas: en el plano de la vara que mira de frente (la dirección (1, 1, 0) es la horizontal de la pantalla)
+const enAla = (u: number, z: number) => iso(u / Math.SQRT2, u / Math.SQRT2, z);
+const ala = (lado: number) => {
+  const q = (u: number, z: number) => enAla(lado * u, z).map((v) => +v.toFixed(2)).join(' ');
+  // el borde de arriba sube desde la vara y se abre hasta la punta; el de abajo son cuatro plumas
+  const borde =
+    `M${q(2, 61)}C${q(6, 70)} ${q(13, 76)} ${q(24, 77)}` +
+    `Q${q(26.5, 73)} ${q(21, 70)}Q${q(20.5, 67.2)} ${q(16, 66.5)}Q${q(15.2, 63.6)} ${q(11, 63.5)}Q${q(10, 61)} ${q(6, 61.4)}Q${q(4, 60.3)} ${q(2, 60)}Z`;
+  const plumas = `M${q(21, 70)}L${q(14.5, 72.6)}M${q(16, 66.5)}L${q(10.5, 69.2)}M${q(11, 63.5)}L${q(6.8, 65.6)}`;
+  return { borde, plumas };
+};
+const alas = [ala(1), ala(-1)];
+
+// yon.com.ar existe pero todavía no tiene landing: se enlaza cuando la tenga
+const productos = [
+  {
+    nombre: 'Hown',
+    para: 'Quien factura sin mostrador: oficios y servicios',
+    texto: 'Un bot de Telegram: le mandás un audio o un texto y te devuelve la factura de ARCA (A, B o C) con su PDF.',
+    sitio: ['hown.howenh-labs.com', 'https://hown.howenh-labs.com/'],
+  },
+  {
+    nombre: 'Yon',
+    para: 'Comercios de mostrador',
+    texto: 'Vende, cobra y factura en el mismo toque; lleva el stock y los clientes, y sigue vendiendo sin señal: factura cuando vuelve la conexión.',
+  },
+  {
+    nombre: 'Kaux',
+    para: 'Estudios contables',
+    texto: 'Arma los archivos de ARCA para la carga masiva (Libro IVA Digital, sueldos) y controla los vencimientos.',
+  },
+];
+
+// ---------- el diagrama: una carta de rutas, en dos disposiciones (ancha y angosta) ----------
+type N = [number, number];
+type Rotulo = { t: string; en: N; ancla: 'arriba' | 'abajo' | 'derecha' | 'izquierda'; tipo: 'nombre' | 'nota' | 'ruta' };
+const curva = (a: N, b: N, vertical: boolean) => {
+  if (vertical) {
+    const m = (b[1] - a[1]) / 2;
+    return `M${a[0]} ${a[1]}C${a[0]} ${a[1] + m} ${b[0]} ${b[1] - m} ${b[0]} ${b[1]}`;
+  }
+  const m = (b[0] - a[0]) / 2;
+  return `M${a[0]} ${a[1]}C${a[0] + m} ${a[1]} ${b[0] - m} ${b[1]} ${b[0]} ${b[1]}`;
+};
+const disposiciones = [
+  {
+    clave: 'ancho',
+    vb: [1000, 400],
+    vertical: false,
+    nodos: { hown: [120, 110], yon: [120, 300], teken: [520, 205], arca: [880, 110], kaux: [880, 300] } as Record<string, N>,
+    rutas: {
+      hown: [[134, 110], [504, 199]],
+      yon: [[134, 300], [504, 211]],
+      ida: [[536, 198], [866, 104]],
+      vuelta: [[866, 116], [536, 210]],
+      kaux: [[532, 219], [866, 300]],
+    } as Record<string, [N, N]>,
+    rotulos: [
+      { t: 'Hown', en: [120, 90], ancla: 'arriba', tipo: 'nombre' },
+      { t: 'bot de Telegram', en: [120, 128], ancla: 'abajo', tipo: 'nota' },
+      { t: 'Yon', en: [120, 280], ancla: 'arriba', tipo: 'nombre' },
+      { t: 'app de mostrador', en: [120, 318], ancla: 'abajo', tipo: 'nota' },
+      { t: 'Teken', en: [520, 166], ancla: 'arriba', tipo: 'nombre' },
+      { t: 'el motor', en: [520, 186], ancla: 'arriba', tipo: 'nota' },
+      { t: 'ARCA', en: [880, 68], ancla: 'arriba', tipo: 'nombre' },
+      { t: 'factura electrónica', en: [880, 92], ancla: 'arriba', tipo: 'nota' },
+      { t: 'Kaux', en: [880, 258], ancla: 'arriba', tipo: 'nombre' },
+      { t: 'estudio contable', en: [880, 282], ancla: 'arriba', tipo: 'nota' },
+      { t: 'comprobante', en: [622, 176], ancla: 'arriba', tipo: 'ruta' },
+      { t: 'CAE', en: [836, 124], ancla: 'abajo', tipo: 'ruta' },
+      { t: 'venta, en vivo', en: [784, 308], ancla: 'abajo', tipo: 'ruta' },
+    ] as Rotulo[],
+  },
+  {
+    clave: 'alto',
+    vb: [400, 660],
+    vertical: true,
+    nodos: { hown: [90, 90], yon: [310, 90], teken: [200, 330], arca: [90, 570], kaux: [310, 570] } as Record<string, N>,
+    rutas: {
+      hown: [[90, 104], [193, 316]],
+      yon: [[310, 104], [207, 316]],
+      ida: [[194, 346], [96, 556]],
+      vuelta: [[84, 556], [184, 346]],
+      kaux: [[212, 346], [310, 556]],
+    } as Record<string, [N, N]>,
+    rotulos: [
+      { t: 'Hown', en: [90, 46], ancla: 'arriba', tipo: 'nombre' },
+      { t: 'bot de Telegram', en: [90, 74], ancla: 'arriba', tipo: 'nota' },
+      { t: 'Yon', en: [310, 46], ancla: 'arriba', tipo: 'nombre' },
+      { t: 'app de mostrador', en: [310, 74], ancla: 'arriba', tipo: 'nota' },
+      { t: 'Teken', en: [226, 318], ancla: 'derecha', tipo: 'nombre' },
+      { t: 'el motor', en: [226, 344], ancla: 'derecha', tipo: 'nota' },
+      { t: 'ARCA', en: [90, 588], ancla: 'abajo', tipo: 'nombre' },
+      { t: 'factura electrónica', en: [90, 620], ancla: 'abajo', tipo: 'nota' },
+      { t: 'Kaux', en: [310, 588], ancla: 'abajo', tipo: 'nombre' },
+      { t: 'estudio contable', en: [310, 620], ancla: 'abajo', tipo: 'nota' },
+      { t: 'comprobante', en: [106, 478], ancla: 'izquierda', tipo: 'ruta' },
+      { t: 'CAE', en: [118, 440], ancla: 'izquierda', tipo: 'ruta' },
+      { t: 'venta, en vivo', en: [270, 452], ancla: 'derecha', tipo: 'ruta' },
+    ] as Rotulo[],
+  },
+];
+// el recorrido de un comprobante, en un ciclo de 20 s: sale de Hown, va por Teken a ARCA, vuelve
+// con el CAE, la factura llega al comercio y la venta al estudio contable. Después, lo mismo desde Yon.
+const CICLO = 20;
+const tramos = (canal: string, t: number) => [
+  { ruta: canal, ida: true, a: t, b: t + 0.08 },
+  { ruta: 'ida', ida: true, a: t + 0.09, b: t + 0.16 },
+  { ruta: 'vuelta', ida: true, a: t + 0.19, b: t + 0.26 },
+  { ruta: canal, ida: false, a: t + 0.27, b: t + 0.35 },
+  { ruta: 'kaux', ida: true, a: t + 0.27, b: t + 0.36 },
+];
+const viaje = [...tramos('hown', 0), ...tramos('yon', 0.5)];
+const pct = (vb: number[], [x, y]: N) => `left:${((x / vb[0]) * 100).toFixed(2)}%;top:${((y / vb[1]) * 100).toFixed(2)}%`;
+const k = (v: number) => v.toFixed(3);
+---
+<section class="seccion productos" id="productos" aria-labelledby="prod-titulo">
+  <h2 id="prod-titulo">Nuestras plataformas</h2>
+  <p class="entrada">Además de los proyectos para el territorio, Howenh crea sus propios SaaS: los diseñamos, los programamos y los mantenemos seguros.</p>
+
+  <article class="kenos" aria-labelledby="kenos-titulo">
+    <div class="kenos-texto">
+      <div class="kenos-cabeza">
+        <h3 id="kenos-titulo"><img class="logo-kenos" src="/kenos-logo-tinta.png" alt="Kenos" width="603" height="514" /></h3>
+        <!-- el caduceo, el símbolo de la medicina: se traza solo cuando llega a la pantalla, primero la
+             vara, después las dos serpientes que suben enroscándose, y al final se abren las alas -->
+        <svg class="asclepio" viewBox="-34 -84 68 90" aria-hidden="true">
+          <g class="alas">
+            {alas.map((a) => (
+              <>
+                <path class="ala" d={a.borde} pathLength="1" />
+                <path class="pluma" d={a.plumas} />
+              </>
+            ))}
+          </g>
+          {tramosSerpientes.map((t) => !t.adelante && (
+            <g style={`--k: ${t.k}`}>
+              <path class="cinta-borde" d={t.d} pathLength="1" />
+              <path class="cinta" d={t.d} pathLength="1" />
+            </g>
+          ))}
+          <g class="vara">
+            <path d={varaLados} pathLength="1" />
+            <path class="vara-sombra" d={varaSombra} />
+            <circle cx={varaTope[0]} cy={varaTope[1]} r="2.4" />
+          </g>
+          {tramosSerpientes.map((t) => t.adelante && (
+            <g style={`--k: ${t.k}`}>
+              <path class="cinta-borde" d={t.d} pathLength="1" />
+              <path class="cinta" d={t.d} pathLength="1" />
+            </g>
+          ))}
+          {cabezas.map((c) => <ellipse class="cabeza" cx={c[0]} cy={c[1]} rx="2" ry="1.3" />)}
+        </svg>
+      </div>
+      <p class="que">Para profesionales y centros de salud.</p>
+      <p>Turnos, pacientes y la administración del consultorio, con las obras sociales y las prepagas, en un solo sistema.</p>
+      <p class="sitio-kenos"><a href="https://www.kenos.app/" target="_blank" rel="noopener">kenos.app ↗</a></p>
+    </div>
+    <figure class="agenda-lamina">
+      <!-- lo que hace Kenos, al lado del rompecabezas: cada cosa aparece cuando la animación la muestra -->
+      <ul class="hace">
+        {kenosHace.map((h, i) => <li data-desde={[1, 4.5, 9.4, 11.6][i]}>{h}</li>)}
+      </ul>
+    <svg class="agenda" viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`} role="img" aria-label="La agenda de la semana, de lunes a viernes y de 8 a 15, dibujada en perspectiva como un rompecabezas que se arma pieza por pieza" data-vive data-quieto="12">
+      <g stroke="var(--tinta)" stroke-linejoin="round">
+        <path d={tabla.frente} fill="var(--papel)" stroke-width="0.35" />
+        <path d={tabla.lado} fill="var(--papel)" stroke-width="0.35" />
+        <path d={tabla.sombra} stroke-width="0.2" />
+        <path d={tabla.techo} fill="var(--aguada-tierra)" stroke-width="0.4" />
+      </g>
+      <!-- las casillas vacías, apenas marcadas, esperando su pieza -->
+      <path d={tabla.casillas} fill="none" stroke="var(--tinta-suave)" stroke-width="0.2" stroke-dasharray="1 1.4" />
+      <!-- las piezas: salen del montón de al lado, de a una, y encajan en su día y su hora -->
+      <g stroke-linejoin="round">
+        {
+          piezas.map((p) => {
+            // los libres: montón → casilla; los tomados siguen: casilla → lote
+            const forma = p.tomado ? [p.monton, p.monton, p.casilla, p.casilla, p.lote, p.lote, p.monton, p.monton] : [p.monton, p.monton, p.casilla, p.casilla, p.monton, p.monton];
+            const tiempos = p.tomado ? [0, p.a, p.b, p.L, p.Lb, 0.94, 0.941, 1] : [0, p.a, p.b, 0.94, 0.941, 1];
+            const curvas = Array.from({ length: forma.length - 1 }, (_, k) => (k === 1 || (p.tomado && k === 3) ? '0.45 0 0.25 1' : '0 0 1 1')).join(';');
+            const kt = tiempos.map(k3).join(';');
+            const rayas = p.tomado ? [p.rayaMonton, p.rayaMonton, p.rayaCasilla, p.rayaCasilla, p.rayaLote, p.rayaLote, p.rayaMonton, p.rayaMonton] : [];
+            const salto = p.tomado ? { v: '0 0;0 0;0 -9;0 0;0 0;0 -9;0 0;0 0', k: [0, p.a, (p.a + p.b) / 2, p.b, p.L, (p.L + p.Lb) / 2, p.Lb, 1] } : { v: '0 0;0 0;0 -9;0 0;0 0', k: [0, p.a, (p.a + p.b) / 2, p.b, 1] };
+            return (
+              <g>
+                <path d={p.casilla} fill="var(--papel)" stroke={p.tomado ? 'var(--tinta)' : 'var(--tinta-suave)'} stroke-width={p.tomado ? 0.32 : 0.26}>
+                  <animate attributeName="d" values={forma.join(';')} keyTimes={kt} calcMode="spline" keySplines={curvas} dur={`${ARMADO}s`} repeatCount="indefinite" />
+                </path>
+                {p.tomado && (
+                  <path d={p.rayaCasilla} fill="none" stroke="var(--tinta-suave)" stroke-width="0.22">
+                    <animate attributeName="d" values={rayas.join(';')} keyTimes={kt} calcMode="spline" keySplines={curvas} dur={`${ARMADO}s`} repeatCount="indefinite" />
+                    {/* cuando se atiende, el rayado de «tomado» deja lugar al tilde */}
+                    <animate attributeName="opacity" values="1;1;0;0;1" keyTimes={`0;${k3(ATENDIDO)};${k3(ATENDIDO + 0.01)};0.95;1`} dur={`${ARMADO}s`} repeatCount="indefinite" />
+                  </path>
+                )}
+                {/* atendido: un tilde, y con él viaja al lote */}
+                {p.tomado && (
+                  <path d={p.tildeCasilla} fill="none" stroke="var(--tinta)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" opacity="0">
+                    <animate attributeName="d" values={`${p.tildeCasilla};${p.tildeCasilla};${p.tildeLote};${p.tildeLote}`} keyTimes={`0;${k3(p.L)};${k3(p.Lb)};1`} dur={`${ARMADO}s`} repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes={`0;${k3(ATENDIDO)};${k3(ATENDIDO + 0.01)};0.9;0.935;1`} dur={`${ARMADO}s`} repeatCount="indefinite" />
+                  </path>
+                )}
+                <!-- en el camino se levanta un poco: va por arriba de la agenda -->
+                <animateTransform attributeName="transform" type="translate" values={salto.v} keyTimes={salto.k.map(k3).join(';')} dur={`${ARMADO}s`} repeatCount="indefinite" />
+                <!-- al final se desarma: se apaga y el montón vuelve a aparecer -->
+                <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.9;0.935;0.95;1" dur={`${ARMADO}s`} repeatCount="indefinite" />
+              </g>
+            );
+          })
+        }
+      </g>
+      <!-- el rótulo del lote: aparece cuando llega el primer turno atendido -->
+      <g class="letra-agenda letra-lote" opacity="0">
+        <text transform={enDias(iso(LOTE.x + 10, LOTE.y - 15))}>PRESENTACIÓN</text>
+        <text transform={enDias(iso(LOTE.x + 10, LOTE.y - 19.5))}>OBRAS SOCIALES Y PREPAGAS</text>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes={`0;${k3(PRIMER_LOTE)};${k3(PRIMER_LOTE + 0.02)};0.9;0.935;1`} dur={`${ARMADO}s`} repeatCount="indefinite" />
+      </g>
+      <!-- los días y las horas, sobre el plano de la agenda -->
+      <g class="letra-agenda">
+        {dias.map((d) => <text transform={d.m}>{d.t}</text>)}
+        {horas.map((h) => <text transform={h.m}>{h.t}</text>)}
+      </g>
+    </svg>
+    <figcaption>{kenosEnUso}</figcaption>
+    </figure>
+  </article>
+
+  <h3 class="grupo">Facturación electrónica, conectada a ARCA</h3>
+  <ul class="lista">
+    {
+      productos.map((p) => (
+        <li>
+          <h4>{p.nombre}</h4>
+          <p class="para rotulo">{p.para}</p>
+          <p class="texto">{p.texto}</p>
+          <p class="sitio">
+            {p.sitio ? (
+              <a href={p.sitio[1]} target="_blank" rel="noopener">
+                {p.sitio[0]} ↗
+              </a>
+            ) : null}
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <figure class="ecosistema">
+    {
+      disposiciones.map((d) => (
+        <div class={`carta carta-${d.clave}`}>
+          <svg viewBox={`0 0 ${d.vb[0]} ${d.vb[1]}`} aria-hidden="true" data-vive data-quieto="2.4">
+            <defs>
+              {Object.entries(d.rutas).map(([n, [a, b]]) => (
+                <path id={`e-${d.clave}-${n}`} d={curva(a, b, d.vertical)} />
+              ))}
+            </defs>
+            <g fill="none" stroke="var(--tinta)" stroke-width="1" stroke-linecap="round">
+              {Object.keys(d.rutas).map((n) => (
+                <use href={`#e-${d.clave}-${n}`} stroke-dasharray={n === 'kaux' ? '4 4' : undefined} />
+              ))}
+            </g>
+            <g stroke="var(--tinta)" stroke-width="1.2">
+              {['hown', 'yon', 'kaux'].map((n) => (
+                <rect x={d.nodos[n][0] - 6} y={d.nodos[n][1] - 6} width="12" height="12" fill="var(--papel)" />
+              ))}
+              <rect x={d.nodos.teken[0] - 13} y={d.nodos.teken[1] - 13} width="26" height="26" fill="var(--papel)" />
+              <rect x={d.nodos.teken[0] - 6} y={d.nodos.teken[1] - 6} width="12" height="12" fill="var(--tinta)" />
+              <rect x={d.nodos.arca[0] - 6} y={d.nodos.arca[1] - 6} width="12" height="12" fill="var(--papel)" stroke="var(--tinta-suave)" stroke-dasharray="2 2" />
+            </g>
+            {viaje.map((v) => (
+              <g opacity="0">
+                <path d="M0 -4.5L4.5 0L0 4.5L-4.5 0Z" fill="var(--acento)" />
+                <animateMotion dur={`${CICLO}s`} repeatCount="indefinite" calcMode="linear" keyPoints={v.ida ? '0;0;1;1' : '1;1;0;0'} keyTimes={`0;${k(v.a)};${k(v.b)};1`}>
+                  <mpath href={`#e-${d.clave}-${v.ruta}`} />
+                </animateMotion>
+                <animate attributeName="opacity" values="0;1;0" keyTimes={`0;${k(v.a)};${k(v.b)}`} calcMode="discrete" dur={`${CICLO}s`} repeatCount="indefinite" />
+              </g>
+            ))}
+          </svg>
+          {d.rotulos.map((r) => (
+            <span class={`e e-${r.tipo} a-${r.ancla}`} style={pct(d.vb, r.en)}>
+              {r.t}
+            </span>
+          ))}
+        </div>
+      ))
+    }
+    <figcaption>
+      Hown y Yon emiten cada comprobante a través de Teken, el motor que habla con ARCA. Si el comercio trabaja con un estudio que usa Kaux, la venta puede llegar sola a su Libro IVA.
+    </figcaption>
+  </figure>
+</section>
+
+<script>
+  // Kenos, cuando llega a la pantalla: la vara de Asclepio se traza una vez, y lo que hace aparece
+  // de a poco, al ritmo del rompecabezas (el reloj del svg de la agenda, que corre solo en pantalla).
+  // Sin JS o con movimiento reducido, todo está a la vista desde el principio.
+  const kenos = document.querySelector<HTMLElement>('.kenos');
+  const agenda = kenos?.querySelector<SVGSVGElement>('.agenda');
+  if (kenos && agenda && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const items = [...kenos.querySelectorAll<HTMLElement>('.hace li')];
+    const CICLO = 24, DESARMA = 0.9 * CICLO;
+    let cuadro = 0, visible = false;
+    const seguir = () => {
+      cuadro = 0;
+      const t = agenda.getCurrentTime() % CICLO;
+      items.forEach((li) => li.toggleAttribute('data-ve', t >= +li.dataset.desde! && t < DESARMA));
+      if (visible) cuadro = requestAnimationFrame(seguir);
+    };
+    kenos.classList.add('espera', 'al-ritmo');
+    new IntersectionObserver(
+      ([v]) => {
+        visible = v.isIntersecting;
+        if (visible) {
+          kenos.classList.replace('espera', 'llega');
+          cuadro ||= requestAnimationFrame(seguir);
+        }
+      },
+      { threshold: 0.3 },
+    ).observe(kenos);
+  }
+</script>
+
+<style>
+  .kenos {
+    margin-top: clamp(48px, 6vw, 88px);
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 32px clamp(32px, 5vw, 96px);
+    align-items: center;
+  }
+  .logo-kenos {
+    display: block;
+    width: auto;
+    height: clamp(64px, 6vw, 92px);
+  }
+  .kenos .que {
+    margin-top: 14px;
+    font-size: clamp(17px, 1.4vw, 20px);
+    font-weight: 600;
+  }
+  .kenos-texto > p:not(.que) {
+    margin-top: 14px;
+    font-size: clamp(16px, 1.2vw, 18px);
+    line-height: 1.55;
+    max-width: 46ch;
+  }
+  .hace {
+    list-style: none;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 24px;
+    max-width: 30rem;
+  }
+  .hace li {
+    padding: 8px 0;
+    border-top: 1px solid var(--tinta-suave);
+    font: 500 12px var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .kenos-texto .sitio-kenos {
+    margin-top: 22px;
+  }
+  .kenos-cabeza {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+  }
+  .asclepio {
+    flex: none;
+    width: auto;
+    height: clamp(72px, 6.6vw, 100px);
+    overflow: visible;
+    fill: none;
+    /* punta recta: con la redonda, un trazo que todavía no se dibujó deja un punto */
+    stroke-linecap: butt;
+    stroke-linejoin: round;
+  }
+  .cinta-borde {
+    stroke: var(--tinta);
+    stroke-width: 3;
+  }
+  .cinta {
+    stroke: var(--papel);
+    stroke-width: 1.6;
+  }
+  .vara path {
+    stroke: var(--tinta);
+    stroke-width: 0.8;
+  }
+  .vara .vara-sombra {
+    stroke: var(--tinta-suave);
+    stroke-width: 0.45;
+  }
+  .vara circle {
+    fill: var(--papel);
+    stroke: var(--tinta);
+    stroke-width: 0.8;
+  }
+  .cabeza {
+    fill: var(--tinta);
+  }
+  .ala {
+    fill: var(--papel);
+    stroke: var(--tinta);
+    stroke-width: 0.7;
+  }
+  .pluma {
+    stroke: var(--tinta-suave);
+    stroke-width: 0.45;
+  }
+  /* se traza una vez, como la costa del hero: primero la vara, después la serpiente subiendo */
+  .espera .asclepio path[pathLength] {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .espera .asclepio .vara-sombra,
+  .espera .asclepio circle,
+  .espera .asclepio .cabeza,
+  .espera .asclepio .alas {
+    opacity: 0;
+  }
+  .llega .asclepio path[pathLength] {
+    stroke-dasharray: 1;
+    transition: stroke-dashoffset 0.5s linear calc(0.9s + var(--k, 0) * 0.16s);
+  }
+  .llega .asclepio .vara path {
+    transition: stroke-dashoffset 1s cubic-bezier(0.16, 0.6, 0.2, 1) 0.1s;
+  }
+  .llega .asclepio .vara-sombra,
+  .llega .asclepio circle {
+    transition: opacity 0.6s ease-out 0.9s;
+  }
+  .llega .asclepio .cabeza {
+    transition: opacity 0.4s ease-out 2.4s;
+  }
+  /* las alas, al final: se abren desde la vara */
+  .asclepio .alas {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  .espera .asclepio .alas {
+    transform: scaleX(0.2);
+  }
+  .llega .asclepio .alas {
+    transition:
+      opacity 0.5s ease-out 2.5s,
+      transform 0.9s cubic-bezier(0.16, 0.6, 0.2, 1) 2.5s;
+  }
+  .llega .asclepio .ala {
+    transition-delay: 2.5s;
+  }
+  /* lo que hace Kenos aparece de a poco, mientras la agenda se arma y se presenta */
+  .hace li {
+    transition:
+      opacity 0.9s cubic-bezier(0.16, 0.6, 0.2, 1),
+      transform 1.2s cubic-bezier(0.16, 0.6, 0.2, 1);
+  }
+  .al-ritmo .hace li:not([data-ve]) {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  .agenda-lamina {
+    position: relative;
+    justify-self: center;
+    width: 100%;
+    max-width: 680px;
+  }
+  /* arriba a la izquierda del dibujo, donde hay papel libre (el montón está más abajo) */
+  .agenda-lamina .hace {
+    position: absolute;
+    top: 2%;
+    left: 0;
+    width: 29%;
+    margin: 0;
+    grid-template-columns: 1fr;
+  }
+  /* debajo del rompecabezas, quién lo usa: es la prueba, va en tinta y legible */
+  .agenda-lamina figcaption {
+    margin: 10px auto 0;
+    max-width: 52ch;
+    font-size: clamp(15px, 1.1vw, 17px);
+    line-height: 1.5;
+    text-align: center;
+    text-wrap: balance;
+  }
+  .letra-agenda text {
+    font-family: var(--mono);
+    font-size: 3.6px;
+    letter-spacing: 0.08em;
+    fill: var(--tinta-suave);
+  }
+  .letra-lote text {
+    font-size: 2.8px;
+    fill: var(--tinta);
+  }
+  .sitio-kenos {
+    font: 500 12px var(--mono);
+    letter-spacing: 0.06em;
+  }
+  .agenda {
+    width: 100%;
+    max-width: 680px;
+    justify-self: center;
+    height: auto;
+    overflow: visible;
+  }
+  .grupo {
+    margin-top: clamp(72px, 8vw, 128px);
+    font-size: clamp(26px, 2.4vw, 36px);
+    max-width: 22em;
+    text-wrap: balance;
+  }
+  .lista {
+    list-style: none;
+    margin-top: clamp(20px, 2.5vw, 32px);
+    border-bottom: 1px solid var(--tinta-suave);
+  }
+  .lista li {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(0, 5fr) minmax(0, 3fr);
+    gap: 8px clamp(20px, 3vw, 48px);
+    align-items: baseline;
+    padding: 22px 0 24px;
+    border-top: 1px solid var(--tinta-suave);
+  }
+  .lista h4 {
+    font: 400 clamp(28px, 2.6vw, 40px) / 1.05 var(--serif);
+    letter-spacing: -0.01em;
+  }
+  .para {
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+  .texto {
+    font-size: 16px;
+    line-height: 1.55;
+    max-width: 52ch;
+  }
+  .sitio {
+    font: 500 12px var(--mono);
+    letter-spacing: 0.06em;
+    justify-self: end;
+  }
+
+  .ecosistema {
+    margin-top: clamp(64px, 8vw, 120px);
+  }
+  .carta {
+    position: relative;
+    max-width: 1100px;
+    margin-inline: auto;
+  }
+  .carta svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .carta-alto {
+    display: none;
+    max-width: 420px;
+  }
+  .e {
+    position: absolute;
+    white-space: nowrap;
+  }
+  .e-nombre {
+    font: 400 clamp(22px, 2.4vw, 32px) / 1 var(--serif);
+  }
+  .e-nota,
+  .e-ruta {
+    font: 400 11px var(--mono);
+    letter-spacing: 0.08em;
+    color: var(--tinta-suave);
+  }
+  .e-ruta {
+    text-shadow: 0 0 4px var(--papel), 0 0 2px var(--papel);
+  }
+  .a-arriba {
+    transform: translate(-50%, -100%);
+  }
+  .a-abajo {
+    transform: translate(-50%, 0);
+  }
+  .a-derecha {
+    transform: translate(0, -50%);
+  }
+  .a-izquierda {
+    transform: translate(-100%, -50%);
+  }
+  .ecosistema figcaption {
+    margin: 28px auto 0;
+    max-width: 62ch;
+    font-size: 15px;
+    line-height: 1.55;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  @media (max-width: 900px) {
+    .kenos {
+      grid-template-columns: 1fr;
+    }
+    .agenda {
+      max-width: 520px;
+    }
+    .agenda-lamina .hace {
+      position: static;
+      width: auto;
+      margin-top: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .lista li {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .lista h4 {
+      grid-row: 1;
+    }
+    .sitio {
+      grid-row: 1;
+      grid-column: 2;
+    }
+    .para,
+    .texto {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 700px) {
+    .carta-ancho {
+      display: none;
+    }
+    .carta-alto {
+      display: block;
+    }
+    .ecosistema figcaption {
+      text-align: left;
+    }
+  }
+</style>

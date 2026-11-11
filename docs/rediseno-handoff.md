@@ -1,6 +1,6 @@
 # Handoff · Rediseño de la web de Howenh Labs
 
-> Estado al 2026-11-10 (hero terminado). Leer esto primero en la sesión nueva, y después `DESIGN.md`.
+> Estado al 2026-11-10, noche: hero terminado y secciones armadas hasta Productos (sin commitear). Leer esto primero en la sesión nueva, y después `DESIGN.md`.
 
 ## Contexto
 - Fecha límite: **2026-11-26**, reunión de Leono con el ministro de Tierra del Fuego por Penon.
@@ -29,8 +29,22 @@
 - Imágenes generadas con IA (Flow/Gemini) para la geografía: no conocen el lugar.
 - Planta, caballera e isométrica plana (matriz afín sobre el plano); las opciones B (lámina con marco), C (recorrido con scroll) y D (planta con el cabo levantado); la vista del cabo como lámina aparte. Están en el historial de git (hasta `8ac00ff`).
 
+## Secciones (2026-11-10, sin commitear todavía)
+Orden en `src/pages/index.astro`: Hero → Laboratorio → Proyectos (Penon + Estación) → Productos → Nosotros + Contacto (en `Nosotros.astro`) → pie (en `Base.astro`). Todo se decidió con Leono mirando la página en vivo.
+- **Laboratorio** (`Laboratorio.astro`): índice de cuatro líneas (IA e ingeniería —con ingeniería agéntica, sin enlace—, Vigilancia de incendios —con SMN—, Estación terrena, Software en producción). Entrada sutil: los filetes se trazan y la letra baja 7 px.
+- **Penon** (`Penon.astro`, la sección abre directo con él; se sacó el título paraguas «Para el territorio»): panel fijo con el texto a la izquierda; a la derecha la isla en perspectiva (`scripts/isla.mjs` → `src/data/isla.json`, capas oficiales en `docs/lugar/isla/`). Con el scroll caen las capas (SMN, industrial y petrolera, rayos, contexto), cada una con su color de la paleta, y quedan apiladas; leyenda de capas abajo. Con la pila armada, el satélite pasa solo (rAF) y aparecen focos ilustrativos: dos «alerta» y uno «rotulado · yacimiento». Textos solo de `docs/penon-hechos.md`; flag `NOMBRAR_ORGANISMO`.
+- **Estación terrena** (en `Proyectos.astro`): la Tierra grabada (`scripts/globo.mjs` → `src/data/globo.json`, costas Natural Earth 1:110m en `docs/lugar/mundo/`), norte arriba, antena QFH clavada en Río Grande, órbita polar; la señal baja, el dato sale por la red (estaciones ilustrativas). Texto: «armamos», «cuando está en línea» (hoy está fuera de línea). Se sacó el rótulo «RED TINYGS».
+- **Productos** (`Productos.astro`): título «Nuestras plataformas» + bajada de Leono. **Kenos** con lugar propio: logo en una tinta (`public/kenos-logo-tinta.png`), caduceo grabado que se traza (Leono pidió dos serpientes con alas), y un rompecabezas-agenda: las piezas salen de un montón, arman la semana, los turnos atendidos (tilde) pasan a un lote «Presentación · obras sociales y prepagas»; las cuatro etiquetas aparecen al lado, al ritmo del reloj del svg. Abajo: «Lo usan profesionales…» (flag `NOMBRAR_CLIENTE` para CENIT). Después «Facturación electrónica, conectada a ARCA»: Hown, Yon, Kaux en filas + diagrama animado del comprobante (Teken como motor).
+- **Nosotros + Contacto**: solo letra; sin nombres de personas.
+- Sacados por Leono: planos con IA (no se anuncia lo que no existe), Tari, logos de producto salvo Kenos.
+
 ## Pendiente
-1. **Las secciones de la landing** (lo próximo): hoy la página es solo el hero; los enlaces Laboratorio, Proyectos, Productos y Nosotros, y «Conocer el laboratorio», no llevan a nada.
-2. Cierre: revisión final de impeccable, tipografías servidas desde el sitio, rendimiento y deploy (destino sin confirmar).
+0. **Commitear** lo de arriba (rama `rediseno-2026`; nada pusheado).
+1. **Nosotros / Contacto / pie**: revisar con Leono (es lo que sigue en el orden de la página).
+2. **`DESIGN.md`**: anotar las secciones nuevas (tamaños de letra de sección —el detector de impeccable los marca como fuera de la escala—, el patrón «lámina que se arma con el scroll», el rompecabezas, la Tierra grabada, colores por capa) y después la revisión final de impeccable.
+3. Decisiones abiertas de Leono: nombrar a CENIT y «tres sedes»; si Kenos ya envía la presentación (la ficha de marca dice que no); enlazar `penon.howenh-labs.com` y yon.com.ar (sin landing); el enlace a TinyGS con la estación fuera de línea; la cuarta línea de Laboratorio («Software en producción» ↔ «Nuestras plataformas»); la bajada del hero que todavía dice «satélites».
+4. Cierre: tipografías servidas desde el sitio, rendimiento (el HTML pesa ~230 KB gzip), deploy (destino sin confirmar).
+
+Capturas de verificación: scripts con Playwright desde `~/Projects/tari/node_modules/playwright` (no hay en este repo).
 
 Servidor local: `npx astro dev` (puerto 4321); build de producción: `npx astro build` y `npx astro preview`.

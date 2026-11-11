@@ -1,0 +1,252 @@
+---
+// Proyectos para el territorio: Penon (en su componente, contado con el scroll) y la estación
+// terrena. Los planos con IA no van hasta que existan (Leono, 2026-11-10).
+import Penon from './Penon.astro';
+import { iso, pol, lin, rayas, satelite, type P } from '../data/iso';
+import globo from '../data/globo.json';
+
+// ---------- la antena de la estación (QFH): dos lazos helicoidales, en los ejes isométricos ----------
+const helice = (r: number, h: number, t0: number) =>
+  Array.from({ length: 49 }, (_, i) => {
+    const t = i / 48, a = t0 + Math.PI * t;
+    return [r * Math.cos(a), r * Math.sin(a), h * t] as [number, number, number];
+  });
+// cada hélice se parte en tramos de adelante (x − y > 0, la cara que mira a quien mira) y de atrás
+const tramos = (pts: [number, number, number][]) => {
+  const adelante: P[][] = [], atras: P[][] = [];
+  let actual: P[] = [], lado = pts[0][0] - pts[0][1] > 0;
+  for (const p of pts) {
+    const l = p[0] - p[1] > 0;
+    if (l !== lado && actual.length) ((lado ? adelante : atras).push(actual), (actual = [actual[actual.length - 1]]), (lado = l));
+    actual.push(iso(...p));
+  }
+  (lado ? adelante : atras).push(actual);
+  return { adelante, atras };
+};
+const lazos = [
+  { r: 9, h: 46, t0: [0, Math.PI] },
+  { r: 8, h: 42, t0: [Math.PI / 2, (3 * Math.PI) / 2] },
+];
+const hel = lazos.flatMap((l) => l.t0.map((t0) => tramos(helice(l.r, l.h, t0))));
+const antenaAtras = hel.flatMap((t) => t.atras).map((p) => lin(...p)).join('');
+const antenaAdelante = hel.flatMap((t) => t.adelante).map((p) => lin(...p)).join('');
+const barras =
+  lin(iso(9, 0, 0), iso(-9, 0, 0)) + lin(iso(-9, 0, 46), iso(9, 0, 46)) + lin(iso(0, 8, 0), iso(0, -8, 0)) + lin(iso(0, -8, 42), iso(0, 8, 42));
+const tubo = (r: number, z0: number, z1: number) => lin(iso(r, -r, z0), iso(r, -r, z1)) + lin(iso(-r, r, z0), iso(-r, r, z1));
+const mastil = tubo(0.9, 0, 50) + pol(iso(0.9, -0.9, 50), iso(0.9, 0.9, 50), iso(-0.9, 0.9, 50), iso(-0.9, -0.9, 50));
+// la antena va clavada en el globo, en Tierra del Fuego: un poste corto y la caja de la placa LoRa
+const poste = tubo(1.5, -30, -1);
+const caja = { x0: 1.5, x1: 7.5, y0: -4, y1: 4, z0: -24, z1: -12 };
+const cajaFrente = pol(iso(caja.x0, caja.y0, caja.z0), iso(caja.x1, caja.y0, caja.z0), iso(caja.x1, caja.y0, caja.z1), iso(caja.x0, caja.y0, caja.z1));
+const cajaLado = pol(iso(caja.x1, caja.y0, caja.z0), iso(caja.x1, caja.y1, caja.z0), iso(caja.x1, caja.y1, caja.z1), iso(caja.x1, caja.y0, caja.z1));
+const cajaTecho = pol(iso(caja.x0, caja.y0, caja.z1), iso(caja.x1, caja.y0, caja.z1), iso(caja.x1, caja.y1, caja.z1), iso(caja.x0, caja.y1, caja.z1));
+const cajaSombra = rayas(iso(caja.x1, caja.y0, caja.z0), iso(caja.x1, caja.y0, caja.z1), iso(caja.x1, caja.y1, caja.z0), iso(caja.x1, caja.y1, caja.z1), 7);
+const cable = `M${iso(4.5, -4, -18).join(' ')}C${iso(4.5, -9, -10).join(' ')} ${iso(3, -6, -4).join(' ')} ${iso(0.9, -0.9, -1).join(' ')}`;
+
+const f1 = (v: number) => (Math.round(v * 10) / 10).toString();
+const k3 = (v: number) => v.toFixed(3);
+
+// ---------- la Tierra: el norte arriba, Tierra del Fuego abajo, y la órbita polar del satélite ----------
+// Todo sale de scripts/globo.mjs (Natural Earth 1:110m, proyección ortográfica). La antena va clavada en
+// Río Grande, siguiendo la vertical del lugar: apunta hacia afuera, hacia el espacio.
+const { R, tierra, reticula, rg, normal, otras, orbita, enRG, trazoOrbita } = globo;
+const ANTENA = 0.34, PIE = 30;
+const giro = ((Math.atan2(normal[0], -normal[1]) * 180) / Math.PI).toFixed(1);
+const antena = `translate(${rg[0]} ${rg[1]}) rotate(${giro}) scale(${ANTENA}) translate(0 ${-PIE})`;
+const tope: P = [rg[0] + normal[0] * (PIE + 50) * ANTENA, rg[1] + normal[1] * (PIE + 50) * ANTENA];
+const enlaces = otras.map((q) => `M${f1(rg[0])} ${f1(rg[1])}L${f1(q[0])} ${f1(q[1])}`);
+
+// el satélite da una vuelta por ciclo, siempre a la misma velocidad; detrás de la Tierra no se ve.
+// La señal baja a la antena mientras pasa cerca de Río Grande.
+const satDibujo = satelite([0, 0]);
+const VUELTA = 20;
+const recorrido = orbita.map(([x, y]) => `${x},${y}`).join(';');
+const seVe = orbita.map(([, , v]) => v).join(';');
+const cerca = orbita.map(([, , v], i) => (v && Math.abs(i - enRG) <= 11 ? 1 : 0)).join(';');
+const puntaX = orbita.map(([x]) => x).join(';');
+const puntaY = orbita.map(([, y]) => y).join(';');
+const PASA = enRG / (orbita.length - 1); // en qué parte del ciclo pasa por arriba de Río Grande
+const quieto = (PASA * VUELTA).toFixed(2); // con movimiento reducido: el satélite sobre la isla
+
+// el globo grabado como el resto de la página: sin relleno de color plano; el volumen lo da un rayado
+// en la cara a la sombra (la luz viene de arriba a la izquierda, como en la maqueta), y el mar se lee
+// por las líneas de agua que siguen las costas, igual que en el hero y en la isla de Penon
+const LUZ = { x: -0.34 * R, y: -0.3 * R, r: 1.1 * R }; // lo que cae fuera de este círculo, y dentro del globo, va a la sombra
+const ANG = (-30 * Math.PI) / 180, PASO_RAYA = 2.6;
+const [ux, uy] = [Math.cos(ANG), Math.sin(ANG)], [vx, vy] = [-uy, ux]; // u: a lo largo de la raya; v: entre rayas
+// los tramos de una recta (offset k sobre v) que quedan dentro de un círculo
+const dentro = (k: number, cx: number, cy: number, r: number): [number, number] | null => {
+  const c = cx * vx + cy * vy, m = cx * ux + cy * uy; // el centro del círculo en las coordenadas (u, v)
+  const h = r * r - (k - c) ** 2;
+  return h <= 0 ? null : [m - Math.sqrt(h), m + Math.sqrt(h)];
+};
+const sombra = Array.from({ length: Math.floor((2 * R) / PASO_RAYA) }, (_, i) => -R + (i + 0.5) * PASO_RAYA)
+  .flatMap((k) => {
+    const g = dentro(k, 0, 0, R);
+    if (!g) return [];
+    const l = dentro(k, LUZ.x, LUZ.y, LUZ.r);
+    // el tramo del globo menos el tramo iluminado
+    const tramos = !l ? [g] : [[g[0], Math.min(g[1], l[0])], [Math.max(g[0], l[1]), g[1]]].filter(([a, b]) => b - a > 0.4);
+    return tramos.map(([a, b]) => `M${f1(a * ux + k * vx)} ${f1(a * uy + k * vy)}L${f1(b * ux + k * vx)} ${f1(b * uy + k * vy)}`);
+  })
+  .join('');
+
+// el dato: cuando el satélite ya pasó, baja por la antena hasta la tierra y sale por la red
+const [SALE, LLEGA] = [PASA + 0.01, PASA + 0.04];
+const REPARTE = 0.08; // lo que tarda en llegar a las otras estaciones
+const baja = `M${f1(tope[0])} ${f1(tope[1])}L${f1(rg[0])} ${f1(rg[1])}`;
+
+---
+<!-- sin título paraguas: la sección abre con Penon (Leono, 2026-11-10); el enlace Proyectos de la barra
+     sigue llevando acá -->
+<section class="seccion proyectos" id="proyectos" aria-labelledby="penon-titulo">
+  <Penon />
+
+  <article class="estacion" id="estacion" aria-labelledby="estacion-titulo">
+      <svg class="vineta" viewBox="-182 -178 364 362" role="img" aria-label="La Tierra con la antena de la estación clavada en Tierra del Fuego; un satélite en órbita polar pasa por arriba, la antena recibe su señal y la reparte a la red de estaciones" data-vive data-quieto={quieto}>
+        <!-- la Tierra, grabada: el mar en papel con aguada y líneas de agua junto a las costas, los
+             continentes con su aguada y su costa, la retícula, y el rayado de la cara a la sombra -->
+        <defs>
+          <clipPath id="g-globo"><circle r={R} /></clipPath>
+          <path id="g-tierra" d={tierra} />
+        </defs>
+        <circle r={R} fill="var(--papel)" />
+        <g clip-path="url(#g-globo)" fill="none" stroke-linejoin="round">
+          <use href="#g-tierra" stroke="var(--aguada-mar)" stroke-width="9" />
+          {[3.6, 2].map((d, i) => (
+            <>
+              <use href="#g-tierra" stroke="var(--tinta-suave)" stroke-opacity={0.45 + i * 0.25} stroke-width={2 * d + 0.35} />
+              <use href="#g-tierra" stroke="var(--aguada-mar)" stroke-width={2 * d - 0.35} />
+            </>
+          ))}
+          <path d={reticula} stroke="var(--tinta-suave)" stroke-width="0.28" opacity="0.7" />
+          <use href="#g-tierra" fill="var(--aguada-tierra)" stroke="var(--tinta)" stroke-width="0.45" />
+          <path d={sombra} stroke="var(--tinta-suave)" stroke-width="0.32" opacity="0.85" />
+        </g>
+        <circle r={R} fill="none" stroke="var(--tinta)" stroke-width="0.9" />
+
+        <!-- la red: los enlaces de Río Grande con las otras estaciones -->
+        <path d={enlaces.join('')} fill="none" stroke="var(--tinta-suave)" stroke-width="0.45" stroke-dasharray="1.5 2.5" stroke-linecap="round">
+          <animate attributeName="stroke" values="var(--tinta-suave);var(--tinta-suave);var(--tinta);var(--tinta-suave);var(--tinta-suave)" keyTimes={`0;${k3(LLEGA)};${k3(LLEGA + 0.03)};${k3(LLEGA + REPARTE + 0.05)};1`} dur={`${VUELTA}s`} repeatCount="indefinite" />
+        </path>
+        {otras.map((q) => <circle cx={q[0]} cy={q[1]} r="1.8" fill="var(--papel)" stroke="var(--tinta)" stroke-width="0.6" />)}
+        {
+          enlaces.map((d) => (
+            <circle r="1.3" fill="var(--tinta)" opacity="0">
+              <animateMotion path={d} dur={`${VUELTA}s`} repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes={`0;${k3(LLEGA)};${k3(LLEGA + REPARTE)};1`} calcMode="linear" />
+              <animate attributeName="opacity" values="0;1;0" keyTimes={`0;${k3(LLEGA)};${k3(LLEGA + REPARTE)}`} calcMode="discrete" dur={`${VUELTA}s`} repeatCount="indefinite" />
+            </circle>
+          ))
+        }
+
+        <!-- la órbita polar: lo que tapa la Tierra no se dibuja -->
+        <path d={trazoOrbita} fill="none" stroke="var(--tinta-suave)" stroke-width="0.55" stroke-dasharray="1 4" stroke-linecap="round" opacity="0.8" />
+
+        <!-- la antena, clavada en Río Grande y apuntando al espacio -->
+        <g transform={antena} fill="none" stroke="var(--tinta)" stroke-linecap="round" stroke-linejoin="round">
+          <path d={poste} stroke="var(--tinta)" stroke-width="1.6" />
+          <path d={cable} stroke="var(--tinta-suave)" stroke-width="1.2" />
+          <path d={cajaFrente + cajaTecho} fill="var(--papel)" stroke-width="1.4" />
+          <path d={cajaLado} fill="var(--papel)" stroke-width="1.4" />
+          <path d={antenaAtras} stroke="var(--tinta-suave)" stroke-width="1.3" />
+          <path d={mastil} fill="var(--papel)" stroke-width="1.4" />
+          <path d={barras} stroke-width="1.4" />
+          <path d={antenaAdelante} stroke-width="2" />
+        </g>
+        <circle cx={rg[0]} cy={rg[1]} r="1.6" fill="var(--tinta)" />
+        <text class="rotulo-red coord" x={f1(rg[0] + 14)} y={f1(rg[1] + 16)}>53°47′ S · 67°42′ O</text>
+
+        <!-- la señal: del satélite a la antena, mientras pasa cerca de Río Grande -->
+        <line x1={orbita[enRG][0]} y1={orbita[enRG][1]} x2={f1(tope[0])} y2={f1(tope[1])} stroke="var(--acento)" stroke-width="0.8" stroke-dasharray="2 3" stroke-linecap="round">
+          <animate attributeName="x1" values={puntaX} dur={`${VUELTA}s`} repeatCount="indefinite" />
+          <animate attributeName="y1" values={puntaY} dur={`${VUELTA}s`} repeatCount="indefinite" />
+          <animate attributeName="stroke-dashoffset" values="0;-10" dur="0.8s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values={cerca} calcMode="discrete" dur={`${VUELTA}s`} repeatCount="indefinite" />
+        </line>
+        <!-- el satélite (la animación lo pone en su órbita: animateMotion se suma al transform, así que no lleva uno) -->
+        <g>
+          <g stroke="var(--tinta)" stroke-linejoin="round" stroke-linecap="round">
+            <path d={satDibujo.alas} fill="var(--papel)" stroke-width="0.6" />
+            <path d={satDibujo.cuerpo} fill="var(--papel)" stroke-width="0.6" />
+          </g>
+          <circle cy="-4" r="1.3" fill="var(--acento)" />
+          <animateMotion values={recorrido} dur={`${VUELTA}s`} repeatCount="indefinite" calcMode="linear" />
+          <animate attributeName="opacity" values={seVe} calcMode="discrete" dur={`${VUELTA}s`} repeatCount="indefinite" />
+        </g>
+
+        <!-- el dato baja por la antena hasta la tierra, y Río Grande se enciende en la red -->
+        <g opacity="0">
+          <path d="M0 -2.4L2.4 0L0 2.4L-2.4 0Z" fill="var(--acento)" />
+          <animateMotion path={baja} dur={`${VUELTA}s`} repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes={`0;${k3(SALE)};${k3(LLEGA)};1`} calcMode="linear" />
+          <animate attributeName="opacity" values="0;1;0" keyTimes={`0;${k3(SALE)};${k3(LLEGA)}`} calcMode="discrete" dur={`${VUELTA}s`} repeatCount="indefinite" />
+        </g>
+        <circle cx={rg[0]} cy={rg[1]} r="3" fill="none" stroke="var(--acento)" stroke-width="0.7" opacity="0">
+          <animate attributeName="r" values="3;3;14;14" keyTimes={`0;${k3(LLEGA)};${k3(LLEGA + 0.06)};1`} dur={`${VUELTA}s`} repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0;0;0.9;0;0" keyTimes={`0;${k3(LLEGA)};${k3(LLEGA + 0.005)};${k3(LLEGA + 0.06)};1`} dur={`${VUELTA}s`} repeatCount="indefinite" />
+        </circle>
+      </svg>
+      <div>
+        <h2 id="estacion-titulo">Estación terrena</h2>
+        <p>
+          En Río Grande armamos una estación para escuchar satélites pequeños: una placa LilyGO T3 con radio LoRa en 433 MHz y una antena helicoidal cuadrifilar (QFH). Cuando está en
+          línea, lo que recibe se suma a TinyGS, una red abierta de estaciones en todo el mundo.
+        </p>
+        <p class="ver"><a href="https://tinygs.com/station/Howenh" target="_blank" rel="noopener">Ver la estación en TinyGS ↗</a></p>
+      </div>
+  </article>
+</section>
+
+<style>
+  /* el panel de Penon ya trae su aire arriba: la sección no suma todo el suyo */
+  .proyectos {
+    padding-top: clamp(48px, 5vw, 80px);
+  }
+  .estacion h2 {
+    font-size: clamp(30px, 3vw, 44px);
+    line-height: 1.05;
+  }
+  /* la estación es su propio proyecto: con aire propio, el dibujo grande y la letra a la derecha */
+  .estacion {
+    margin-top: clamp(72px, 8vw, 128px);
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 32px clamp(32px, 4vw, 72px);
+    align-items: center;
+  }
+  .estacion p {
+    margin-top: 14px;
+    font-size: clamp(16px, 1.2vw, 18px);
+    line-height: 1.55;
+    max-width: 52ch;
+  }
+  .vineta {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .rotulo-red {
+    font: 400 7.5px var(--mono);
+    letter-spacing: 0.12em;
+    fill: var(--tinta-suave);
+    paint-order: stroke;
+    stroke: var(--papel);
+    stroke-width: 2.5px;
+    stroke-linejoin: round;
+  }
+  .coord {
+    fill: var(--tinta);
+  }
+  .ver {
+    font: 500 12px var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  @media (max-width: 900px) {
+    .estacion {
+      grid-template-columns: 1fr;
+    }
+    .vineta {
+      max-width: 520px;
+    }
+  }
+</style>

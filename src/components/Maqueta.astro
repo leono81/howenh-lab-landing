@@ -30,9 +30,11 @@ const lineasChicas = [3, 7, 12, 18].map((d, i) => ({ d, w: 0.9, o: 1 - i * 0.2 }
     <clipPath id="q-franja"><rect x={franja.x} y={franja.y} width={franja.w} height={franja.h} /></clipPath>
     <clipPath id="q-mar"><path d={agua.mar} /></clipPath>
     <clipPath id="q-estuario"><path d={agua.estuario} clip-rule="evenodd" clip-path="url(#q-franja)" /></clipPath>
-    <!-- la ciudad crece desde la plaza de la torre -->
+    <!-- la ciudad crece desde la plaza de la torre. El radio de base es 0: el reloj SMIL arranca
+         recién con el load, y con un radio de base lleno la ciudad se veía entera desde el primer
+         cuadro, desaparecía al llegar el begin y volvía a crecer. -->
     <clipPath id="q-crece">
-      <circle cx={tx} cy={ty} r="1100">
+      <circle cx={tx} cy={ty} r="0">
         <animate attributeName="r" values="0;1100" keyTimes="0;1" calcMode="spline" keySplines="0.3 0.1 0.25 1" begin="1.9s" dur="2.6s" fill="freeze" />
       </circle>
     </clipPath>
