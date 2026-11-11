@@ -205,6 +205,17 @@ const olas = Array.from({ length: 34 }, () => {
 });
 ---
 <section class="hero-a" aria-labelledby="hero-titulo">
+  <!-- el texto va antes que la maqueta en el HTML: el svg pesa ~1 MB y, si el texto llegaba
+       después, el teléfono pintaba la maqueta arriba y la corría al llegar el texto (CLS 0,52) -->
+  <div class="texto">
+    <p class="coordenadas entra" style="--d: 3.7s">53°47′09″ S · 67°42′07″ O</p>
+    <h1 class="entra" id="hero-titulo" style="--d: 0s">Un laboratorio en el borde del continente</h1>
+    <p class="bajada entra" style="--d: 4.3s">Inteligencia artificial, satélites y software en producción. Hechos con tiempo, cerca del mar.</p>
+    <div class="acciones entra" style="--d: 4.6s">
+      <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar una reunión →</a>
+      <a class="secundario" href="#laboratorio">Conocer el laboratorio ↓</a>
+    </div>
+  </div>
   <div class="ventana">
     <div class="plano">
       <div role="img" aria-label="Maqueta grabada de la costa norte de Río Grande, Tierra del Fuego, vista desde el mar: adelante la ciudad con la Torre de Agua junto a la desembocadura del río Grande; detrás el aeropuerto, la Ruta 3 y la Misión Salesiana; al fondo, el Cabo Domingo con su baliza encendida sobre el acantilado. Por el mar pasa un barco, por la ruta llegan camiones a la ciudad, un avión aterriza y despega y un satélite cruza el cielo.">
@@ -393,15 +404,6 @@ const olas = Array.from({ length: 34 }, () => {
     </div>
   </div>
 
-  <div class="texto">
-    <p class="coordenadas entra" style="--d: 3.7s">53°47′09″ S · 67°42′07″ O</p>
-    <h1 class="entra" id="hero-titulo" style="--d: 0s">Un laboratorio en el borde del continente</h1>
-    <p class="bajada entra" style="--d: 4.3s">Inteligencia artificial, satélites y software en producción. Hechos con tiempo, cerca del mar.</p>
-    <div class="acciones entra" style="--d: 4.6s">
-      <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar una reunión →</a>
-      <a class="secundario" href="#laboratorio">Conocer el laboratorio ↓</a>
-    </div>
-  </div>
 </section>
 
 <script>
@@ -483,8 +485,9 @@ const olas = Array.from({ length: 34 }, () => {
     padding: max(84px, var(--w) * 0.07) var(--margen) 0;
   }
   .coordenadas {
+    white-space: nowrap; /* una línea siempre, con o sin la mono cargada: nada se corre */
     margin-bottom: calc(var(--w) * 0.012);
-    font: 400 11px var(--mono);
+    font: 400 11px / 16px var(--mono); /* alto fijo: ′ y ″ no están en Martian Mono y salen de otra fuente */
     letter-spacing: 0.12em;
     color: var(--tinta-suave);
   }

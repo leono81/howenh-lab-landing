@@ -1,0 +1,4 @@
+Archivo, EB Garamond y Martian Mono: tipografías libres bajo la SIL Open Font License 1.1.
+Los archivos woff2 (variables, subconjuntos latín y latín extendido, tomados de Google Fonts
+el 2026-11-11) se sirven desde /_astro/. El copyright y el texto de la licencia de cada familia
+están en OFL-archivo.txt, OFL-ebgaramond.txt y OFL-martianmono.txt.
