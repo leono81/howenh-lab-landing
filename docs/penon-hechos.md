@@ -8,6 +8,7 @@ Fuente única para todo copy sobre Penon en la landing. Lo verificó la sesión 
 - **Pendiente de Leono:** fecha oficial de puesta en servicio, cantidad de usuarios, si se puede nombrar al ministerio como cliente. No escribir "convenio" ni "contrato" sin su confirmación: el convenio está en borrador.
 
 ## Qué hace
+- Leono (2026-11-11): se puede decir «detección temprana» y nombrar **NASA FIRMS (LANCE)**, como hace la página de Penon. «Temprana» sin número: la latencia sigue sin medir.
 - Focos de calor satelitales: VIIRS (NOAA-20 y NOAA-21) y MODIS, vía NASA FIRMS; para NOAA-20/21 también NOAA NESDIS, que publica antes. **No** decir "satélites de la NASA" a secas, ni "tres VIIRS": Suomi NPP no aporta datos desde el 2/11/2026 (FIRMS vacío desde esa fecha).
 - Agrupa focos cercanos en incendios y sigue cada fuego como unidad.
 - Índice de peligro FWI en 3 zonas, con observaciones oficiales del SMN y partes de guardia de las brigadas (no Open-Meteo).

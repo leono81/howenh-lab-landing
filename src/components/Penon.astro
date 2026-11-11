@@ -21,7 +21,7 @@ const leyenda = [
   { nombre: 'Capa industrial y petrolera', desc: 'Lo que cae acá se rotula: no se descarta.', color: 'var(--tinta-suave)', cuanto: 0.24 },
   { nombre: 'Capa de rayos', desc: 'Los rayos que registra el satélite GOES-19.', color: 'var(--aguada-ciudad)', cuanto: 1 },
   { nombre: 'Capa de contexto', desc: 'Áreas protegidas y poblados: lo que hay alrededor de cada foco.', color: 'var(--tinta)', cuanto: 0.12 },
-  { nombre: 'Capa satelital', desc: 'VIIRS y MODIS pasan varias veces al día; lo detectado llega al mapa en un máximo de 30 minutos.', color: 'var(--acento)', cuanto: 1 },
+  { nombre: 'Capa satelital', desc: 'Focos de calor de VIIRS y MODIS, de NASA FIRMS (LANCE): los satélites pasan varias veces al día y lo detectado llega al mapa en un máximo de 30 minutos.', color: 'var(--acento)', cuanto: 1 },
 ];
 
 // ---------- la isla en perspectiva ----------
@@ -95,7 +95,7 @@ const quieto = enU(focos[1].u);
     <div class="panel">
       <div class="penon-texto">
         <h2 id="penon-titulo">Penon</h2>
-        <p class="que">Vigilancia satelital de incendios forestales en Tierra del Fuego.</p>
+        <p class="que">Detección temprana y vigilancia satelital de incendios forestales en Tierra del Fuego.</p>
         <p>
           El 30 de noviembre de 2022 empezó un incendio a 12 km de Tolhuin, en la Reserva Corazón de la Isla. Duró unos tres meses, quemó cerca de 12.000 hectáreas y llegó a tener
           unos 1.000 brigadistas trabajando.
