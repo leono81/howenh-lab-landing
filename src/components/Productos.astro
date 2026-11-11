@@ -4,12 +4,8 @@
 // aparece solo en el diagrama). Tari queda afuera hasta que esté en producción.
 import { iso, pol, lin, rayas } from '../data/iso';
 import KenosActos from './KenosActos.astro';
+import Facturacion from './Facturacion.astro';
 
-// Kenos: CENIT no se nombra hasta que Leono lo confirme (PRODUCT.md)
-const NOMBRAR_CLIENTE = false;
-const kenosEnUso = NOMBRAR_CLIENTE
-  ? 'Lo usan profesionales con su suscripción y CENIT, un centro de kinesiología de Buenos Aires con tres sedes, donde lo implementamos en persona.'
-  : 'Lo usan profesionales con su suscripción y un centro de kinesiología de Buenos Aires con tres sedes, donde lo implementamos en persona.';
 // sin «facturación electrónica» ni «envío de la presentación»: Kenos todavía no los hace (assets/sistema/marcas/kenos.md)
 // una por acto de la lámina (la agenda de acá y las cuatro de KenosActos.astro), en el mismo orden
 const kenosHace = ['Turnos y agenda por profesional', 'Pacientes e historia clínica', 'Órdenes y sesiones', 'Presentación a las coberturas', 'Reportes y métricas'];
@@ -122,109 +118,6 @@ const enDias = ([px, py]: number[]) => `matrix(${r1(C)} ${-S} ${r1(C)} ${S} ${r1
 const enHoras = ([px, py]: number[]) => `matrix(${r1(C)} ${S} ${r1(-C)} ${S} ${r1(px)} ${r1(py)})`;
 const dias = DIAS_NOMBRE.map((t, d) => ({ t: t.slice(0, 3).toUpperCase().replace('MIE', 'MIÉ'), m: enDias(iso(-4.5, d * CEL + CEL / 2 - ALTO_LETRA / 2)) }));
 const horas = Array.from({ length: HORAS }, (_, h) => ({ t: `${String(PRIMERA_HORA + h).padStart(2, '0')}:00`, m: enHoras(iso(h * CEL + CEL / 2 + ALTO_LETRA / 2, -5)) }));
-
-// yon.com.ar existe pero todavía no tiene landing: se enlaza cuando la tenga
-const productos = [
-  {
-    nombre: 'Hown',
-    para: 'Quien factura sin mostrador: oficios y servicios',
-    texto: 'Un bot de Telegram: le mandás un audio o un texto y te devuelve la factura de ARCA (A, B o C) con su PDF.',
-    sitio: ['hown.howenh-labs.com', 'https://hown.howenh-labs.com/'],
-  },
-  {
-    nombre: 'Yon',
-    para: 'Comercios de mostrador',
-    texto: 'Vende, cobra y factura en el mismo toque; lleva el stock y los clientes, y sigue vendiendo sin señal: factura cuando vuelve la conexión.',
-  },
-  {
-    nombre: 'Kaux',
-    para: 'Estudios contables',
-    texto: 'Arma los archivos de ARCA para la carga masiva (Libro IVA Digital, sueldos) y controla los vencimientos.',
-  },
-];
-
-// ---------- el diagrama: una carta de rutas, en dos disposiciones (ancha y angosta) ----------
-type N = [number, number];
-type Rotulo = { t: string; en: N; ancla: 'arriba' | 'abajo' | 'derecha' | 'izquierda'; tipo: 'nombre' | 'nota' | 'ruta' };
-const curva = (a: N, b: N, vertical: boolean) => {
-  if (vertical) {
-    const m = (b[1] - a[1]) / 2;
-    return `M${a[0]} ${a[1]}C${a[0]} ${a[1] + m} ${b[0]} ${b[1] - m} ${b[0]} ${b[1]}`;
-  }
-  const m = (b[0] - a[0]) / 2;
-  return `M${a[0]} ${a[1]}C${a[0] + m} ${a[1]} ${b[0] - m} ${b[1]} ${b[0]} ${b[1]}`;
-};
-const disposiciones = [
-  {
-    clave: 'ancho',
-    vb: [1000, 400],
-    vertical: false,
-    nodos: { hown: [120, 110], yon: [120, 300], teken: [520, 205], arca: [880, 110], kaux: [880, 300] } as Record<string, N>,
-    rutas: {
-      hown: [[134, 110], [504, 199]],
-      yon: [[134, 300], [504, 211]],
-      ida: [[536, 198], [866, 104]],
-      vuelta: [[866, 116], [536, 210]],
-      kaux: [[532, 219], [866, 300]],
-    } as Record<string, [N, N]>,
-    rotulos: [
-      { t: 'Hown', en: [120, 90], ancla: 'arriba', tipo: 'nombre' },
-      { t: 'bot de Telegram', en: [120, 128], ancla: 'abajo', tipo: 'nota' },
-      { t: 'Yon', en: [120, 280], ancla: 'arriba', tipo: 'nombre' },
-      { t: 'app de mostrador', en: [120, 318], ancla: 'abajo', tipo: 'nota' },
-      { t: 'Teken', en: [520, 166], ancla: 'arriba', tipo: 'nombre' },
-      { t: 'el motor', en: [520, 186], ancla: 'arriba', tipo: 'nota' },
-      { t: 'ARCA', en: [880, 68], ancla: 'arriba', tipo: 'nombre' },
-      { t: 'factura electrónica', en: [880, 92], ancla: 'arriba', tipo: 'nota' },
-      { t: 'Kaux', en: [880, 258], ancla: 'arriba', tipo: 'nombre' },
-      { t: 'estudio contable', en: [880, 282], ancla: 'arriba', tipo: 'nota' },
-      { t: 'comprobante', en: [622, 176], ancla: 'arriba', tipo: 'ruta' },
-      { t: 'CAE', en: [836, 124], ancla: 'abajo', tipo: 'ruta' },
-      { t: 'venta, en vivo', en: [784, 308], ancla: 'abajo', tipo: 'ruta' },
-    ] as Rotulo[],
-  },
-  {
-    clave: 'alto',
-    vb: [400, 660],
-    vertical: true,
-    nodos: { hown: [90, 90], yon: [310, 90], teken: [200, 330], arca: [90, 570], kaux: [310, 570] } as Record<string, N>,
-    rutas: {
-      hown: [[90, 104], [193, 316]],
-      yon: [[310, 104], [207, 316]],
-      ida: [[194, 346], [96, 556]],
-      vuelta: [[84, 556], [184, 346]],
-      kaux: [[212, 346], [310, 556]],
-    } as Record<string, [N, N]>,
-    rotulos: [
-      { t: 'Hown', en: [90, 46], ancla: 'arriba', tipo: 'nombre' },
-      { t: 'bot de Telegram', en: [90, 74], ancla: 'arriba', tipo: 'nota' },
-      { t: 'Yon', en: [310, 46], ancla: 'arriba', tipo: 'nombre' },
-      { t: 'app de mostrador', en: [310, 74], ancla: 'arriba', tipo: 'nota' },
-      { t: 'Teken', en: [226, 318], ancla: 'derecha', tipo: 'nombre' },
-      { t: 'el motor', en: [226, 344], ancla: 'derecha', tipo: 'nota' },
-      { t: 'ARCA', en: [90, 588], ancla: 'abajo', tipo: 'nombre' },
-      { t: 'factura electrónica', en: [90, 620], ancla: 'abajo', tipo: 'nota' },
-      { t: 'Kaux', en: [310, 588], ancla: 'abajo', tipo: 'nombre' },
-      { t: 'estudio contable', en: [310, 620], ancla: 'abajo', tipo: 'nota' },
-      { t: 'comprobante', en: [106, 478], ancla: 'izquierda', tipo: 'ruta' },
-      { t: 'CAE', en: [118, 440], ancla: 'izquierda', tipo: 'ruta' },
-      { t: 'venta, en vivo', en: [270, 452], ancla: 'derecha', tipo: 'ruta' },
-    ] as Rotulo[],
-  },
-];
-// el recorrido de un comprobante, en un ciclo de 20 s: sale de Hown, va por Teken a ARCA, vuelve
-// con el CAE, la factura llega al comercio y la venta al estudio contable. Después, lo mismo desde Yon.
-const CICLO = 20;
-const tramos = (canal: string, t: number) => [
-  { ruta: canal, ida: true, a: t, b: t + 0.08 },
-  { ruta: 'ida', ida: true, a: t + 0.09, b: t + 0.16 },
-  { ruta: 'vuelta', ida: true, a: t + 0.19, b: t + 0.26 },
-  { ruta: canal, ida: false, a: t + 0.27, b: t + 0.35 },
-  { ruta: 'kaux', ida: true, a: t + 0.27, b: t + 0.36 },
-];
-const viaje = [...tramos('hown', 0), ...tramos('yon', 0.5)];
-const pct = (vb: number[], [x, y]: N) => `left:${((x / vb[0]) * 100).toFixed(2)}%;top:${((y / vb[1]) * 100).toFixed(2)}%`;
-const k = (v: number) => v.toFixed(3);
 ---
 <section class="seccion productos" id="productos" aria-labelledby="prod-titulo">
   <h2 id="prod-titulo">Nuestras plataformas</h2>
@@ -305,75 +198,10 @@ const k = (v: number) => v.toFixed(3);
     </svg>
     <KenosActos />
     </div>
-    <figcaption>{kenosEnUso}</figcaption>
     </figure>
   </article>
 
-  <h3 class="grupo">Facturación electrónica, conectada a ARCA</h3>
-  <ul class="lista">
-    {
-      productos.map((p) => (
-        <li>
-          <h4>{p.nombre}</h4>
-          <p class="para rotulo">{p.para}</p>
-          <p class="texto">{p.texto}</p>
-          <p class="sitio">
-            {p.sitio ? (
-              <a href={p.sitio[1]} target="_blank" rel="noopener">
-                {p.sitio[0]} ↗
-              </a>
-            ) : null}
-          </p>
-        </li>
-      ))
-    }
-  </ul>
-
-  <figure class="ecosistema">
-    {
-      disposiciones.map((d) => (
-        <div class={`carta carta-${d.clave}`}>
-          <svg viewBox={`0 0 ${d.vb[0]} ${d.vb[1]}`} aria-hidden="true" data-vive data-quieto="2.4">
-            <defs>
-              {Object.entries(d.rutas).map(([n, [a, b]]) => (
-                <path id={`e-${d.clave}-${n}`} d={curva(a, b, d.vertical)} />
-              ))}
-            </defs>
-            <g fill="none" stroke="var(--tinta)" stroke-width="1" stroke-linecap="round">
-              {Object.keys(d.rutas).map((n) => (
-                <use href={`#e-${d.clave}-${n}`} stroke-dasharray={n === 'kaux' ? '4 4' : undefined} />
-              ))}
-            </g>
-            <g stroke="var(--tinta)" stroke-width="1.2">
-              {['hown', 'yon', 'kaux'].map((n) => (
-                <rect x={d.nodos[n][0] - 6} y={d.nodos[n][1] - 6} width="12" height="12" fill="var(--papel)" />
-              ))}
-              <rect x={d.nodos.teken[0] - 13} y={d.nodos.teken[1] - 13} width="26" height="26" fill="var(--papel)" />
-              <rect x={d.nodos.teken[0] - 6} y={d.nodos.teken[1] - 6} width="12" height="12" fill="var(--tinta)" />
-              <rect x={d.nodos.arca[0] - 6} y={d.nodos.arca[1] - 6} width="12" height="12" fill="var(--papel)" stroke="var(--tinta-suave)" stroke-dasharray="2 2" />
-            </g>
-            {viaje.map((v) => (
-              <g opacity="0">
-                <path d="M0 -4.5L4.5 0L0 4.5L-4.5 0Z" fill="var(--acento)" />
-                <animateMotion dur={`${CICLO}s`} repeatCount="indefinite" calcMode="linear" keyPoints={v.ida ? '0;0;1;1' : '1;1;0;0'} keyTimes={`0;${k(v.a)};${k(v.b)};1`}>
-                  <mpath href={`#e-${d.clave}-${v.ruta}`} />
-                </animateMotion>
-                <animate attributeName="opacity" values="0;1;0" keyTimes={`0;${k(v.a)};${k(v.b)}`} calcMode="discrete" dur={`${CICLO}s`} repeatCount="indefinite" />
-              </g>
-            ))}
-          </svg>
-          {d.rotulos.map((r) => (
-            <span class={`e e-${r.tipo} a-${r.ancla}`} style={pct(d.vb, r.en)}>
-              {r.t}
-            </span>
-          ))}
-        </div>
-      ))
-    }
-    <figcaption>
-      Hown y Yon emiten cada comprobante a través de Teken, el motor que habla con ARCA. Si el comercio trabaja con un estudio que usa Kaux, la venta puede llegar sola a su Libro IVA.
-    </figcaption>
-  </figure>
+  <Facturacion />
 </section>
 
 <script>
@@ -526,16 +354,6 @@ const k = (v: number) => v.toFixed(3);
   .al-ritmo .actos > :global(svg[data-actual]) {
     opacity: 1;
   }
-  /* debajo de la lámina, quién lo usa: es la prueba, va en tinta y legible */
-  .agenda-lamina figcaption {
-    grid-column: 1 / -1;
-    margin: 10px auto 0;
-    max-width: 52ch;
-    font-size: clamp(15px, 1.1vw, 17px);
-    line-height: 1.5;
-    text-align: center;
-    text-wrap: balance;
-  }
   .letra-agenda text {
     font-family: var(--mono);
     font-size: 3.6px;
@@ -546,98 +364,6 @@ const k = (v: number) => v.toFixed(3);
     font: 500 12px var(--mono);
     letter-spacing: 0.06em;
   }
-  .grupo {
-    margin-top: clamp(72px, 8vw, 128px);
-    font-size: clamp(26px, 2.4vw, 36px);
-    max-width: 22em;
-    text-wrap: balance;
-  }
-  .lista {
-    list-style: none;
-    margin-top: clamp(20px, 2.5vw, 32px);
-    border-bottom: 1px solid var(--tinta-suave);
-  }
-  .lista li {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(0, 5fr) minmax(0, 3fr);
-    gap: 8px clamp(20px, 3vw, 48px);
-    align-items: baseline;
-    padding: 22px 0 24px;
-    border-top: 1px solid var(--tinta-suave);
-  }
-  .lista h4 {
-    font: 400 clamp(28px, 2.6vw, 40px) / 1.05 var(--serif);
-    letter-spacing: -0.01em;
-  }
-  .para {
-    text-transform: uppercase;
-    line-height: 1.6;
-  }
-  .texto {
-    font-size: 16px;
-    line-height: 1.55;
-    max-width: 52ch;
-  }
-  .sitio {
-    font: 500 12px var(--mono);
-    letter-spacing: 0.06em;
-    justify-self: end;
-  }
-
-  .ecosistema {
-    margin-top: clamp(64px, 8vw, 120px);
-  }
-  .carta {
-    position: relative;
-    max-width: 1100px;
-    margin-inline: auto;
-  }
-  .carta svg {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  .carta-alto {
-    display: none;
-    max-width: 420px;
-  }
-  .e {
-    position: absolute;
-    white-space: nowrap;
-  }
-  .e-nombre {
-    font: 400 clamp(22px, 2.4vw, 32px) / 1 var(--serif);
-  }
-  .e-nota,
-  .e-ruta {
-    font: 400 11px var(--mono);
-    letter-spacing: 0.08em;
-    color: var(--tinta-suave);
-  }
-  .e-ruta {
-    text-shadow: 0 0 4px var(--papel), 0 0 2px var(--papel);
-  }
-  .a-arriba {
-    transform: translate(-50%, -100%);
-  }
-  .a-abajo {
-    transform: translate(-50%, 0);
-  }
-  .a-derecha {
-    transform: translate(0, -50%);
-  }
-  .a-izquierda {
-    transform: translate(-100%, -50%);
-  }
-  .ecosistema figcaption {
-    margin: 28px auto 0;
-    max-width: 62ch;
-    font-size: 15px;
-    line-height: 1.55;
-    text-align: center;
-    text-wrap: balance;
-  }
-
   @media (max-width: 900px) {
     .kenos {
       grid-template-columns: 1fr;
@@ -651,34 +377,6 @@ const k = (v: number) => v.toFixed(3);
       order: 1;
       margin-top: 8px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .agenda-lamina figcaption {
-      order: 2;
-    }
-    .lista li {
-      grid-template-columns: minmax(0, 1fr) auto;
-    }
-    .lista h4 {
-      grid-row: 1;
-    }
-    .sitio {
-      grid-row: 1;
-      grid-column: 2;
-    }
-    .para,
-    .texto {
-      grid-column: 1 / -1;
-    }
-  }
-  @media (max-width: 700px) {
-    .carta-ancho {
-      display: none;
-    }
-    .carta-alto {
-      display: block;
-    }
-    .ecosistema figcaption {
-      text-align: left;
     }
   }
 </style>

@@ -1,0 +1,922 @@
+---
+// Facturación y contabilidad, debajo de Kenos (Leono eligió la «recomendada» del canvas
+// «Facturación · bosquejos», 2026-11-11). A la izquierda, Hown y Yon (facturan) y Kaux (contable);
+// a la derecha, una mesa grabada donde se ve el recorrido: el comprobante sale de Hown o de Yon,
+// pasa por Teken (el motor interno, no se ofrece al público) a ARCA y vuelve con el CAE; Kaux trae
+// de ARCA el libro de IVA, el contador lo revisa y lo sube él (todavía no es automático).
+// Todo lo de la mesa corre con un solo reloj SMIL de 18 s; el script de abajo lee ese reloj para
+// marcar la fila del producto que actúa y mostrar su recuadro de detalle (como en un atlas).
+const DUR = 18;
+type Paso = [number, string | number];
+const k = (t: number) => +(t / DUR).toFixed(4);
+// una animación SMIL a partir de pares [segundo, valor]; dos valores iguales seguidos son una pausa
+const anim = (pasos: Paso[], curva?: string) => ({
+  dur: `${DUR}s`,
+  repeatCount: 'indefinite',
+  values: pasos.map(([, v]) => v).join(';'),
+  keyTimes: pasos.map(([t]) => k(t)).join(';'),
+  ...(curva && { calcMode: 'spline', keySplines: pasos.slice(1).map(() => curva).join(';') }),
+});
+const CAE_CURVA = '0.3 0.7 0.2 1';
+// se ve entre a y b
+const entre = (a: number, b: number, fin = DUR): Paso[] => [[0, 0], [a, 0], [a + 0.06, 1], [b, 1], [b + 0.06, 0], [fin, 0]];
+// se traza entre a y b (con pathLength="1") y queda
+const traza = (a: number, b: number): Paso[] => [[0, 1], [a, 1], [b, 0], [DUR, 0]];
+
+// los caminos, en el plano de la mesa (u a lo largo, v hacia adelante)
+const R = {
+  hown: 'M20 13C32 13 38 27 48 27',
+  yon: 'M28 38C36 38 40 33 48 33',
+  ida: 'M64 26C74 26 80 15 88 14',
+  cae: 'M88 18C80 19 74 30 64 30',
+  trae: 'M100 22C100 30 92 33 88 38',
+  sube: 'M104 40C108 33 108 27 106 22',
+};
+// lo que viaja: comprobantes, el CAE (magenta) y el libro de IVA
+const viaja = (d: string, a: number, b: number) => ({
+  mov: { path: d, keyPoints: '0;0;1;1', keyTimes: `0;${k(a)};${k(b)};1`, calcMode: 'linear', dur: `${DUR}s`, repeatCount: 'indefinite' },
+  op: anim(entre(a, b)),
+});
+const viajes = {
+  hown: viaja(R.hown, 1.2, 3),
+  ida: viaja(R.ida, 4, 5.4),
+  cae: viaja(`${R.cae}L48 27C38 27 32 13 20 13`, 5.4, 6.9),
+  cola: [
+    viaja('M31.5 43C38 43 42 33 48 33', 9.5, 10.4),
+    viaja('M35.5 43C40 43 43 33 48 33', 9.9, 10.8),
+    viaja('M39.5 43C42 43 44 33 48 33', 10.3, 11.2),
+  ],
+  trae: viaja(R.trae, 11.3, 12.6),
+  sube: viaja(R.sube, 14.4, 15.8),
+};
+// la fila de espera de Yon cuando no hay señal
+const cola = [
+  { x: 30.2, ve: 8.5, sale: 9.5 },
+  { x: 34.2, ve: 8.8, sale: 9.9 },
+  { x: 38.2, ve: 9.1, sale: 10.3 },
+];
+// los renglones del libro de IVA que se escriben en el escritorio de Kaux
+const renglones = ['M3.2 6H11.5', 'M3.2 7.5H10.5', 'M3.2 9H11.5', 'M14.2 4.5H22.5', 'M14.2 6H21.5', 'M14.2 7.5H22.5', 'M14.2 9H20.5'];
+// la voz en la pantalla del celular: barras que suben y bajan, cada una a su ritmo
+const voz = [
+  [1.43, 1.2, 0.7], [2.13, 2.6, 0.95], [2.83, 3.8, 0.8], [3.53, 2, 1.05], [4.23, 4.2, 0.75], [4.93, 2.8, 0.9], [5.63, 1.4, 1],
+].map(([x, h, d]) => ({ x, y: 6.5 - h / 2, h, d }));
+// y la del recuadro del chat
+const vozChat = [4, 8, 12, 6, 14, 10, 5, 12, 9, 15, 7, 11, 4, 8].map((h, i) => ({ x: 1 + i * 3.6, y: 8 - h / 2, h, d: [0.7, 0.95, 0.8, 1.05, 0.75, 0.9, 1][i % 7], r: -((i * 0.37) % 0.8) }));
+const rayasMesa = Array.from({ length: 29 }, (_, i) => `M${(i + 1) * 2} 0v3`).join('');
+---
+
+<div class="facturacion">
+  <h3>Facturación y contabilidad, conectadas a ARCA</h3>
+  <div class="cuerpo">
+    <div class="textos">
+      <section aria-labelledby="fact-facturacion">
+        <p class="rubro" id="fact-facturacion">Facturación</p>
+        <div class="fila" data-producto="hown">
+          <h4><img class="marca-producto" src="/hown-logo-tinta.svg" alt="" width="44" height="44" />Hown</h4>
+          <div>
+            <p class="para">Quien factura sin mostrador</p>
+            <p class="texto">Un bot de Telegram: le mandás un audio o un texto y te devuelve la factura de ARCA (A, B o C) con su PDF.</p>
+            <p class="sitio"><a href="https://hown.howenh-labs.com/" target="_blank" rel="noopener">hown.howenh-labs.com ↗</a></p>
+          </div>
+        </div>
+        <!-- yon.com.ar existe pero todavía no tiene landing: se enlaza cuando la tenga -->
+        <div class="fila" data-producto="yon">
+          <h4><img class="marca-producto" src="/yon-logo-tinta.svg" alt="" width="44" height="44" />Yon</h4>
+          <div>
+            <p class="para">Comercios de mostrador</p>
+            <p class="texto">Una web app para vender y facturar: clientes, productos y stock, con métricas e historial. Si se corta la señal, sigue vendiendo y factura cuando vuelve.</p>
+          </div>
+        </div>
+      </section>
+      <section aria-labelledby="fact-contabilidad">
+        <p class="rubro" id="fact-contabilidad">Contabilidad</p>
+        <div class="fila kaux" data-producto="kaux">
+          <div class="kaux-cabeza">
+            <h4>Kaux</h4>
+            <p class="que">Sistema contable para contadores y estudios.</p>
+          </div>
+          <p class="texto">Trae de ARCA los libros de IVA para que el contador los revise y los corrija antes de subirlos, y liquida los sueldos con los convenios incluidos.</p>
+          <ul class="funciones">
+            <li>Conexión con ARCA</li>
+            <li>Libros de IVA traídos de ARCA</li>
+            <li>Sueldos con los convenios incluidos</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <figure class="mesa">
+      <svg class="mesa-arca" viewBox="-4 -72 166 110" role="img" aria-label="Una mesa grabada: el comprobante de Hown viaja por Teken, el motor interno, hasta ARCA y vuelve con el CAE; Yon sigue facturando sin señal y manda sus facturas cuando vuelve la conexión; Kaux trae de ARCA el libro de IVA, el contador lo revisa y lo sube, y se suma un recibo de sueldo" data-vive data-quieto="17.5">
+        <!-- la mesa -->
+        <g transform="matrix(0.866 0.5 0 1 0 0)"><rect class="cara" width="60" height="3"></rect><path class="sombra" d={rayasMesa}></path></g>
+        <g transform="matrix(0.866 -0.5 0 1 51.96 30)"><rect class="cara" width="120" height="3"></rect></g>
+        <g transform="matrix(0.866 -0.5 0.866 0.5 0 0)">
+          <rect class="tabla" width="120" height="60"></rect>
+          <path class="ruta" d={R.ida}></path>
+          <path class="ruta-cae" d={R.cae}></path>
+          <g class="obj obj-hown">
+            <path class="ruta" d={R.hown}></path>
+            <text class="t-tinta rotulo" x="27" y="5">HOWN</text>
+            <text class="t-suave nota" x="27" y="7.8">bot de Telegram</text>
+          </g>
+          <g class="obj obj-yon">
+            <path class="ruta" d={R.yon}></path>
+            <text class="t-tinta rotulo" x="8" y="50.5">YON</text>
+            <text class="t-suave nota" x="17" y="50.5">app de mostrador</text>
+            {
+              cola.map((q) => (
+                <rect class="hoja-espera" x={q.x} y="41.4" width="2.6" height="3.2" opacity="0">
+                  <animate attributeName="opacity" {...anim(entre(q.ve, q.sale))} />
+                </rect>
+              ))
+            }
+            <text class="t-suave" x="30.2" y="48" font-size="1.8" opacity="0">
+              SIN SEÑAL
+              <animate attributeName="opacity" {...anim(entre(8.4, 9.45))} />
+            </text>
+          </g>
+          <g class="obj obj-kaux">
+            <path class="ruta" d={R.trae}></path>
+            <path class="ruta-mano" d={R.sube}></path>
+            <text class="t-tinta rotulo" x="74" y="56.8">KAUX</text>
+            <text class="t-suave nota" x="86" y="56.8">sistema contable</text>
+          </g>
+          <!-- los pasos del recorrido -->
+          {
+            [[34.75, 20, 1], [38, 35.5, 1], [77, 22.4, 2], [95.5, 31.1, 3], [107.25, 30.25, 4]].map(([x, y, n]) => (
+              <g class="marca">
+                <circle cx={x} cy={y} r="2.2"></circle>
+                <text x={x} y={y + 0.8}>{n}</text>
+              </g>
+            ))
+          }
+          <!-- lo que viaja por los caminos -->
+          <g class="obj obj-hown">
+            <g opacity="0">
+              <animate attributeName="opacity" {...viajes.hown.op} />
+              <animateMotion {...viajes.hown.mov} />
+              <rect class="hoja" x="-1.3" y="-1.6" width="2.6" height="3.2"></rect>
+            </g>
+          </g>
+          <g opacity="0">
+            <animate attributeName="opacity" {...viajes.ida.op} />
+            <animateMotion {...viajes.ida.mov} />
+            <rect class="hoja" x="-1.3" y="-1.6" width="2.6" height="3.2"></rect>
+          </g>
+          <!-- el CAE (magenta) vuelve de ARCA, pasa por Teken y llega a Hown -->
+          <g opacity="0">
+            <animate attributeName="opacity" {...viajes.cae.op} />
+            <animateMotion {...viajes.cae.mov} />
+            <circle class="halo" r="1.9"></circle>
+            <circle class="acento" r="1"></circle>
+          </g>
+          <g class="obj obj-yon">
+            {
+              viajes.cola.map((v) => (
+                <g opacity="0">
+                  <animate attributeName="opacity" {...v.op} />
+                  <animateMotion {...v.mov} />
+                  <rect class="hoja" x="-1.3" y="-1.6" width="2.6" height="3.2"></rect>
+                </g>
+              ))
+            }
+          </g>
+          <g class="obj obj-kaux">
+            {
+              [viajes.trae, viajes.sube].map((v) => (
+                <g opacity="0">
+                  <animate attributeName="opacity" {...v.op} />
+                  <animateMotion {...v.mov} />
+                  <rect class="hoja" x="-1.6" y="-1.4" width="3" height="3.2"></rect>
+                  <rect class="hoja" x="-1" y="-2" width="3" height="3.2"></rect>
+                </g>
+              ))
+            }
+          </g>
+        </g>
+
+        <!-- ARCA, al fondo: la escalinata, las pilastras, el frontón y su nombre en el friso -->
+        <g transform="matrix(0.866 0.5 0 1 79.67 -44.5)"><rect class="cara" width="18" height="2.5"></rect></g>
+        <g transform="matrix(0.866 -0.5 0 1 95.26 -35.5)"><rect class="cara" width="26" height="2.5"></rect><path class="suave" d="M0 0.8h26M0 1.6h26"></path></g>
+        <g transform="matrix(0.866 -0.5 0.866 0.5 79.67 -44.5)"><rect class="cara" width="26" height="18"></rect></g>
+        <g transform="matrix(0.866 0.5 0 1 84.87 -56.5)"><rect class="cara" width="12" height="12"></rect><path class="sombra" d="M1.5 0v12M3 0v12M4.5 0v12M6 0v12M7.5 0v12M9 0v12M10.5 0v12"></path></g>
+        <g transform="matrix(0.866 -0.5 0 1 95.26 -50.5)">
+          <rect class="cara" width="20" height="12"></rect>
+          <path class="trazo" d="M0 2.4H20M2.5 2.4V12M5 2.4V12M7.5 2.4V12M10 2.4V12M12.5 2.4V12M15 2.4V12M17.5 2.4V12"></path>
+          <text class="t-tinta" x="10" y="1.85" font-size="1.7" font-weight="500" text-anchor="middle">ARCA</text>
+        </g>
+        <g transform="matrix(0.866 -0.5 0.866 0.5 84.87 -56.5)"><rect class="cara" width="20" height="12"></rect></g>
+        <g transform="matrix(0.866 -0.5 0 1 95.26 -50.5)"><path class="cara" d="M-1 0L10 -5L21 0Z"></path></g>
+
+        <!-- Kaux: el escritorio con el libro de IVA y, al lado, los sueldos -->
+        <g class="obj obj-kaux">
+          <g transform="matrix(0.866 0.5 0 1 96.99 -24)"><rect class="cara" width="14" height="6"></rect><path class="sombra" d="M1.75 0v6M3.5 0v6M5.25 0v6M7 0v6M8.75 0v6M10.5 0v6M12.25 0v6"></path></g>
+          <g transform="matrix(0.866 -0.5 0 1 109.12 -17)"><rect class="cara" width="26" height="6"></rect></g>
+          <g transform="matrix(0.866 -0.5 0.866 0.5 96.99 -24)">
+            <rect class="cara" width="26" height="14"></rect>
+            <rect class="hoja" x="2" y="2" width="11" height="10"></rect>
+            <rect class="hoja" x="13" y="2" width="11" height="10"></rect>
+            <text class="t-tinta" x="3.2" y="4.2" font-size="1.4" font-weight="500">LIBRO IVA</text>
+            {
+              renglones.map((d, i) => (
+                <path class="escribe" pathLength="1" d={d}>
+                  <animate attributeName="stroke-dashoffset" {...anim(traza(12.6 + 0.17 * i, 12.85 + 0.17 * i))} />
+                </path>
+              ))
+            }
+            <!-- revisado por el contador -->
+            <path class="tilde" pathLength="1" d="M17.5 10.4L19 11.6L22 8.8">
+              <animate attributeName="stroke-dashoffset" {...anim(traza(13.9, 14.3))} />
+            </path>
+          </g>
+          <g transform="matrix(0.866 0.5 0 1 122.97 -34)"><rect class="cara" width="12" height="3"></rect><path class="suave" d="M0 1h12M0 2h12"></path></g>
+          <g transform="matrix(0.866 -0.5 0 1 133.36 -28)"><rect class="cara" width="12" height="3"></rect><path class="suave" d="M0 1h12M0 2h12"></path></g>
+          <g transform="matrix(0.866 -0.5 0.866 0.5 122.97 -34)">
+            <rect class="pestana" x="8.5" y="11.5" width="2.5" height="2"></rect>
+            <rect class="hoja" width="12" height="12"></rect>
+            <text class="t-tinta" x="1.5" y="3.5" font-size="1.8" font-weight="500">SUELDOS</text>
+            <text class="t-suave" x="1.5" y="6" font-size="1.4">CONVENIO</text>
+            <path class="suave" d="M1.5 8H10M1.5 9.5H9"></path>
+          </g>
+          <!-- un recibo nuevo cae sobre la pila -->
+          <g opacity="0">
+            <animate attributeName="opacity" {...anim([[0, 0], [16, 0], [16.12, 1], [17.9, 1], [DUR, 0]])} />
+            <animateTransform attributeName="transform" type="translate" {...anim([[0, '0 -10'], [16, '0 -10'], [16.6, '0 0'], [DUR, '0 0']], CAE_CURVA)} />
+            <g transform="matrix(0.866 -0.5 0.866 0.5 122.97 -34.4)">
+              <rect class="pestana" x="3" y="11.5" width="2.5" height="2"></rect>
+              <rect class="hoja" width="12" height="12"></rect>
+              <text class="t-tinta" x="1.5" y="3.5" font-size="1.8" font-weight="500">RECIBO</text>
+              <path class="suave" d="M1.5 5.5H10M1.5 7H9M1.5 8.5H10"></path>
+            </g>
+          </g>
+        </g>
+
+        <!-- Teken: el motor interno, una caja cerrada; sus ranuras se trazan mientras trabaja -->
+        <g transform="matrix(0.866 0.5 0 1 60.62 -23)"><rect class="cara" width="16" height="10"></rect><path class="sombra" d="M1.6 0v10M3.2 0v10M4.8 0v10M6.4 0v10M8 0v10M9.6 0v10M11.2 0v10M12.8 0v10M14.4 0v10"></path></g>
+        <g transform="matrix(0.866 -0.5 0 1 74.48 -15)">
+          <rect class="cara" width="16" height="10"></rect>
+          <path class="suave" d="M3 3H13M3 4.6H13M3 6.2H13"></path>
+          {
+            ['M3 3H13', 'M3 4.6H13', 'M3 6.2H13'].map((d, i) => (
+              <path class="escribe ranura" pathLength="1" d={d} stroke-dashoffset="1">
+                <animate attributeName="stroke-dashoffset" {...anim(traza(3 + 0.3 * i, 3.3 + 0.3 * i))} />
+                <animate attributeName="opacity" {...anim([[0, 1], [4.2, 1], [5.4, 0], [DUR, 0]])} />
+              </path>
+            ))
+          }
+        </g>
+        <g transform="matrix(0.866 -0.5 0.866 0.5 60.62 -23)">
+          <rect class="cara" width="16" height="16"></rect>
+          <text class="t-tinta" x="2" y="6" font-size="3" font-weight="500">TEKEN</text>
+          <text class="t-suave" x="2" y="10" font-size="1.45">motor interno</text>
+        </g>
+
+        <!-- Hown: el celular con la voz y la factura que vuelve con su CAE -->
+        <g class="obj obj-hown">
+          <g transform="matrix(0.866 0.5 0 1 17.32 -15)"><rect class="canto" width="1.4" height="13"></rect></g>
+          <g transform="matrix(0.866 -0.5 0 1 18.53 -14.3)">
+            <rect class="cara" width="7" height="13"></rect>
+            <rect class="pantalla" x="0.8" y="1.2" width="5.4" height="10.6"></rect>
+            {
+              voz.map((b) => (
+                <rect class="t-tinta" x={b.x} y={b.y} width="0.35" height={b.h}>
+                  <animate attributeName="height" values={`${b.h};${b.h * 0.2};${b.h}`} dur={`${b.d}s`} repeatCount="indefinite" />
+                  <animate attributeName="y" values={`${b.y};${b.y + b.h * 0.4};${b.y}`} dur={`${b.d}s`} repeatCount="indefinite" />
+                </rect>
+              ))
+            }
+          </g>
+          <g transform="matrix(0.866 -0.5 0.866 0.5 17.32 -15)"><rect class="cara" width="7" height="1.4"></rect></g>
+          <g opacity="0">
+            <animate attributeName="opacity" {...anim([[0, 0], [6.88, 0], [7.1, 1], [17.9, 1], [DUR, 0]])} />
+            <animateTransform attributeName="transform" type="translate" {...anim([[0, '0 -6'], [6.88, '0 -6'], [7.1, '0 0'], [DUR, '0 0']], CAE_CURVA)} />
+            <g transform="matrix(0.866 -0.5 0.866 0.5 19.05 1.7)">
+              <rect class="hoja" width="10" height="12"></rect>
+              <text class="t-tinta" x="1" y="2.6" font-size="1.4" font-weight="500">FACTURA C</text>
+              <path class="suave" d="M1 4.5H8M1 6H7M1 7.5H8"></path>
+              <!-- el sello del CAE (magenta) baja sobre la factura -->
+              <g transform="translate(3.5 10)">
+                <g opacity="0">
+                  <animate attributeName="opacity" {...anim([[0, 0], [7, 0], [7.25, 1], [DUR, 1]])} />
+                  <animateTransform attributeName="transform" type="scale" {...anim([[0, 1.7], [7, 1.7], [7.25, 1], [DUR, 1]], '0.55 0 1 0.45')} />
+                  <rect class="cae" x="-2.5" y="-1" width="5" height="2"></rect>
+                  <text class="t-acento" x="-1.9" y="0.5" font-size="1.3">CAE</text>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+
+        <!-- Yon: el mostrador con la tablet y la impresora que saca el ticket -->
+        <g class="obj obj-yon">
+          <g transform="matrix(0.866 0.5 0 1 38.1 7)"><rect class="cara" width="8" height="7"></rect><path class="sombra" d="M1.6 0v7M3.2 0v7M4.8 0v7M6.4 0v7"></path></g>
+          <g transform="matrix(0.866 -0.5 0 1 45.03 11)"><rect class="cara" width="20" height="7"></rect><path class="suave" d="M0 2.3h20M0 4.6h20"></path></g>
+          <g transform="matrix(0.866 -0.5 0.866 0.5 38.1 7)"><rect class="cara" width="20" height="8"></rect></g>
+          <g transform="matrix(0.866 0.5 0 1 42 5.05)"><rect class="canto" width="4.5" height="1.2"></rect></g>
+          <g transform="matrix(0.866 -0.5 0 1 45.9 7.3)"><rect class="cara" width="6" height="1.2"></rect></g>
+          <g transform="matrix(0.866 -0.5 0.866 0.5 42 5.05)"><rect class="cara" width="6" height="4.5"></rect><rect class="pantalla" x="0.6" y="0.6" width="4.8" height="3.3"></rect></g>
+          <g transform="matrix(0.866 0.5 0 1 49.8 -1.25)"><rect class="cara" width="4.5" height="3"></rect><path class="sombra" d="M1.5 0v3M3 0v3"></path></g>
+          <g transform="matrix(0.866 -0.5 0 1 53.69 1)"><rect class="cara" width="5" height="3"></rect></g>
+          <g transform="matrix(0.866 -0.5 0.866 0.5 49.8 -1.25)"><rect class="cara" width="5" height="4.5"></rect><path class="trazo" d="M1 2.2H4"></path></g>
+          <g transform="matrix(0.866 -0.5 0 1 52.39 -0.75)">
+            <g>
+              <animateTransform attributeName="transform" type="scale" {...anim([[0, '1 0'], [7.8, '1 0'], [8.4, '1 1'], [17.9, '1 1'], [DUR, '1 0']])} />
+              <rect class="hoja" x="0.5" y="-6" width="3" height="6"></rect>
+              <path class="suave" d="M1 -4.6H3M1 -3.6H2.6M1 -2.6H3"></path>
+            </g>
+          </g>
+        </g>
+
+        <!-- las lupas: marcan el producto que se cuenta en el recuadro de abajo -->
+        <g class="lupa lupa-hown" opacity="0"><animate attributeName="opacity" {...anim([[0, 0], [0.12, 1], [7.7, 1], [7.8, 0], [DUR, 0]])} /><circle cx="22" cy="-8" r="10"></circle><path d="M22 2V38"></path></g>
+        <g class="lupa lupa-yon" opacity="0"><animate attributeName="opacity" {...anim(entre(7.8, 11.1))} /><circle cx="48" cy="3" r="12"></circle><path d="M48 15V38"></path></g>
+        <g class="lupa lupa-kaux" opacity="0"><animate attributeName="opacity" {...anim([[0, 0], [11.2, 0], [11.34, 1], [17.88, 1], [DUR, 0]])} /><circle cx="117" cy="-20" r="16"></circle><path d="M117 -4V38"></path></g>
+      </svg>
+
+      <!-- el recuadro de detalle: lo que hace cada producto; data-desde y data-hasta (en segundos del
+           reloj de la mesa) dicen cuándo aparece cada cosa -->
+      <div class="fichas">
+        <div class="ficha" data-producto="hown">
+          <div class="ficha-texto">
+            <p class="pasos">1 · 2 — Hown</p>
+            <p>Le mandás un audio por Telegram. Teken lleva el comprobante a ARCA y vuelve con el CAE.</p>
+          </div>
+          <div class="chat">
+            <div class="yo" data-desde="0.4">
+              <span class="grabando" aria-hidden="true"></span>
+              <svg class="voz" viewBox="0 0 52 16" aria-hidden="true">
+                {vozChat.map((b) => <rect x={b.x} y={b.y} width="2" height={b.h} style={`animation-duration: ${b.d}s; animation-delay: ${b.r.toFixed(2)}s`}></rect>)}
+              </svg>
+              <span>0:07</span>
+            </div>
+            <div class="respuesta">
+              <div class="pensando transitorio" data-desde="1.2" data-hasta="6.9" aria-hidden="true">· · ·</div>
+              <div class="bot" data-desde="6.9">
+                <strong>Factura C emitida</strong>
+                <span class="tenue">N.º 0003-00000148</span>
+                <span>CAE <span class="cae-numero" data-numero="74291836540215">74291836540215</span></span>
+                <span class="pdf">factura.pdf ↓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ficha" data-producto="yon">
+          <div class="ficha-texto">
+            <p class="pasos">1 — Yon</p>
+            <p>El mostrador entero en una web app: ventas, clientes, productos y stock, con métricas e historial. Sin señal, las facturas esperan en cola y salen solas cuando vuelve la conexión.</p>
+          </div>
+          <div class="app">
+            <div class="modulos">
+              <span class="activo">Ventas</span><span>Clientes</span><span>Productos</span><span>Stock</span><span>Métricas</span><span>Historial</span>
+            </div>
+            <div class="venta">
+              <div><span>Venta 0231</span><span class="tenue">Mostrador</span></div>
+              <div class="tenue"><span>3 artículos</span><span>efectivo</span></div>
+              <div class="total"><span>Total</span><span>$ 12.300</span></div>
+            </div>
+            <div class="estado">
+              <span class="transitorio tenue" data-desde="8.4" data-hasta="9.5">○ Sin señal · 3 facturas en cola</span>
+              <span data-desde="9.5">● En línea · 3 facturas emitidas</span>
+            </div>
+          </div>
+        </div>
+        <div class="ficha" data-producto="kaux">
+          <div class="ficha-texto">
+            <p class="pasos">3 · 4 — Kaux</p>
+            <p>Kaux trae de ARCA el libro de IVA; el contador lo revisa, lo corrige si hace falta y lo sube.</p>
+          </div>
+          <div class="libro">
+            <div class="cabeza tenue"><span>Libro IVA ventas · nov</span><span>Neto · IVA</span></div>
+            <div data-desde="12.6"><span>03/11 A 0001-00000231</span><span>100.000,00 · 21.000,00</span></div>
+            <div data-desde="12.94"><span>05/11 B 0001-00000117</span><span>41.322,31 · 8.677,69</span></div>
+            <div data-desde="13.28"><span>10/11 A 0001-00000232</span><span>64.500,00 · 13.545,00</span></div>
+            <div class="revision"><strong data-desde="13.9">✓ Revisado</strong><span data-desde="14.4">→ Lo sube el contador</span></div>
+            <div class="tenue" data-desde="16">+ Recibo de sueldo · convenio aplicado</div>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+<script>
+  // la fila y el recuadro siguen al reloj de la mesa (el svg corre solo en pantalla, Base.astro);
+  // al pasar por una fila, la mesa se queda con ese producto y su recuadro se ve completo.
+  // Sin JS: se ve el recuadro de Hown. Con movimiento reducido: la mesa quieta, todo a la vista.
+  const sec = document.querySelector<HTMLElement>('.facturacion');
+  const mesa = sec?.querySelector<SVGSVGElement>('.mesa-arca');
+  if (sec && mesa) {
+    const CICLO = 18;
+    const TRAMOS: [string, number][] = [['kaux', 11.2], ['yon', 7.8], ['hown', 0]];
+    const FIN: Record<string, number> = { hown: 7.79, yon: 11.19, kaux: 17.99 };
+    const marcables = [...sec.querySelectorAll<HTMLElement>('.fila, .ficha')];
+    const pasos = [...sec.querySelectorAll<HTMLElement>('[data-desde]')];
+    const cae = sec.querySelector<HTMLElement>('.cae-numero');
+    const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let fijo: string | null = null, visible = false, cuadro = 0;
+    const pintar = () => {
+      cuadro = 0;
+      const t = quieto ? FIN.kaux : mesa.getCurrentTime() % CICLO;
+      const actual = fijo ?? TRAMOS.find(([, d]) => t >= d)![0];
+      const tf = fijo ? FIN[fijo] : t;
+      marcables.forEach((m) => m.toggleAttribute('data-actual', m.dataset.producto === actual));
+      pasos.forEach((p) => p.toggleAttribute('data-ve', tf >= +p.dataset.desde! && tf < +(p.dataset.hasta ?? CICLO)));
+      if (cae) cae.textContent = cae.dataset.numero!.slice(0, Math.max(0, Math.min(14, Math.floor(((tf - 7) / 0.6) * 14))));
+      if (visible && !quieto) cuadro = requestAnimationFrame(pintar);
+    };
+    sec.classList.add('al-ritmo');
+    sec.querySelectorAll<HTMLElement>('.fila').forEach((f) => {
+      const fijar = (p: string | null) => () => {
+        fijo = p;
+        sec.dataset.fijo = p ?? '';
+        if (!cuadro) pintar();
+      };
+      f.addEventListener('pointerenter', fijar(f.dataset.producto!));
+      f.addEventListener('pointerleave', fijar(null));
+      f.addEventListener('focusin', fijar(f.dataset.producto!));
+      f.addEventListener('focusout', fijar(null));
+    });
+    new IntersectionObserver(([v]) => {
+      visible = v.isIntersecting;
+      if (visible && !cuadro) pintar();
+    }).observe(sec);
+    pintar();
+  }
+</script>
+
+<style>
+  .facturacion h3 {
+    margin-top: clamp(72px, 8vw, 128px);
+    font-size: clamp(26px, 2.4vw, 36px);
+    max-width: 22em;
+    text-wrap: balance;
+  }
+  .cuerpo {
+    margin-top: clamp(20px, 2.5vw, 32px);
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 32px clamp(32px, 5vw, 96px);
+    align-items: start;
+  }
+  .textos {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 3vw, 40px);
+  }
+  .rubro {
+    margin-bottom: 6px;
+    font: 500 11px var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+  }
+  /* la fila del producto que actúa va en tinta; las otras, lavadas */
+  .fila {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 4px 20px;
+    padding: 16px 0 18px;
+    border-top: 1px solid var(--tinta-suave);
+    transition: opacity 0.5s ease;
+  }
+  .fila:last-child {
+    border-bottom: 1px solid var(--tinta-suave);
+  }
+  .al-ritmo .fila:not([data-actual]) {
+    opacity: 0.42;
+  }
+  .fila h4 {
+    align-self: start;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font: 400 clamp(28px, 2.6vw, 40px) / 1 var(--serif);
+    letter-spacing: -0.01em;
+  }
+  /* los logos, en una tinta como el de Kenos */
+  .marca-producto {
+    flex: none;
+    width: clamp(34px, 3vw, 44px);
+    height: auto;
+  }
+  .para {
+    font: 400 11px/1.6 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+  }
+  .texto {
+    margin-top: 4px;
+    font-size: 16px;
+    line-height: 1.55;
+    max-width: 52ch;
+  }
+  .sitio {
+    margin-top: 6px;
+    font: 500 12px var(--mono);
+    letter-spacing: 0.06em;
+  }
+  .kaux {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .kaux-cabeza {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+  .kaux h4 {
+    font-size: clamp(40px, 3.6vw, 56px);
+  }
+  .kaux .que {
+    font-size: clamp(16px, 1.3vw, 18px);
+    font-weight: 600;
+  }
+  .funciones {
+    list-style: none;
+    margin-top: 4px;
+  }
+  .funciones li {
+    padding: 8px 0;
+    border-top: 1px solid var(--tinta-suave);
+    font: 500 12px var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* la mesa a la izquierda y el texto a la derecha: al revés que Kenos, para alternar */
+  .mesa {
+    order: -1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mesa-arca {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .mesa-arca text {
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+  }
+  .mesa-arca .rotulo {
+    font-size: 3.4px;
+    font-weight: 500;
+  }
+  .mesa-arca .nota {
+    font-size: 2.1px;
+  }
+  .tabla {
+    fill: var(--aguada-tierra);
+    stroke: var(--tinta);
+    stroke-width: 0.4;
+    stroke-linejoin: round;
+  }
+  .cara,
+  .hoja {
+    fill: var(--papel);
+    stroke: var(--tinta);
+    stroke-width: 0.35;
+    stroke-linejoin: round;
+  }
+  .hoja {
+    stroke-width: 0.3;
+  }
+  .hoja-espera {
+    fill: var(--papel);
+    stroke: var(--tinta-suave);
+    stroke-width: 0.3;
+    stroke-dasharray: 0.6 0.5;
+  }
+  .canto {
+    fill: var(--tinta-suave);
+    stroke: var(--tinta);
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+  }
+  .pantalla {
+    fill: var(--aguada-mar);
+    stroke: var(--tinta);
+    stroke-width: 0.25;
+  }
+  .pestana {
+    fill: var(--aguada-ciudad);
+    stroke: var(--tinta);
+    stroke-width: 0.25;
+  }
+  .sombra {
+    fill: none;
+    stroke: var(--tinta-suave);
+    stroke-width: 0.22;
+  }
+  .suave {
+    fill: none;
+    stroke: var(--tinta-suave);
+    stroke-width: 0.25;
+  }
+  .trazo {
+    fill: none;
+    stroke: var(--tinta);
+    stroke-width: 0.3;
+    stroke-linecap: round;
+  }
+  .escribe,
+  .tilde {
+    fill: none;
+    stroke: var(--tinta);
+    stroke-width: 0.3;
+    stroke-dasharray: 1;
+  }
+  .ranura {
+    stroke-width: 0.45;
+  }
+  .tilde {
+    stroke-width: 0.45;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ruta,
+  .ruta-cae,
+  .ruta-mano {
+    fill: none;
+    stroke: var(--tinta);
+    stroke-width: 0.45;
+    stroke-linecap: round;
+  }
+  .ruta-cae {
+    stroke: var(--acento);
+    stroke-dasharray: 1.4 1;
+  }
+  .ruta-mano {
+    stroke-dasharray: 0.3 1;
+  }
+  .marca circle {
+    fill: var(--papel);
+    stroke: var(--tinta);
+    stroke-width: 0.35;
+  }
+  .marca text {
+    fill: var(--tinta);
+    font-size: 2.2px;
+    font-weight: 500;
+    text-anchor: middle;
+  }
+  .cae {
+    fill: none;
+    stroke: var(--acento);
+    stroke-width: 0.3;
+  }
+  .acento,
+  .t-acento {
+    fill: var(--acento);
+  }
+  .halo {
+    fill: var(--papel);
+  }
+  .t-tinta {
+    fill: var(--tinta);
+  }
+  .t-suave {
+    fill: var(--tinta-suave);
+  }
+  .lupa circle,
+  .lupa path {
+    fill: none;
+    stroke: var(--tinta);
+    stroke-width: 0.3;
+    stroke-dasharray: 1 0.8;
+  }
+  /* al pasar por una fila: lo demás se lava y la lupa va a ese producto */
+  .obj {
+    transition: opacity 0.3s ease;
+  }
+  .facturacion[data-fijo='hown'] .obj:not(.obj-hown),
+  .facturacion[data-fijo='yon'] .obj:not(.obj-yon),
+  .facturacion[data-fijo='kaux'] .obj:not(.obj-kaux) {
+    opacity: 0.22;
+  }
+  .facturacion[data-fijo='hown'] .lupa,
+  .facturacion[data-fijo='yon'] .lupa,
+  .facturacion[data-fijo='kaux'] .lupa {
+    opacity: 0 !important;
+  }
+  .facturacion[data-fijo='hown'] .lupa-hown,
+  .facturacion[data-fijo='yon'] .lupa-yon,
+  .facturacion[data-fijo='kaux'] .lupa-kaux {
+    opacity: 1 !important;
+  }
+
+  /* el recuadro de detalle, debajo de la mesa: uno por producto, en el mismo lugar */
+  .fichas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    font: 400 11px/1.6 var(--mono);
+    letter-spacing: 0.04em;
+  }
+  .ficha {
+    grid-area: 1 / 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: 24px;
+    padding-top: 12px;
+    border-top: 1px solid var(--tinta);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.4s ease,
+      visibility 0.4s;
+  }
+  .ficha[data-actual],
+  .facturacion:not(.al-ritmo) .ficha[data-producto='hown'] {
+    opacity: 1;
+    visibility: visible;
+  }
+  .ficha-texto p:last-child {
+    margin-top: 6px;
+    font: 400 15px/1.5 var(--sans);
+    letter-spacing: normal;
+  }
+  .pasos {
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+  }
+  .tenue {
+    color: var(--tinta-suave);
+  }
+  /* lo que aparece a su tiempo; lo transitorio, solo mientras dura */
+  [data-desde] {
+    transition: opacity 0.3s ease;
+  }
+  .al-ritmo [data-desde]:not([data-ve]),
+  .transitorio:not([data-ve]) {
+    opacity: 0;
+  }
+  .chat {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .yo {
+    align-self: flex-end;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    background: var(--aguada-mar);
+    border: 1px solid var(--tinta);
+  }
+  /* grabando: el punto de la voz (magenta), y la onda */
+  .grabando {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--acento);
+    animation: grabando 1s steps(1) infinite;
+  }
+  .voz {
+    width: 96px;
+    height: 28px;
+    fill: var(--tinta);
+  }
+  .voz rect {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: voz 0.9s ease-in-out infinite alternate;
+  }
+  @keyframes grabando {
+    50% {
+      opacity: 0.15;
+    }
+  }
+  @keyframes voz {
+    from {
+      transform: scaleY(0.2);
+    }
+  }
+  .respuesta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pensando,
+  .bot {
+    grid-area: 1 / 1;
+    align-self: start;
+    justify-self: start;
+  }
+  .pensando {
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: var(--tinta-suave);
+  }
+  .bot {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 10px;
+    border: 1px solid var(--tinta);
+    background: var(--papel);
+  }
+  .pdf {
+    margin-top: 4px;
+    align-self: flex-start;
+    padding: 1px 6px;
+    border: 1px solid var(--tinta-suave);
+  }
+  .app {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .modulos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .modulos span {
+    padding: 1px 6px;
+    border: 1px solid var(--tinta-suave);
+    color: var(--tinta-suave);
+  }
+  .modulos .activo {
+    border-color: var(--tinta);
+    color: var(--tinta);
+    font-weight: 600;
+  }
+  .venta {
+    padding: 8px 10px;
+    border: 1px solid var(--tinta);
+    line-height: 1.7;
+  }
+  .venta div,
+  .libro div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .venta .total {
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .venta div:first-child span:first-child {
+    text-transform: uppercase;
+  }
+  .estado {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    text-transform: uppercase;
+  }
+  .estado span {
+    grid-area: 1 / 1;
+  }
+  .libro {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+  }
+  .libro .cabeza {
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--tinta-suave);
+  }
+  .libro .revision {
+    justify-content: flex-start;
+    gap: 14px;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+  .libro div:last-child {
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 900px) {
+    .cuerpo {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .mesa {
+      order: 0;
+      max-width: 640px;
+    }
+  }
+  @media (max-width: 560px) {
+    .ficha,
+    .fila {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .voz rect,
+    .grabando {
+      animation: none;
+    }
+  }
+</style>
