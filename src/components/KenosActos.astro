@@ -1,0 +1,423 @@
+---
+// Las láminas de Kenos que siguen a la agenda de Productos.astro: la historia clínica, las órdenes,
+// la presentación a las coberturas y los números del mes (las eligió Leono el 2026-11-11 en el
+// canvas «Kenos · animación por etapa»). Cada una es un svg con su propio reloj SMIL de 12 s, en los
+// ejes isométricos comunes; Productos.astro las pasa de a una desde el segundo cero y data-largo dice
+// cuánto dura cada acto antes de dar paso al siguiente (lo que queda del reloj no se ve).
+import { iso } from '../data/iso';
+
+const DUR = 12;
+type Paso = [number, string | number];
+// una animación SMIL a partir de pares [segundo, valor]; dos valores iguales seguidos son una pausa
+const anim = (pasos: Paso[], curva?: string) => ({
+  dur: `${DUR}s`,
+  repeatCount: 'indefinite',
+  values: pasos.map(([, v]) => v).join(';'),
+  keyTimes: pasos.map(([t]) => +(t / DUR).toFixed(4)).join(';'),
+  ...(curva && { calcMode: 'spline', keySplines: pasos.slice(1).map(() => curva).join(';') }),
+});
+const CAE = '0.3 0.7 0.2 1'; // llega y se apoya despacio
+const GOLPE = '0.55 0 1 0.45'; // un sello que baja
+const aparece = (t: number): Paso[] => [[0, 0], [t, 0], [t + 0.01, 1], [DUR, 1]];
+const traza = (a: number, b: number): Paso[] => [[0, 1], [a, 1], [b, 0], [DUR, 0]]; // con pathLength="1"
+const baja = (t: number, desde: number, tarda = 0.6): Paso[] => [[0, `0 ${desde}`], [t, `0 ${desde}`], [t + tarda, '0 0'], [DUR, '0 0']];
+
+// una hoja apoyada en el plano: u a lo largo del renglón, v hacia abajo de la hoja (u = -x, v = -y
+// de iso.ts). Sus planos: la cara de arriba, el canto de u = 0 (a la sombra) y el de adelante.
+const P = (u: number, v: number, z = 0) => iso(-u, -v, z);
+const r2 = (n: number) => +n.toFixed(2);
+const C = 0.866, S = 0.5;
+const plano = ([x, y]: number[]) => `matrix(${C} ${-S} ${C} ${S} ${r2(x)} ${r2(y)})`;
+const cantoIzq = ([x, y]: number[]) => `matrix(${C} ${S} 0 1 ${r2(x)} ${r2(y)})`;
+const cantoFrente = ([x, y]: number[]) => `matrix(${C} ${-S} 0 1 ${r2(x)} ${r2(y)})`;
+const rayas = (largo: number, alto: number, paso: number) =>
+  Array.from({ length: Math.ceil(largo / paso) - 1 }, (_, i) => `M${r2((i + 1) * paso)} 0v${alto}`).join('');
+const punto = (p: number[]) => p.map(r2).join(' ');
+
+// ---------- 2 · pacientes e historia clínica: la carpeta se abre, se anota y se cierra ----------
+// la tapa gira sobre el borde de arriba de la hoja (v = 0) hasta quedar apoyada atrás
+const HOJA = { u: 72, v: 50 }, TAPA_Z = 0.6;
+const girar = (pts: number[][], th: number) =>
+  'M' + pts.map(([u, v]) => punto(P(u, v * Math.cos(th), TAPA_Z + v * Math.sin(th)))).join('L') + 'Z';
+const tapa = [[0, 0], [HOJA.u, 0], [HOJA.u, HOJA.v], [0, HOJA.v]];
+const solapa = [[50, HOJA.v], [52, HOJA.v + 3], [64, HOJA.v + 3], [66, HOJA.v]];
+const ABRE = [0.8, 2.2], CIERRA = [8.4, 9.8];
+const suave = (t: number) => (t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) ** 2);
+const giro = (pts: number[][]) => {
+  const pasos: Paso[] = [[0, girar(pts, 0)]];
+  for (let i = 0; i <= 12; i++) pasos.push([ABRE[0] + ((ABRE[1] - ABRE[0]) * i) / 12, girar(pts, suave(i / 12) * Math.PI)]);
+  for (let i = 0; i <= 12; i++) pasos.push([CIERRA[0] + ((CIERRA[1] - CIERRA[0]) * i) / 12, girar(pts, suave(1 - i / 12) * Math.PI)]);
+  pasos.push([DUR, girar(pts, 0)]);
+  return anim(pasos);
+};
+// cada renglón de evolución, a mano: el mismo trazo cortado a distinto largo
+const TRAZO = ['c.7 -.8 1.7 -.8 2.4 0', 's1.2 .6 2 0', 's1.5 -.7 2.8 0', 's.9 .5 1.6 0', 's1.3 -.8 2.5 0', 's1.1 .6 2.2 0', 's1.6 -.6 3 0', 's.9 .7 1.8 0', 's1.2 -.7 2.4 0', 's1.4 .5 2.6 0', 's1 -.8 2 0', 's1.5 .6 2.8 0', 's.8 -.5 1.6 0', 's1.3 .7 2.5 0', 's1.1 -.6 2.2 0', 's1.6 .6 3 0', 's1 -.7 1.9 0', 's1.2 .6 2.3 0'];
+const renglones = [
+  { fecha: '03/11', v: 16.5, n: 18, a: 2.6, b: 3.6 },
+  { fecha: '05/11', v: 23.5, n: 14, a: 3.8, b: 4.6 },
+  { fecha: '10/11', v: 30.5, n: 16, a: 4.8, b: 5.7 },
+  { fecha: '12/11', v: 37.5, n: 11, a: 5.9, b: 6.6 },
+  { fecha: '17/11', v: 44.5, n: 13, a: 6.8, b: 7.6 },
+].map((r) => {
+  const tramos = TRAZO.slice(0, r.n);
+  return { ...r, d: `M17 ${r.v}${tramos.join('')}`, largo: r2(tramos.reduce((s, t) => s + +t.split(' ').at(-2)!, 0)) };
+});
+
+// ---------- 3 · órdenes y sesiones: la orden llega, se sella y cada sesión tilda su casilla ----------
+const casillas = Array.from({ length: 10 }, (_, k) => {
+  const x = 5 + (k % 5) * 11.25, y = k < 5 ? 17 : 28.5, cx = x + 4.5, cy = y + 4.5;
+  return { k, x, y, tilde: `M${r2(cx - 3.4)} ${r2(cy + 0.4)}L${r2(cx - 1.1)} ${r2(cy + 2.9)}L${r2(cx + 3.8)} ${r2(cy - 3.2)}`, a: 2 + 0.6 * k };
+});
+
+// ---------- 4 · presentación a las coberturas: las sesiones se ordenan, se fajan y se cierran ----------
+const coberturas = [
+  { nombre: 'OBRA SOCIAL', hojas: 4, retraso: 0 },
+  { nombre: 'PREPAGA', hojas: 3, retraso: 0.15 },
+  { nombre: 'ART', hojas: 2, retraso: 0.3 },
+].map((c, k) => {
+  const u0 = 32 * k, alto = c.hojas + 1.2;
+  // cada hoja cae en su ronda, un poco corrida a lo ancho para que se lea la pila
+  const hojas = Array.from({ length: c.hojas }, (_, i) => {
+    const d = [0, 0.3, -0.25, 0.2][i];
+    return { o: P(u0 + d, d, i + 1), frente: P(u0 + d, 30, i + 1), t: 1 + i + c.retraso };
+  });
+  const faja = (v: number) => `M${punto(P(u0 + 24, v, alto))}L${punto(P(u0, v, alto))}L${punto(P(u0, v, 0))}`;
+  return { ...c, k, u0, hojas, tapa: P(u0, 0, alto), tapaFrente: P(u0, 30, alto), fajas: [faja(19), faja(23)] };
+});
+
+// ---------- 5 · reportes y métricas: las sesiones de cada mes crecen como columnas ----------
+const meses = ['JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV'].map((mes, k) => {
+  const u0 = 8 + 14 * k, h = [16, 21, 19, 26, 31, 36][k], d = 0.2 * k;
+  return { mes, u0, h, d, cima: P(u0 + 4, 18, h) };
+});
+const tendencia = 'M' + meses.map((m) => punto(m.cima)).join('L');
+const ultima = meses.at(-1)!.cima;
+---
+
+<!-- 2 · la historia clínica -->
+<svg class="acto" data-largo="10.4" viewBox="-50 -97 162 130" role="img" aria-label="La carpeta del paciente se abre y muestra su historia clínica; cada atención escribe un renglón de evolución y la carpeta se vuelve a cerrar">
+  <g transform={cantoIzq(P(0, 0))}><rect class="cara" width="50" height="3"></rect><path class="sombra" d={rayas(50, 3, 2.5)}></path></g>
+  <g transform={cantoFrente(P(0, HOJA.v))}><rect class="cara" width="72" height="3"></rect><path class="suave" d="M0 1h72M0 2h72"></path></g>
+  <g transform={plano(P(0, 0))}>
+    <rect class="hoja" width="72" height="50"></rect>
+    <text class="tinta" x="5" y="7.6" font-size="3.4" font-weight="500">HISTORIA CLÍNICA</text>
+    <text class="lavada" x="67" y="7.4" font-size="2.4" text-anchor="end">EVOLUCIÓN</text>
+    <path class="suave" d="M5 10.5H67"></path>
+    {
+      renglones.map((r) => (
+        <>
+          <text class="lavada" x="5" y={r.v + 0.9} font-size="2.5" opacity="0">
+            {r.fecha}
+            <animate attributeName="opacity" {...anim(aparece(r.a))} />
+          </text>
+          <path class="renglon" pathLength="1" d={r.d} opacity="0" stroke-dashoffset="1">
+            <animate attributeName="opacity" {...anim(aparece(r.a))} />
+            <animate attributeName="stroke-dashoffset" {...anim(traza(r.a, r.b))} />
+          </path>
+          <!-- la pluma (magenta) va adelante del trazo -->
+          <circle class="pluma" cx="17" cy={r.v} r="1.3" opacity="0">
+            <animate attributeName="opacity" {...anim([[0, 0], [r.a, 0], [r.a + 0.01, 1], [r.b, 1], [r.b + 0.02, 0], [DUR, 0]])} />
+            <animateTransform attributeName="transform" type="translate" {...anim([[0, '0 0'], [r.a, '0 0'], [r.b, `${r.largo} 0`], [DUR, `${r.largo} 0`]])} />
+          </circle>
+        </>
+      ))
+    }
+  </g>
+  <path class="carton" d={girar(tapa, 0)}><animate attributeName="d" {...giro(tapa)} /></path>
+  <path class="carton" d={girar(solapa, 0)}><animate attributeName="d" {...giro(solapa)} /></path>
+  <!-- el rótulo de la tapa: se apaga apenas empieza a abrirse y vuelve con la carpeta cerrada -->
+  <g transform={plano(P(0, 0, TAPA_Z))}>
+    <animate attributeName="opacity" {...anim([[0, 1], [ABRE[0], 1], [ABRE[0] + 0.1, 0], [CIERRA[1], 0], [CIERRA[1] + 0.2, 1], [DUR, 1]])} />
+    <text class="tinta" x="5" y="8.6" font-size="3.6" font-weight="500">PACIENTE</text>
+    <path class="suave" d="M5 13H40M5 16.5H30"></path>
+  </g>
+</svg>
+
+<!-- 3 · las órdenes y sus sesiones -->
+<svg class="acto" data-largo="9.4" viewBox="-42 -74 140 102" role="img" aria-label="Una orden médica de diez sesiones llega, se sella autorizada y cada sesión atendida tilda una casilla hasta completarla; detrás, las órdenes que esperan">
+  <!-- detrás: las que esperan -->
+  <g transform={cantoIzq(P(10, -52, 4.5))}><rect class="cara-lavada" width="44" height="6"></rect><path class="sombra" d={rayas(44, 6, 2.2)}></path></g>
+  <g transform={cantoFrente(P(10, -8, 4.5))}><rect class="cara-lavada" width="64" height="6"></rect><path class="suave" d="M0 1.5h64M0 3h64M0 4.5h64"></path></g>
+  <g transform={plano(P(10, -52, 4.5))}>
+    <rect class="hoja-lavada" width="64" height="44"></rect>
+    <text class="lavada" x="5" y="7.2" font-size="3" font-weight="500">ORDEN MÉDICA</text>
+    <text class="lavada" x="5" y="11.6" font-size="2.3">6 SESIONES</text>
+    <path class="suave" d="M5 14H59"></path>
+    {casillas.slice(0, 6).map((c) => <rect class="casilla-lavada" x={c.x} y={c.y} width="9" height="9"></rect>)}
+  </g>
+  <!-- la activa: llega, se sella y se completa -->
+  <g opacity="0">
+    <animateTransform attributeName="transform" type="translate" {...anim(baja(0, -20, 0.9), CAE)} />
+    <animate attributeName="opacity" {...anim([[0, 0], [0.9, 1], [DUR, 1]], CAE)} />
+    <g transform={cantoIzq(P(0, 0))}><rect class="canto" width="44" height="1.5"></rect></g>
+    <g transform={cantoFrente(P(0, 44))}><rect class="cara" width="64" height="1.5"></rect></g>
+    <g transform={plano(P(0, 0))}>
+      <rect class="hoja" width="64" height="44"></rect>
+      <text class="tinta" x="5" y="7.2" font-size="3" font-weight="500">ORDEN MÉDICA</text>
+      <text class="lavada" x="5" y="11.6" font-size="2.3">10 SESIONES</text>
+      <path class="suave" d="M5 14H59"></path>
+      {
+        casillas.map((c) => (
+          <rect class="llena" x={c.x + 0.4} y={c.y + 0.4} width="8.2" height="8.2" opacity="0">
+            <animate attributeName="opacity" {...anim(aparece(c.a))} />
+          </rect>
+        ))
+      }
+      {casillas.map((c) => <rect class="casilla" x={c.x} y={c.y} width="9" height="9"></rect>)}
+      {casillas.map((c) => <text class="lavada" x={c.x + 1} y={c.y + 2.4} font-size="1.8">{c.k + 1}</text>)}
+      {
+        casillas.map((c) => (
+          <path class="tilde" pathLength="1" d={c.tilde} opacity="0" stroke-dashoffset="1">
+            <animate attributeName="opacity" {...anim(aparece(c.a))} />
+            <animate attributeName="stroke-dashoffset" {...anim(traza(c.a, c.a + 0.3))} />
+          </path>
+        ))
+      }
+      <!-- el sello (magenta): baja de golpe, un poco torcido -->
+      <g transform="translate(48 7.3) rotate(-5)">
+        <g class="sello" opacity="0">
+          <animateTransform attributeName="transform" type="scale" {...anim([[0, 1.35], [1.2, 1.35], [1.62, 1], [DUR, 1]], GOLPE)} />
+          <animate attributeName="opacity" {...anim([[0, 0], [1.2, 0], [1.62, 0.92], [DUR, 0.92]], GOLPE)} />
+          <rect x="-11" y="-4.3" width="22" height="8.6" stroke-width="0.5"></rect>
+          <rect x="-10.1" y="-3.4" width="20.2" height="6.8" stroke-width="0.2"></rect>
+          <text x="0" y="1" font-size="2.5" font-weight="500" text-anchor="middle">AUTORIZADA</text>
+        </g>
+      </g>
+      <text class="tinta" x="59" y="41.6" font-size="2.2" font-weight="500" text-anchor="end" opacity="0">
+        COMPLETA
+        <animate attributeName="opacity" {...anim([[0, 0], [7.92, 0], [8.16, 1], [DUR, 1]])} />
+      </text>
+    </g>
+  </g>
+</svg>
+
+<!-- 4 · la presentación a las coberturas -->
+<svg class="acto" data-largo="9.2" viewBox="-12 -66 134 94" role="img" aria-label="Las sesiones atendidas caen, ordenadas, en tres pilas: obra social, prepaga y ART; cada pila recibe la carátula del período, se faja y se cierra con un lacre">
+  <g transform={cantoIzq(P(-4, -4))}><rect class="cara" width="46" height="2.5"></rect><path class="sombra" d={rayas(46, 2.5, 2)}></path></g>
+  <g transform={cantoFrente(P(-4, 42))}><rect class="cara" width="96" height="2.5"></rect></g>
+  <g transform={plano(P(-4, -4))}>
+    <rect class="tabla" width="96" height="46"></rect>
+    {coberturas.map((c) => <rect class="casilla-lavada" x={c.u0 + 4} y="4" width="24" height="30"></rect>)}
+    {coberturas.map((c) => <text class="tinta" x={c.u0 + 16} y="41.6" font-size="2.5" font-weight="500" text-anchor="middle">{c.nombre}</text>)}
+  </g>
+  {
+    coberturas.toReversed().map((c) => (
+      <>
+        {c.hojas.map((h) => (
+          <g opacity="0">
+            <animateTransform attributeName="transform" type="translate" {...anim(baja(h.t, -26), CAE)} />
+            <animate attributeName="opacity" {...anim([[0, 0], [h.t, 0], [h.t + 0.14, 1], [DUR, 1]])} />
+            <g transform={cantoIzq(h.o)}><rect class="canto" width="30" height="1"></rect></g>
+            <g transform={cantoFrente(h.frente)}><rect class="cara" width="24" height="1"></rect></g>
+            <g transform={plano(h.o)}>
+              <rect class="hoja" width="24" height="30"></rect>
+              <path class="suave" d="M4 8H15M4 11.5H12M4 15H14"></path>
+              <path class="tick" d="M15.6 21.4L17.4 23.4L21.2 18.6"></path>
+            </g>
+          </g>
+        ))}
+        <!-- la carátula del período -->
+        <g opacity="0">
+          <animateTransform attributeName="transform" type="translate" {...anim(baja(5.2 + c.retraso, -22), CAE)} />
+          <animate attributeName="opacity" {...anim([[0, 0], [5.2 + c.retraso, 0], [5.34 + c.retraso, 1], [DUR, 1]])} />
+          <g transform={cantoIzq(c.tapa)}><rect class="canto" width="30" height="1.2"></rect></g>
+          <g transform={cantoFrente(c.tapaFrente)}><rect class="cara" width="24" height="1.2"></rect></g>
+          <g transform={plano(c.tapa)}>
+            <rect class="caratula" width="24" height="30"></rect>
+            <text class="tinta" x="3" y="6.5" font-size="2.2" font-weight="500">PRESENTACIÓN</text>
+            <text class="lavada" x="3" y="10" font-size="2">NOV 2026</text>
+          </g>
+        </g>
+        {c.fajas.map((d) => (
+          <path class="faja" pathLength="1" d={d} opacity="0" stroke-dashoffset="1">
+            <animate attributeName="opacity" {...anim(aparece(6.4 + c.retraso))} />
+            <animate attributeName="stroke-dashoffset" {...anim(traza(6.4 + c.retraso, 7.2 + c.retraso))} />
+          </path>
+        ))}
+        <!-- el lacre (magenta): la pila queda cerrada -->
+        <g transform={plano(c.tapa)}>
+          <g transform="translate(12 21)">
+            <g opacity="0">
+              <animateTransform attributeName="transform" type="scale" {...anim([[0, 1.6], [7.4 + c.retraso, 1.6], [7.7 + c.retraso, 1], [DUR, 1]], GOLPE)} />
+              <animate attributeName="opacity" {...anim([[0, 0], [7.4 + c.retraso, 0], [7.7 + c.retraso, 1], [DUR, 1]], GOLPE)} />
+              <circle class="lacre" r="2.6"></circle>
+              <circle class="lacre-aro" r="1.5"></circle>
+            </g>
+          </g>
+        </g>
+      </>
+    ))
+  }
+</svg>
+
+<!-- 5 · los reportes y las métricas -->
+<svg class="acto" data-largo="7.6" viewBox="-6 -78 122 104" role="img" aria-label="Las sesiones de cada mes, de junio a noviembre, crecen como columnas grabadas sobre la mesa; una línea une sus techos y el mes en curso se enciende">
+  <g transform={cantoIzq(P(0, 0))}><rect class="cara" width="42" height="2.5"></rect><path class="sombra" d={rayas(42, 2.5, 2)}></path></g>
+  <g transform={cantoFrente(P(0, 42))}><rect class="cara" width="90" height="2.5"></rect></g>
+  <g transform={plano(P(0, 0))}>
+    <rect class="tabla" width="90" height="42"></rect>
+    <text class="tinta" x="4" y="39.2" font-size="2.6" font-weight="500">SESIONES POR MES</text>
+    {meses.map((m) => <rect class="casilla-lavada" x={m.u0} y="14" width="8" height="8"></rect>)}
+    {meses.map((m) => <text class="lavada" x={m.u0 + 4} y="31.5" font-size="2.4" text-anchor="middle">{m.mes}</text>)}
+  </g>
+  <!-- las columnas crecen desde la mesa, de la del fondo a la de adelante -->
+  {
+    meses.toReversed().map((m) => {
+      const crece = anim([[0, '1 0'], [0.6 + m.d, '1 0'], [1.8 + m.d, '1 1'], [DUR, '1 1']], CAE);
+      return (
+        <>
+          <g transform={cantoIzq(P(m.u0, 14))}>
+            <g>
+              <animateTransform attributeName="transform" type="scale" {...crece} />
+              <rect class="cara" y={-m.h} width="8" height={m.h}></rect>
+              <path class="sombra" d={[1.6, 3.2, 4.8, 6.4].map((x) => `M${x} ${-m.h}V0`).join('')}></path>
+            </g>
+          </g>
+          <g transform={cantoFrente(P(m.u0, 22))}>
+            <g>
+              <animateTransform attributeName="transform" type="scale" {...crece} />
+              <rect class="cara" y={-m.h} width="8" height={m.h}></rect>
+            </g>
+          </g>
+          <g>
+            <animateTransform attributeName="transform" type="translate" {...anim(baja(0.6 + m.d, m.h, 1.2), CAE)} />
+            <g transform={plano(P(m.u0, 14, m.h))}><rect class="techo" width="8" height="8"></rect></g>
+          </g>
+        </>
+      );
+    })
+  }
+  <!-- la tendencia une los techos y el mes en curso se enciende (magenta) -->
+  <path class="linea" pathLength="1" d={tendencia} stroke-dashoffset="1"><animate attributeName="stroke-dashoffset" {...anim(traza(3, 4.56))} /></path>
+  <g transform={`translate(${punto(ultima)})`}>
+    <circle class="luz" r="1.3" opacity="0">
+      <animateTransform attributeName="transform" type="scale" {...anim([[0, 1.8], [4.56, 1.8], [4.92, 1], [DUR, 1]], CAE)} />
+      <animate attributeName="opacity" {...anim([[0, 0], [4.56, 0], [4.92, 1], [DUR, 1]], CAE)} />
+    </circle>
+  </g>
+</svg>
+
+<style>
+  .acto text {
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+  }
+  .tinta {
+    fill: var(--tinta);
+  }
+  .lavada {
+    fill: var(--tinta-suave);
+  }
+  .hoja,
+  .cara,
+  .techo {
+    fill: var(--papel);
+    stroke: var(--tinta);
+    stroke-width: 0.35;
+    stroke-linejoin: round;
+  }
+  .hoja,
+  .techo {
+    stroke-width: 0.4;
+  }
+  .hoja-lavada,
+  .cara-lavada {
+    fill: var(--papel);
+    stroke: var(--tinta-suave);
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+  }
+  .canto {
+    fill: var(--tinta-suave);
+    stroke: var(--tinta);
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+  }
+  .carton,
+  .tabla {
+    fill: var(--aguada-tierra);
+    stroke: var(--tinta);
+    stroke-width: 0.45;
+    stroke-linejoin: round;
+  }
+  .tabla {
+    stroke-width: 0.4;
+  }
+  .caratula {
+    fill: var(--aguada-ciudad);
+    stroke: var(--tinta);
+    stroke-width: 0.4;
+    stroke-linejoin: round;
+  }
+  .sombra {
+    fill: none;
+    stroke: var(--tinta-suave);
+    stroke-width: 0.22;
+  }
+  .suave {
+    fill: none;
+    stroke: var(--tinta-suave);
+    stroke-width: 0.25;
+  }
+  .casilla {
+    fill: none;
+    stroke: var(--tinta);
+    stroke-width: 0.3;
+  }
+  .casilla-lavada {
+    fill: none;
+    stroke: var(--tinta-suave);
+    stroke-width: 0.25;
+    stroke-dasharray: 0.8 0.8;
+  }
+  .llena {
+    fill: var(--aguada-mar);
+  }
+  .renglon,
+  .tilde,
+  .faja,
+  .linea {
+    fill: none;
+    stroke: var(--tinta);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+  }
+  .renglon {
+    stroke-width: 0.5;
+  }
+  .tilde {
+    stroke-width: 0.5;
+  }
+  .faja {
+    stroke-width: 0.35;
+    stroke-linecap: butt;
+  }
+  .linea {
+    stroke-width: 0.45;
+  }
+  .tick {
+    fill: none;
+    stroke: var(--tinta);
+    stroke-width: 0.45;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .pluma,
+  .lacre,
+  .luz {
+    fill: var(--acento);
+  }
+  .lacre-aro {
+    fill: none;
+    stroke: var(--papel);
+    stroke-width: 0.35;
+  }
+  .sello rect {
+    fill: none;
+    stroke: var(--acento);
+  }
+  .sello text {
+    fill: var(--acento);
+  }
+</style>

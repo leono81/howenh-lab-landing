@@ -3,6 +3,7 @@
 // después, los de facturación con cómo se conectan (Teken es el motor y no se ofrece al público:
 // aparece solo en el diagrama). Tari queda afuera hasta que esté en producción.
 import { iso, pol, lin, rayas } from '../data/iso';
+import KenosActos from './KenosActos.astro';
 
 // Kenos: CENIT no se nombra hasta que Leono lo confirme (PRODUCT.md)
 const NOMBRAR_CLIENTE = false;
@@ -10,7 +11,8 @@ const kenosEnUso = NOMBRAR_CLIENTE
   ? 'Lo usan profesionales con su suscripción y CENIT, un centro de kinesiología de Buenos Aires con tres sedes, donde lo implementamos en persona.'
   : 'Lo usan profesionales con su suscripción y un centro de kinesiología de Buenos Aires con tres sedes, donde lo implementamos en persona.';
 // sin «facturación electrónica» ni «envío de la presentación»: Kenos todavía no los hace (assets/sistema/marcas/kenos.md)
-const kenosHace = ['Turnos y agenda por profesional', 'Pacientes e historia', 'Órdenes y sesiones', 'Liquidación a obras sociales y prepagas'];
+// una por acto de la lámina (la agenda de acá y las cuatro de KenosActos.astro), en el mismo orden
+const kenosHace = ['Turnos y agenda por profesional', 'Pacientes e historia clínica', 'Órdenes y sesiones', 'Presentación a las coberturas', 'Reportes y métricas'];
 
 // la viñeta de Kenos: la agenda de la semana como un rompecabezas, en los ejes isométricos (x, las
 // horas; y, los días). Cada casilla es una pieza que cae y encaja hasta que la semana queda armada;
@@ -70,13 +72,12 @@ const ubicar = (pts: number[][], de: number[], a: number[], giro: number) => {
 };
 const proyectar = (pts: number[][]) => pts.map(([x, y]) => iso(x, y));
 const trazos = (segs: number[][][], z = 0) => segs.map(([a, b]) => lin(iso(a[0], a[1], z), iso(b[0], b[1], z))).join('');
-// el segundo acto: armada la semana, los turnos tomados se marcan atendidos y pasan, de a uno, a la
-// presentación para las obras sociales y prepagas: un lote prolijo delante de la agenda
-const LOTE = { x: 52, y: -66 }, CAPA = 1.3;
-const ARMADO = 24; // segundos: se arma, se atiende, se presenta, y vuelve a empezar
+// armada la semana, los turnos tomados se marcan atendidos (el tilde); lo que sigue (la historia,
+// las órdenes, la presentación, los números) lo cuentan las láminas de KenosActos.astro
+const ARMADO = 13; // segundos del reloj; el acto dura LARGO y después pasa a la historia
+const LARGO = 11.2;
 const ATENDIDO = 9.3 / ARMADO;
 const tilde = (c: number[]) => [[c[0] - 3.4, c[1] + 0.4], [c[0] - 1.1, c[1] + 2.9], [c[0] + 3.8, c[1] - 3.2]];
-let enLote = 0;
 const piezas = Array.from({ length: HORAS * DIAS }, (_, i) => pieza(i % HORAS, Math.floor(i / HORAS)))
   .map((p) => ({ p, orden: azar() }))
   .sort((a, b) => a.orden - b.orden)
@@ -86,34 +87,22 @@ const piezas = Array.from({ length: HORAS * DIAS }, (_, i) => pieza(i % HORAS, M
     const enMonton = ubicar(p.contorno, p.centro, lugar, giro);
     const rayaMonton = p.raya.map((seg) => ubicar(seg, p.centro, lugar, giro));
     const a = (0.8 + i * 0.17) / ARMADO;
-    // los tomados, en el orden en que llegaron, se apilan en el lote: cada uno un poco más arriba
-    const j = p.tomado ? enLote++ : 0;
-    const z = j * CAPA;
-    const L = (10.8 + j * 0.28) / ARMADO;
-    const enElLote = ubicar(p.contorno, p.centro, [LOTE.x, LOTE.y], 0);
     return {
       tomado: p.tomado,
       monton: pol(...proyectar(enMonton)),
       casilla: pol(...proyectar(p.contorno)),
-      lote: pol(...enElLote.map(([x, y]) => iso(x, y, z))),
       rayaMonton: trazos(rayaMonton),
       rayaCasilla: trazos(p.raya),
-      rayaLote: trazos(p.raya.map((seg) => ubicar(seg, p.centro, [LOTE.x, LOTE.y], 0)), z),
       tildeCasilla: lin(...tilde(p.centro).map(([x, y]) => iso(x, y))),
-      tildeLote: lin(...tilde([LOTE.x, LOTE.y]).map(([x, y]) => iso(x, y, z))),
       a,
       b: a + 0.7 / ARMADO,
-      L,
-      Lb: L + 0.7 / ARMADO,
     };
   })
   // la que sale primero va arriba de todo, así no pasa por debajo del montón
   .reverse();
 const k3 = (v: number) => v.toFixed(3);
 // el marco del dibujo: la agenda con sus rótulos (a la derecha) y el montón (abajo a la izquierda)
-const bordes = [iso(0, 0), iso(X, 0), iso(X, Y), iso(0, Y), iso(MONTON.x1 + 9, MONTON.y0 - 9), iso(MONTON.x1 + 9, MONTON.y1 + 9), iso(MONTON.x0 - 9, MONTON.y1 + 9), iso(LOTE.x + 16, LOTE.y - 22), iso(LOTE.x - 30, LOTE.y - 22), iso(LOTE.x + 10, LOTE.y + 8, 24)];
-// el rótulo del lote, impreso en el plano, delante de la pila
-const PRIMER_LOTE = (10.8 + 0.7) / ARMADO;
+const bordes = [iso(0, 0), iso(X, 0), iso(X, Y), iso(0, Y), iso(MONTON.x1 + 9, MONTON.y0 - 9), iso(MONTON.x1 + 9, MONTON.y1 + 9), iso(MONTON.x0 - 9, MONTON.y1 + 9)];
 const VB = (() => {
   const xs = bordes.map((p) => p[0]), ys = bordes.map((p) => p[1]);
   const [x0, x1, y0, y1] = [Math.min(...xs) - 6, Math.max(...xs) + 30, Math.min(...ys) - 30, Math.max(...ys) + 22];
@@ -133,56 +122,6 @@ const enDias = ([px, py]: number[]) => `matrix(${r1(C)} ${-S} ${r1(C)} ${S} ${r1
 const enHoras = ([px, py]: number[]) => `matrix(${r1(C)} ${S} ${r1(-C)} ${S} ${r1(px)} ${r1(py)})`;
 const dias = DIAS_NOMBRE.map((t, d) => ({ t: t.slice(0, 3).toUpperCase().replace('MIE', 'MIÉ'), m: enDias(iso(-4.5, d * CEL + CEL / 2 - ALTO_LETRA / 2)) }));
 const horas = Array.from({ length: HORAS }, (_, h) => ({ t: `${String(PRIMERA_HORA + h).padStart(2, '0')}:00`, m: enHoras(iso(h * CEL + CEL / 2 + ALTO_LETRA / 2, -5)) }));
-
-// el símbolo de la medicina como lo pidió Leono (2026-11-10): el caduceo, la vara con dos serpientes
-// enroscadas y alas arriba. Grabado como la antena de la estación: en los ejes isométricos, la vara es
-// un cilindro con su lado a la sombra rayado, cada serpiente una cinta con borde de tinta, y lo que
-// queda detrás de la vara se dibuja antes. Las alas van en el plano que mira a quien mira.
-const VARA = { r: 1.7, alto: 66 };
-const varaLados = lin(iso(VARA.r, -VARA.r, 0), iso(VARA.r, -VARA.r, VARA.alto)) + lin(iso(-VARA.r, VARA.r, 0), iso(-VARA.r, VARA.r, VARA.alto));
-const varaSombra = rayas(iso(0, 0, 0), iso(0, 0, VARA.alto), iso(-VARA.r, VARA.r, 0), iso(-VARA.r, VARA.r, VARA.alto), 4);
-const varaTope = iso(0, 0, VARA.alto + 2.2);
-// las dos serpientes: la misma hélice, media vuelta corridas, así se cruzan adelante y atrás
-const serpienteEn = (fase: number) => {
-  const pts = Array.from({ length: 121 }, (_, i) => {
-    const t = i / 120, a = fase + Math.PI * 4.5 * t;
-    return [5.4 * Math.cos(a), 5.4 * Math.sin(a), 5 + 46 * t] as [number, number, number];
-  });
-  // la cabeza: sube un poco más y mira hacia la vara, enfrentada con la otra
-  const [x, y] = pts[pts.length - 1];
-  pts.push([x * 0.85, y * 0.85, 54.5], [x * 0.5, y * 0.5, 57]);
-  return pts;
-};
-// en tramos de adelante (x − y > 0, la cara que mira a quien mira) y de atrás, en orden, para dibujarla subiendo
-const enTramos = (pts: [number, number, number][]) => {
-  const tramos: { d: string; adelante: boolean; k: number }[] = [];
-  let actual = [pts[0]], lado = pts[0][0] - pts[0][1] > 0;
-  for (const p of pts.slice(1)) {
-    const l = p[0] - p[1] > 0;
-    actual.push(p);
-    if (l !== lado) {
-      tramos.push({ d: lin(...actual.map((q) => iso(...q))), adelante: lado, k: tramos.length });
-      (actual = [p]), (lado = l);
-    }
-  }
-  tramos.push({ d: lin(...actual.map((q) => iso(...q))), adelante: lado, k: tramos.length });
-  return tramos;
-};
-const serpientes = [Math.PI / 4, Math.PI / 4 + Math.PI].map((fase) => serpienteEn(fase));
-const tramosSerpientes = serpientes.flatMap((sp) => enTramos(sp));
-const cabezas = serpientes.map((sp) => iso(...sp[sp.length - 1]));
-// las alas: en el plano de la vara que mira de frente (la dirección (1, 1, 0) es la horizontal de la pantalla)
-const enAla = (u: number, z: number) => iso(u / Math.SQRT2, u / Math.SQRT2, z);
-const ala = (lado: number) => {
-  const q = (u: number, z: number) => enAla(lado * u, z).map((v) => +v.toFixed(2)).join(' ');
-  // el borde de arriba sube desde la vara y se abre hasta la punta; el de abajo son cuatro plumas
-  const borde =
-    `M${q(2, 61)}C${q(6, 70)} ${q(13, 76)} ${q(24, 77)}` +
-    `Q${q(26.5, 73)} ${q(21, 70)}Q${q(20.5, 67.2)} ${q(16, 66.5)}Q${q(15.2, 63.6)} ${q(11, 63.5)}Q${q(10, 61)} ${q(6, 61.4)}Q${q(4, 60.3)} ${q(2, 60)}Z`;
-  const plumas = `M${q(21, 70)}L${q(14.5, 72.6)}M${q(16, 66.5)}L${q(10.5, 69.2)}M${q(11, 63.5)}L${q(6.8, 65.6)}`;
-  return { borde, plumas };
-};
-const alas = [ala(1), ala(-1)];
 
 // yon.com.ar existe pero todavía no tiene landing: se enlaza cuando la tenga
 const productos = [
@@ -293,49 +232,26 @@ const k = (v: number) => v.toFixed(3);
 
   <article class="kenos" aria-labelledby="kenos-titulo">
     <div class="kenos-texto">
-      <div class="kenos-cabeza">
-        <h3 id="kenos-titulo"><img class="logo-kenos" src="/kenos-logo-tinta.png" alt="Kenos" width="603" height="514" /></h3>
-        <!-- el caduceo, el símbolo de la medicina: se traza solo cuando llega a la pantalla, primero la
-             vara, después las dos serpientes que suben enroscándose, y al final se abren las alas -->
-        <svg class="asclepio" viewBox="-34 -84 68 90" aria-hidden="true">
-          <g class="alas">
-            {alas.map((a) => (
-              <>
-                <path class="ala" d={a.borde} pathLength="1" />
-                <path class="pluma" d={a.plumas} />
-              </>
-            ))}
-          </g>
-          {tramosSerpientes.map((t) => !t.adelante && (
-            <g style={`--k: ${t.k}`}>
-              <path class="cinta-borde" d={t.d} pathLength="1" />
-              <path class="cinta" d={t.d} pathLength="1" />
-            </g>
-          ))}
-          <g class="vara">
-            <path d={varaLados} pathLength="1" />
-            <path class="vara-sombra" d={varaSombra} />
-            <circle cx={varaTope[0]} cy={varaTope[1]} r="2.4" />
-          </g>
-          {tramosSerpientes.map((t) => t.adelante && (
-            <g style={`--k: ${t.k}`}>
-              <path class="cinta-borde" d={t.d} pathLength="1" />
-              <path class="cinta" d={t.d} pathLength="1" />
-            </g>
-          ))}
-          {cabezas.map((c) => <ellipse class="cabeza" cx={c[0]} cy={c[1]} rx="2" ry="1.3" />)}
-        </svg>
-      </div>
+      <h3 id="kenos-titulo"><img class="logo-kenos" src="/kenos-logo-tinta.png" alt="Kenos" width="603" height="514" /></h3>
       <p class="que">Para profesionales y centros de salud.</p>
       <p>Turnos, pacientes y la administración del consultorio, con las obras sociales y las prepagas, en un solo sistema.</p>
       <p class="sitio-kenos"><a href="https://www.kenos.app/" target="_blank" rel="noopener">kenos.app ↗</a></p>
+      <!-- la base de datos de Kenos está inscripta ante la AAIP (dato de Leono, 2026-11-11): va chico,
+           como un pie de imprenta, pero entero -->
+      <p class="registro">
+        Base de datos inscripta en el Registro Nacional de Bases de Datos Privadas, ante la Dirección Nacional de Protección de Datos Personales (AAIP), conforme al art. 21 de la Ley 25.326.
+        <span>Legajo N.º <span class="legajo">RL-2026-72031250-APN-DNPDP#AAIP</span></span>
+      </p>
     </div>
     <figure class="agenda-lamina">
-      <!-- lo que hace Kenos, al lado del rompecabezas: cada cosa aparece cuando la animación la muestra -->
+      <!-- lo que hace Kenos, al lado de la lámina: cada cosa aparece cuando llega su acto -->
       <ul class="hace">
-        {kenosHace.map((h, i) => <li data-desde={[1, 4.5, 9.4, 11.6][i]}>{h}</li>)}
+        {kenosHace.map((h) => <li>{h}</li>)}
       </ul>
-    <svg class="agenda" viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`} role="img" aria-label="La agenda de la semana, de lunes a viernes y de 8 a 15, dibujada en perspectiva como un rompecabezas que se arma pieza por pieza" data-vive data-quieto="12">
+    <!-- los cinco actos, uno encima del otro: la agenda y los de KenosActos.astro; el script de
+         abajo los pasa de a uno (sin JS o con movimiento reducido queda la agenda armada) -->
+    <div class="actos">
+    <svg class="acto agenda" viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`} role="img" aria-label="La agenda de la semana, de lunes a viernes y de 8 a 15, dibujada en perspectiva como un rompecabezas que se arma pieza por pieza; los turnos atendidos quedan tildados" data-largo={LARGO} data-quieto="10.5">
       <g stroke="var(--tinta)" stroke-linejoin="round">
         <path d={tabla.frente} fill="var(--papel)" stroke-width="0.35" />
         <path d={tabla.lado} fill="var(--papel)" stroke-width="0.35" />
@@ -348,13 +264,12 @@ const k = (v: number) => v.toFixed(3);
       <g stroke-linejoin="round">
         {
           piezas.map((p) => {
-            // los libres: montón → casilla; los tomados siguen: casilla → lote
-            const forma = p.tomado ? [p.monton, p.monton, p.casilla, p.casilla, p.lote, p.lote, p.monton, p.monton] : [p.monton, p.monton, p.casilla, p.casilla, p.monton, p.monton];
-            const tiempos = p.tomado ? [0, p.a, p.b, p.L, p.Lb, 0.94, 0.941, 1] : [0, p.a, p.b, 0.94, 0.941, 1];
-            const curvas = Array.from({ length: forma.length - 1 }, (_, k) => (k === 1 || (p.tomado && k === 3) ? '0.45 0 0.25 1' : '0 0 1 1')).join(';');
-            const kt = tiempos.map(k3).join(';');
-            const rayas = p.tomado ? [p.rayaMonton, p.rayaMonton, p.rayaCasilla, p.rayaCasilla, p.rayaLote, p.rayaLote, p.rayaMonton, p.rayaMonton] : [];
-            const salto = p.tomado ? { v: '0 0;0 0;0 -9;0 0;0 0;0 -9;0 0;0 0', k: [0, p.a, (p.a + p.b) / 2, p.b, p.L, (p.L + p.Lb) / 2, p.Lb, 1] } : { v: '0 0;0 0;0 -9;0 0;0 0', k: [0, p.a, (p.a + p.b) / 2, p.b, 1] };
+            // montón → casilla, y al final del reloj vuelve al montón (ya sin verse)
+            const forma = [p.monton, p.monton, p.casilla, p.casilla, p.monton, p.monton];
+            const curvas = '0 0 1 1;0.45 0 0.25 1;0 0 1 1;0 0 1 1;0 0 1 1';
+            const kt = [0, p.a, p.b, 0.94, 0.941, 1].map(k3).join(';');
+            const rayas = [p.rayaMonton, p.rayaMonton, p.rayaCasilla, p.rayaCasilla, p.rayaMonton, p.rayaMonton];
+            const salto = { v: '0 0;0 0;0 -9;0 0;0 0', k: [0, p.a, (p.a + p.b) / 2, p.b, 1] };
             return (
               <g>
                 <path d={p.casilla} fill="var(--papel)" stroke={p.tomado ? 'var(--tinta)' : 'var(--tinta-suave)'} stroke-width={p.tomado ? 0.32 : 0.26}>
@@ -367,10 +282,9 @@ const k = (v: number) => v.toFixed(3);
                     <animate attributeName="opacity" values="1;1;0;0;1" keyTimes={`0;${k3(ATENDIDO)};${k3(ATENDIDO + 0.01)};0.95;1`} dur={`${ARMADO}s`} repeatCount="indefinite" />
                   </path>
                 )}
-                {/* atendido: un tilde, y con él viaja al lote */}
+                {/* atendido: un tilde */}
                 {p.tomado && (
                   <path d={p.tildeCasilla} fill="none" stroke="var(--tinta)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" opacity="0">
-                    <animate attributeName="d" values={`${p.tildeCasilla};${p.tildeCasilla};${p.tildeLote};${p.tildeLote}`} keyTimes={`0;${k3(p.L)};${k3(p.Lb)};1`} dur={`${ARMADO}s`} repeatCount="indefinite" />
                     <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes={`0;${k3(ATENDIDO)};${k3(ATENDIDO + 0.01)};0.9;0.935;1`} dur={`${ARMADO}s`} repeatCount="indefinite" />
                   </path>
                 )}
@@ -383,18 +297,14 @@ const k = (v: number) => v.toFixed(3);
           })
         }
       </g>
-      <!-- el rótulo del lote: aparece cuando llega el primer turno atendido -->
-      <g class="letra-agenda letra-lote" opacity="0">
-        <text transform={enDias(iso(LOTE.x + 10, LOTE.y - 15))}>PRESENTACIÓN</text>
-        <text transform={enDias(iso(LOTE.x + 10, LOTE.y - 19.5))}>OBRAS SOCIALES Y PREPAGAS</text>
-        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes={`0;${k3(PRIMER_LOTE)};${k3(PRIMER_LOTE + 0.02)};0.9;0.935;1`} dur={`${ARMADO}s`} repeatCount="indefinite" />
-      </g>
       <!-- los días y las horas, sobre el plano de la agenda -->
       <g class="letra-agenda">
         {dias.map((d) => <text transform={d.m}>{d.t}</text>)}
         {horas.map((h) => <text transform={h.m}>{h.t}</text>)}
       </g>
     </svg>
+    <KenosActos />
+    </div>
     <figcaption>{kenosEnUso}</figcaption>
     </figure>
   </article>
@@ -467,32 +377,42 @@ const k = (v: number) => v.toFixed(3);
 </section>
 
 <script>
-  // Kenos, cuando llega a la pantalla: la vara de Asclepio se traza una vez, y lo que hace aparece
-  // de a poco, al ritmo del rompecabezas (el reloj del svg de la agenda, que corre solo en pantalla).
-  // Sin JS o con movimiento reducido, todo está a la vista desde el principio.
+  // Kenos, cuando llega a la pantalla: los cinco actos pasan de a uno (la agenda, la historia, las órdenes, la presentación y los números), cada uno con su
+  // reloj SMIL desde cero y durante data-largo segundos; la lista de al lado se completa al mismo
+  // ritmo y marca el acto que se ve. Fuera de pantalla todo queda en pausa.
+  // Sin JS o con movimiento reducido: la agenda armada y quieta, y la lista entera.
   const kenos = document.querySelector<HTMLElement>('.kenos');
-  const agenda = kenos?.querySelector<SVGSVGElement>('.agenda');
-  if (kenos && agenda && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const items = [...kenos.querySelectorAll<HTMLElement>('.hace li')];
-    const CICLO = 24, DESARMA = 0.9 * CICLO;
-    let cuadro = 0, visible = false;
-    const seguir = () => {
-      cuadro = 0;
-      const t = agenda.getCurrentTime() % CICLO;
-      items.forEach((li) => li.toggleAttribute('data-ve', t >= +li.dataset.desde! && t < DESARMA));
-      if (visible) cuadro = requestAnimationFrame(seguir);
-    };
-    kenos.classList.add('espera', 'al-ritmo');
-    new IntersectionObserver(
-      ([v]) => {
-        visible = v.isIntersecting;
-        if (visible) {
-          kenos.classList.replace('espera', 'llega');
-          cuadro ||= requestAnimationFrame(seguir);
-        }
-      },
-      { threshold: 0.3 },
-    ).observe(kenos);
+  const actos = [...(kenos?.querySelectorAll<SVGSVGElement>('svg.acto') ?? [])];
+  const items = [...(kenos?.querySelectorAll<HTMLElement>('.hace li') ?? [])];
+  actos.forEach((a) => a.pauseAnimations());
+  if (kenos && actos.length) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) actos[0].setCurrentTime(+actos[0].dataset.quieto!);
+    else {
+      let actual = 0, reloj = 0;
+      const mostrar = (i: number) => {
+        actual = i;
+        actos.forEach((a, j) => {
+          a.toggleAttribute('data-actual', j === i);
+          if (j !== i) a.pauseAnimations();
+        });
+        actos[i].setCurrentTime(0);
+        actos[i].unpauseAnimations();
+        items.forEach((li, j) => {
+          li.toggleAttribute('data-ve', j <= i);
+          li.toggleAttribute('data-actual', j === i);
+        });
+        reloj = window.setTimeout(() => mostrar((i + 1) % actos.length), +actos[i].dataset.largo! * 1000);
+      };
+      kenos.classList.add('al-ritmo');
+      new IntersectionObserver(
+        ([v]) => {
+          clearTimeout(reloj);
+          if (!v.isIntersecting) return actos[actual].pauseAnimations();
+          mostrar(actual);
+        },
+        { threshold: 0.3 },
+      ).observe(kenos);
+    }
   }
 </script>
 
@@ -538,122 +458,77 @@ const k = (v: number) => v.toFixed(3);
   .kenos-texto .sitio-kenos {
     margin-top: 22px;
   }
-  .kenos-cabeza {
-    display: flex;
-    align-items: flex-end;
-    gap: 18px;
+  .kenos-texto > p.registro {
+    margin-top: 28px;
+    padding-top: 10px;
+    border-top: 1px solid var(--tinta-suave);
+    max-width: 50ch;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--tinta-suave);
   }
-  .asclepio {
-    flex: none;
-    width: auto;
-    height: clamp(72px, 6.6vw, 100px);
-    overflow: visible;
-    fill: none;
-    /* punta recta: con la redonda, un trazo que todavía no se dibujó deja un punto */
-    stroke-linecap: butt;
-    stroke-linejoin: round;
+  .registro > span {
+    display: block;
+    margin-top: 4px;
+    font: 400 11px var(--mono);
+    letter-spacing: 0.04em;
   }
-  .cinta-borde {
-    stroke: var(--tinta);
-    stroke-width: 3;
-  }
-  .cinta {
-    stroke: var(--papel);
-    stroke-width: 1.6;
-  }
-  .vara path {
-    stroke: var(--tinta);
-    stroke-width: 0.8;
-  }
-  .vara .vara-sombra {
-    stroke: var(--tinta-suave);
-    stroke-width: 0.45;
-  }
-  .vara circle {
-    fill: var(--papel);
-    stroke: var(--tinta);
-    stroke-width: 0.8;
-  }
-  .cabeza {
-    fill: var(--tinta);
-  }
-  .ala {
-    fill: var(--papel);
-    stroke: var(--tinta);
-    stroke-width: 0.7;
-  }
-  .pluma {
-    stroke: var(--tinta-suave);
-    stroke-width: 0.45;
-  }
-  /* se traza una vez, como la costa del hero: primero la vara, después la serpiente subiendo */
-  .espera .asclepio path[pathLength] {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-  }
-  .espera .asclepio .vara-sombra,
-  .espera .asclepio circle,
-  .espera .asclepio .cabeza,
-  .espera .asclepio .alas {
-    opacity: 0;
-  }
-  .llega .asclepio path[pathLength] {
-    stroke-dasharray: 1;
-    transition: stroke-dashoffset 0.5s linear calc(0.9s + var(--k, 0) * 0.16s);
-  }
-  .llega .asclepio .vara path {
-    transition: stroke-dashoffset 1s cubic-bezier(0.16, 0.6, 0.2, 1) 0.1s;
-  }
-  .llega .asclepio .vara-sombra,
-  .llega .asclepio circle {
-    transition: opacity 0.6s ease-out 0.9s;
-  }
-  .llega .asclepio .cabeza {
-    transition: opacity 0.4s ease-out 2.4s;
-  }
-  /* las alas, al final: se abren desde la vara */
-  .asclepio .alas {
-    transform-box: fill-box;
-    transform-origin: 50% 100%;
-  }
-  .espera .asclepio .alas {
-    transform: scaleX(0.2);
-  }
-  .llega .asclepio .alas {
-    transition:
-      opacity 0.5s ease-out 2.5s,
-      transform 0.9s cubic-bezier(0.16, 0.6, 0.2, 1) 2.5s;
-  }
-  .llega .asclepio .ala {
-    transition-delay: 2.5s;
+  /* el número en su renglón y sin cortarse en los guiones */
+  .legajo {
+    display: block;
+    white-space: nowrap;
   }
   /* lo que hace Kenos aparece de a poco, mientras la agenda se arma y se presenta */
   .hace li {
     transition:
       opacity 0.9s cubic-bezier(0.16, 0.6, 0.2, 1),
-      transform 1.2s cubic-bezier(0.16, 0.6, 0.2, 1);
+      transform 1.2s cubic-bezier(0.16, 0.6, 0.2, 1),
+      color 0.7s ease;
   }
   .al-ritmo .hace li:not([data-ve]) {
     opacity: 0;
     transform: translateY(-7px);
   }
+  /* lo ya contado queda, en tinta lavada; el acto que se ve, en tinta */
+  .al-ritmo .hace li[data-ve]:not([data-actual]) {
+    color: var(--tinta-suave);
+  }
+  /* la lista a la izquierda y, a la derecha, los cinco actos en el mismo lugar, de a uno */
   .agenda-lamina {
-    position: relative;
     justify-self: center;
     width: 100%;
-    max-width: 680px;
+    max-width: 760px;
+    display: grid;
+    grid-template-columns: 10.5rem minmax(0, 1fr);
+    gap: 0 clamp(16px, 2vw, 28px);
   }
-  /* arriba a la izquierda del dibujo, donde hay papel libre (el montón está más abajo) */
   .agenda-lamina .hace {
-    position: absolute;
-    top: 2%;
-    left: 0;
-    width: 29%;
     margin: 0;
     grid-template-columns: 1fr;
+    align-self: start;
   }
-  /* debajo del rompecabezas, quién lo usa: es la prueba, va en tinta y legible */
+  .actos {
+    position: relative;
+    aspect-ratio: 4 / 3;
+  }
+  .actos > :global(svg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    transition: opacity 0.7s ease;
+  }
+  .actos > :global(svg:not(.agenda)),
+  .al-ritmo .actos > :global(svg:not([data-actual])) {
+    opacity: 0;
+  }
+  .al-ritmo .actos > :global(svg[data-actual]) {
+    opacity: 1;
+  }
+  /* debajo de la lámina, quién lo usa: es la prueba, va en tinta y legible */
   .agenda-lamina figcaption {
+    grid-column: 1 / -1;
     margin: 10px auto 0;
     max-width: 52ch;
     font-size: clamp(15px, 1.1vw, 17px);
@@ -667,20 +542,9 @@ const k = (v: number) => v.toFixed(3);
     letter-spacing: 0.08em;
     fill: var(--tinta-suave);
   }
-  .letra-lote text {
-    font-size: 2.8px;
-    fill: var(--tinta);
-  }
   .sitio-kenos {
     font: 500 12px var(--mono);
     letter-spacing: 0.06em;
-  }
-  .agenda {
-    width: 100%;
-    max-width: 680px;
-    justify-self: center;
-    height: auto;
-    overflow: visible;
   }
   .grupo {
     margin-top: clamp(72px, 8vw, 128px);
@@ -778,14 +642,18 @@ const k = (v: number) => v.toFixed(3);
     .kenos {
       grid-template-columns: 1fr;
     }
-    .agenda {
-      max-width: 520px;
+    /* en angosto: la lámina arriba y la lista debajo, en dos columnas */
+    .agenda-lamina {
+      max-width: 560px;
+      grid-template-columns: minmax(0, 1fr);
     }
     .agenda-lamina .hace {
-      position: static;
-      width: auto;
+      order: 1;
       margin-top: 8px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .agenda-lamina figcaption {
+      order: 2;
     }
     .lista li {
       grid-template-columns: minmax(0, 1fr) auto;
