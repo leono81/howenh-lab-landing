@@ -47,7 +47,7 @@ De noroeste a sudeste la costa es **una diagonal casi recta, rumbo ~135° (mar a
 
 ## Plataformas de imagen
 
-Conclusión: la geometría NO se genera con IA; sale de OSM proyectado a SVG (como `mapa-real.svg`), estilizado con trazo y hachurado a una tinta. La IA solo para íconos chicos (baliza, torre, avión) pegados encima.
+Conclusión: la geometría NO se genera con IA; sale de OSM proyectado a SVG, estilizado con trazo y hachurado a una tinta. La IA solo para íconos chicos (baliza, torre, avión) pegados encima.
 
 | Plataforma | Gratis hoy | Comentario | Estado |
 |---|---|---|---|
