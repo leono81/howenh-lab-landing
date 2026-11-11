@@ -1,0 +1,11 @@
+node_modules
+dist
+.astro
+.git
+.claude
+.agents
+.superpowers
+.worktrees
+.impeccable
+flow
+docs
