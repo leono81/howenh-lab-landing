@@ -1,5 +1,8 @@
 ---
 // Laboratorio: el índice. Las cuatro líneas de trabajo, cada una con el enlace a su prueba más abajo.
+// Después, los programas que eligieron a Howenh (canvas «Programas en la landing», D1, 2026-11-12),
+// armados igual que el índice pero al revés: el título a la derecha. Anthropic va en texto (su logo
+// pide aprobación previa); ElevenLabs con su logo oficial en negro, como da su guía de marca.
 const lineas = [
   {
     titulo: 'Inteligencia artificial e ingeniería',
@@ -49,11 +52,31 @@ const lineas = [
   </dl>
 </section>
 
+<section class="seccion programas" id="programas" aria-labelledby="prog-titulo">
+  <div class="cabeza aparece">
+    <h2 id="prog-titulo">Programas que nos eligieron</h2>
+    <p class="entrada">Dos empresas de inteligencia artificial sumaron a Howenh Labs a sus programas para startups.</p>
+  </div>
+  <dl class="lineas">
+    <div class="linea aparece">
+      <dt><span class="marca-programa rotulo">ANTHROPIC</span>Claude Startups</dt>
+      <dd><p>El programa de Anthropic para startups que construyen con Claude. Con Claude funciona Taiyin, el asistente de esta página.</p></dd>
+    </div>
+    <div class="linea aparece">
+      <dt>
+        <a class="marca-programa" href="https://elevenlabs.io" target="_blank" rel="noopener"><img src="/elevenlabs-logo-black.svg" alt="ElevenLabs" width="123" height="16" /></a>
+        ElevenLabs Startup Grant
+      </dt>
+      <dd><p>La beca para startups de ElevenLabs, la plataforma de voz con inteligencia artificial.</p></dd>
+    </div>
+  </dl>
+</section>
+
 <script>
   // la entrada del índice, una vez, cuando llega a la pantalla: cada filete se traza de izquierda a
   // derecha como la costa del hero y la letra se asienta igual que en el hero (baja 7 px, sin rebote).
   // Sin JS o con movimiento reducido no hay nada que esperar: todo está visible desde el principio.
-  const piezas = document.querySelectorAll<HTMLElement>('.laboratorio .aparece');
+  const piezas = document.querySelectorAll<HTMLElement>('.laboratorio .aparece, .programas .aparece');
   if (piezas.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     piezas.forEach((p) => p.classList.add('espera'));
     const io = new IntersectionObserver(
@@ -75,11 +98,36 @@ const lineas = [
 </script>
 
 <style>
-  .laboratorio {
+  .laboratorio,
+  .programas {
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: 40px clamp(40px, 6vw, 112px);
     align-items: start;
+  }
+  /* los programas, al revés: la lista a la izquierda y el título a la derecha (en el HTML el título
+     va primero, para leerlo y para el teléfono) */
+  .programas {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+  .programas .cabeza {
+    grid-area: 1 / 2;
+  }
+  .programas .lineas {
+    grid-area: 1 / 1;
+  }
+  /* arriba de cada programa, quién lo da: en mono, o el logo. Alrededor del logo, aire igual a su
+     alto (la guía de ElevenLabs) */
+  .marca-programa {
+    display: flex;
+    align-items: center;
+    height: 16px;
+    margin-bottom: 16px;
+  }
+  .marca-programa img {
+    display: block;
+    width: auto;
+    height: 16px;
   }
   .lineas {
     display: grid;
@@ -142,8 +190,13 @@ const lineas = [
     text-transform: uppercase;
   }
   @media (max-width: 900px) {
-    .laboratorio {
+    .laboratorio,
+    .programas {
       grid-template-columns: 1fr;
+    }
+    .programas .cabeza,
+    .programas .lineas {
+      grid-area: auto;
     }
   }
   @media (max-width: 600px) {
