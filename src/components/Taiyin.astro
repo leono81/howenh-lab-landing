@@ -77,6 +77,17 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     const abrir = (si: boolean) => boton.setAttribute('aria-expanded', String(si));
     boton.addEventListener('click', () => abrir(boton.getAttribute('aria-expanded') === 'false'));
     raiz.addEventListener('keydown', (e) => e.key === 'Escape' && (abrir(false), boton.focus())); // en la compu el cuadrado no se ve: no pasa nada
+    // un enlace a #taiyin desde otra parte de la página (el de los programas) la abre y deja el cursor
+    // en la barra: en la compu sube hasta el hero, salvo que la barra ya esté acoplada abajo
+    const campo = raiz.querySelector<HTMLInputElement>('#taiyin-campo')!;
+    document.addEventListener('click', (e) => {
+      if (!(e.target as Element).closest('a[href="#taiyin"]')) return;
+      e.preventDefault();
+      abrir(true);
+      campo.focus({ preventScroll: true });
+      if (!matchMedia('(max-width: 900px)').matches && !raiz.classList.contains('acoplada'))
+        campo.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    });
   }
 </script>
 
