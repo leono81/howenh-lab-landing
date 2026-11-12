@@ -5,20 +5,23 @@
 // 2026-11-11): quien es de acá la reconoce.
 // El cabo no se dibuja de nuevo: es la misma lámina del hero (#maqueta-lamina) y el mismo haz
 // (#haz-baliza), reusados con <use> y vistos por una ventana sobre la baliza.
-// Debajo de Desde la isla, a todo el ancho, un albatros de ceja negra planea sobre el mar grabado
-// (canvas «Desde la isla: aves», 2026-11-12; src/scripts/albatros.ts, que baja recién al acercarse).
+// Debajo de Desde la isla, a todo el ancho, un albatros de ceja negra planea a lo largo de la costa
+// (canvas «Desde la isla: aves» y «el albatros en la lámina», opción A, 2026-11-12;
+// src/scripts/albatros.ts, que baja recién al acercarse). La franja es liviana y se mete apenas
+// debajo de la letra de arriba y de los programas de abajo: las tres cosas se leen de corrido.
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
 const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la linterna a 154,59 del borde
 ---
 <section class="seccion nosotros" id="nosotros" aria-labelledby="nos-titulo">
-  <h2 id="nos-titulo">Desde la isla</h2>
-  <div class="cuerpo">
+  <div class="aparece"><h2 id="nos-titulo">Desde la isla</h2></div>
+  <div class="cuerpo aparece">
     <p class="dicho">Howenh Labs trabaja sobre la costa atlántica de Tierra del Fuego. Hacemos software para el lugar donde vivimos y, desde acá, para el resto del país.</p>
     <p>Esta tierra tenía nombre mucho antes de llamarse Tierra del Fuego. Ahí tiene raíz nuestra identidad, y de ahí vienen nuestros nombres: de las lenguas de sus pueblos originarios, las primeras voces de la isla.</p>
   </div>
   <noscript><style>.mar { display: none; }</style></noscript>
   <figure class="mar">
-    <svg role="img" aria-label="Un albatros de ceja negra planea sobre el mar, con su sombra en el agua"></svg>
+    <svg role="img" aria-label="Un albatros de ceja negra planea a lo largo de la costa, sobre el mar, con su sombra en el agua"></svg>
+    <figcaption class="rotulo">ALBATROS DE CEJA NEGRA<br />THALASSARCHE MELANOPHRIS</figcaption>
   </figure>
 </section>
 
@@ -62,6 +65,8 @@ const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la li
 
 <style>
   .nosotros {
+    position: relative;
+    z-index: 0; /* para que la franja vaya debajo de la letra (z-index: -1) sin irse debajo de la página */
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: 32px clamp(40px, 6vw, 112px);
@@ -77,13 +82,14 @@ const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la li
     max-width: 24em;
     text-wrap: pretty;
   }
-  /* el mar del albatros: a sangre por los dos lados, y se apaga en el papel por los cuatro (papel
-     pintado encima, sin rectas ni máscaras) */
+  /* el mar del albatros: a sangre por los dos lados; se apaga en el papel con el contorno irregular
+     que dibuja el script (papel pintado encima, sin rectas ni máscaras) */
   .mar {
     grid-column: 1 / -1;
     position: relative;
-    margin: 8px calc(-1 * var(--margen)) 0;
-    height: clamp(240px, 27vw, 380px);
+    margin: -48px calc(-1 * var(--margen)) 0;
+    height: clamp(240px, 25vw, 350px);
+    z-index: -1; /* debajo de la letra, que llega hasta su apagado */
   }
   .mar svg {
     position: absolute;
@@ -91,13 +97,16 @@ const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la li
     width: 100%;
     height: 100%;
   }
-  .mar::after {
-    content: '';
+  /* el nombre del ave: está, pero no pide atención. Adentro del dibujo, en el mar que ya se lavó: en
+     el borde de abajo quedaba justo arriba del título de los programas y se leía como su volanta */
+  .mar figcaption {
     position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(to right, var(--papel), rgb(246 247 251 / 0) 14%, rgb(246 247 251 / 0) 86%, var(--papel)),
-      linear-gradient(to bottom, var(--papel), rgb(246 247 251 / 0) 22%, rgb(246 247 251 / 0) 78%, var(--papel));
+    right: var(--margen);
+    bottom: 30%;
+    text-align: right;
+    font-size: 8.5px;
+    line-height: 1.5;
+    letter-spacing: 0.14em;
   }
   /* Hablemos a la izquierda y, a sangre por la derecha, el cabo que se apaga en el papel */
   .contacto {
@@ -118,7 +127,9 @@ const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la li
     justify-self: end;
     width: min(680px, 100% + var(--margen));
     aspect-ratio: 1;
-    margin: calc(-1 * clamp(30px, 5vw, 90px)) calc(-1 * var(--margen)) 0 0;
+    /* sin subir sobre los programas: con el albatros arriba, la columna de la derecha quedaba con el
+       texto de los programas pegado al rayado del cabo */
+    margin: 0 calc(-1 * var(--margen)) 0 0;
   }
   .cabo svg {
     position: absolute;
@@ -150,6 +161,11 @@ const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la li
     }
     .contacto .texto {
       padding-top: 0;
+    }
+    /* en el teléfono el ave ocupa casi todo el ancho: el nombre va abajo, a la derecha, lejos del
+       título de los programas, que va a la izquierda */
+    .mar figcaption {
+      bottom: 10%;
     }
     /* a sangre por los dos lados en el teléfono; en tablet, contra la derecha */
     .cabo {

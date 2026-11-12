@@ -94,6 +94,28 @@ const organizacion = {
         });
       })();
     </script>
+    <script>
+      // la entrada de las secciones de abajo (.aparece). Sin JS o con movimiento reducido no hay nada
+      // que esperar: todo está visible desde el principio.
+      const piezas = document.querySelectorAll<HTMLElement>('.aparece');
+      if (piezas.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        piezas.forEach((p) => p.classList.add('espera'));
+        const io = new IntersectionObserver(
+          (vistas) => {
+            vistas
+              .filter((v) => v.isIntersecting)
+              .forEach((v, i) => {
+                const p = v.target as HTMLElement;
+                p.style.setProperty('--n', String(i));
+                p.classList.replace('espera', 'llega');
+                io.unobserve(p);
+              });
+          },
+          { rootMargin: '0px 0px -12% 0px' },
+        );
+        piezas.forEach((p) => io.observe(p));
+      }
+    </script>
     <script is:inline>
       // primero el mapa: la letra entra después (.entra, ~3,5 s). Si la persona ya hace algo
       // (scroll, tecla, toque), se muestra todo enseguida: no se la hace esperar.
@@ -231,6 +253,21 @@ const organizacion = {
   }
   .sin-intro .entra {
     animation: none;
+  }
+  /* las secciones de abajo entran igual, una vez, al llegar a la pantalla (.aparece → .espera →
+     .llega): la letra de cada pieza baja 7 px y se asienta; las que llegan juntas, una tras otra */
+  .espera > * {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  .llega > * {
+    transition:
+      opacity 1.4s cubic-bezier(0.16, 0.6, 0.2, 1),
+      transform 1.6s cubic-bezier(0.16, 0.6, 0.2, 1);
+    transition-delay: calc(var(--n) * 140ms + 0.25s);
+  }
+  .llega > :nth-child(2) {
+    transition-delay: calc(var(--n) * 140ms + 0.4s);
   }
   @media (prefers-reduced-motion: reduce) {
     .entra {

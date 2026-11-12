@@ -1,13 +1,16 @@
-// El albatros de ceja negra de «Desde la isla»: planea sobre el mar grabado, en los ejes isométricos
-// de la maqueta del hero. Prototipo, capturas y referencias en docs/design/aves/ (elegido en el canvas
-// el 2026-11-12, con las fotos que pasó Leono).
+// El albatros de ceja negra de «Desde la isla»: planea a lo largo de la costa, en los ejes isométricos
+// de la maqueta del hero, con el mar grabado como allá: la orilla arriba a la izquierda, las líneas de
+// agua apretadas contra ella y cada vez más separadas y tenues mar adentro, y el dibujo que se apaga en
+// el papel con un contorno irregular. Prototipo, capturas y referencias en docs/design/aves/ (elegido
+// en el canvas el 2026-11-12, con las fotos que pasó Leono).
 //
 // Mundo en metros: U a lo largo de la costa (en pantalla, arriba a la derecha), V mar adentro (abajo a
 // la derecha), Z arriba; quien mira está del lado del mar, arriba (-1, 1, 1). El cuerpo es un sólido de
 // anillos y se ve con su silueta real; las alas tienen la planta en banana de las fotos (la muñeca
 // adelante, la mano hacia atrás), van en arco hacia abajo al planear y su tono cambia con la luz.
 // El vuelo es dinámico: eses desparejas, sube al girar y baja rasante, con su sombra en el agua. La
-// cámara lo sigue y el agua pasa por debajo. Todo es periódico en 16 s.
+// cámara lo sigue a lo largo de la costa: la orilla queda quieta y pasan la playa y el agua. La tierra
+// es el papel, con la playa en puntos. Todo es periódico en 16 s.
 //
 // Corre solo mientras se ve; con movimiento reducido queda quieto en un cuadro.
 
@@ -17,9 +20,16 @@ type Pt = number[];
 const NS = 'http://www.w3.org/2000/svg';
 const LOOP = 16;
 const C = Math.cos(Math.PI / 6), S = 0.5;
-const PSI0 = Math.PI / 2 + 0.35; // rumbo medio: abajo a la derecha, un poco hacia quien mira
-const AVANCE = (16 * 1.05) / Math.sin(PSI0); // por vuelta el agua corre un número entero de líneas
+const PSI0 = Math.PI; // rumbo medio: a lo largo de la costa, abajo a la izquierda, hacia quien mira
+const AVANCE = 18; // metros que corre la costa por vuelta: lo que pasa se repite cada AVANCE
 const VEL = AVANCE / LOOP;
+const KU = (2 * Math.PI) / AVANCE;
+// la orilla corre casi recta, como en la maqueta, con entrantes suaves
+const orilla = (U: number) => 0.1 * Math.sin(2 * KU * U + 0.7) + 0.05 * Math.sin(5 * KU * U + 2.1) + 0.02 * Math.sin(11 * KU * U + 0.3);
+// las líneas de agua de la maqueta del hero (en sus unidades), llevadas a metros desde la costa
+const AGUA = [4, 9, 15, 22, 30, 39, 49, 60, 72, 87, 105, 127, 154, 186, 225, 272, 330, 400, 480].map((d) => d * 0.022);
+const NIEBLA = [1, 0.55, 0.42, 0.32, 0.25, 0.2, 0.15, 0.12]; // la de la maqueta: de afuera hacia adentro
+const azarDe = (i: number, c: number) => { const x = Math.sin(i * 12.9898 + c * 78.233) * 43758.5453; return x - Math.floor(x); };
 
 const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
 const suave = (x: number) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
@@ -81,34 +91,89 @@ export function iniciar(svg: SVGSVGElement) {
   };
   const pone = (e: Element, at: Record<string, string>) => { for (const a in at) e.setAttribute(a, at[a]); };
 
-  let lineas: { v: number; fase: number; e: Element }[] = [];
-  let olas: { v: number; u: number; largo: number; fase: number; dur: number; e: Element }[] = [];
-  let sombra: Element, sombra2: Element;
+  let lineas: { d: number; fase: number; e: Element }[] = [];
+  let olas: { i: number; largo: number; fase: number; n: number; e: Element }[] = [];
+  let playa: { u: number; q: number }[] = [];
+  let aguaMar: Element, costa: Element, arena: Element, sombra: Element;
   let gAves: Element;
   let alas: { g: Element; lonja: Element; borde: Element; rayas: Element }[] = [];
   let cuerpoG: { g: Element; cola: Element; contorno: Element; sombreado: Element; manto: Element; cejas: Element; pico: Element; culmen: Element };
+  let DC = 4.5, uA = -20, uB = 20;
+
+  // el contorno del apagado: un rectángulo redondeado que ondula a lo largo de su borde (las ondas se
+  // miden en px, así ondula igual en lo largo y en lo corto), abierto del lado que va a sangre
+  function contorno(capa: number, franja: boolean) {
+    // la onda (A) no saca nunca el contorno de afuera hasta el borde del svg: ahí quedaría una recta
+    const fx = (franja ? 0.14 : 0.2) * W, fy = 0.24 * H, A = 0.22 * fy, a = (capa + 1) / NIEBLA.length;
+    const x0 = franja ? A + fx * a : -0.6 * W, x1 = franja ? 1.6 * W : W - A - fx * a, y0 = A + fy * a, y1 = H - A - fy * a;
+    const R = Math.min(fy * 1.6, (y1 - y0) / 2, (x1 - x0) / 2);
+    // el borde, recorrido por tramos: rectas y cuartos de círculo
+    const tramos: [number, (s: number) => [Pt, Pt]][] = [];
+    const recta = (p: Pt, q: Pt): [number, (s: number) => [Pt, Pt]] => {
+      const L = Math.hypot(q[0] - p[0], q[1] - p[1]);
+      return [L, (s) => [[p[0] + ((q[0] - p[0]) * s) / L, p[1] + ((q[1] - p[1]) * s) / L], [(q[1] - p[1]) / L, -(q[0] - p[0]) / L]]];
+    };
+    const arco = (c: Pt, a0: number): [number, (s: number) => [Pt, Pt]] => [(Math.PI / 2) * R, (s) => { const an = a0 + s / R; return [[c[0] + R * Math.cos(an), c[1] + R * Math.sin(an)], [Math.cos(an), Math.sin(an)]]; }];
+    tramos.push(recta([x0 + R, y0], [x1 - R, y0]), arco([x1 - R, y0 + R], -Math.PI / 2), recta([x1, y0 + R], [x1, y1 - R]), arco([x1 - R, y1 - R], 0));
+    tramos.push(recta([x1 - R, y1], [x0 + R, y1]), arco([x0 + R, y1 - R], Math.PI / 2), recta([x0, y1 - R], [x0, y0 + R]), arco([x0 + R, y0 + R], Math.PI));
+    const pts: Pt[] = [];
+    let s0 = 0;
+    for (const [L, en] of tramos) {
+      for (let s = 0; s < L; s += 10) {
+        const [p, n] = en(s), u = s0 + s;
+        const r = A * (0.55 * Math.sin(u / 70 + 1.3) + 0.3 * Math.sin(u / 27 + 0.4) + 0.15 * Math.sin(u / 11 + 2.2));
+        pts.push([p[0] + n[0] * r, p[1] + n[1] * r]);
+      }
+      s0 += L;
+    }
+    return camino(pts, true);
+  }
 
   function montar() {
     W = svg.clientWidth;
     H = svg.clientHeight;
     if (!W || !H) return false;
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    k = Math.min(H / 4.25, W / 6.5);
-    O = [W * 0.5, H * 0.8];
+    // a lo ancho (debajo del texto, y en el teléfono) o al costado del texto
+    const franja = W / H > 1.4;
+    k = franja ? Math.min(H / 4.25, W / 6.5) : Math.min(H / 4.6, W / 6);
+    O = franja ? [W * 0.5, H * 0.8] : [W * 0.52, H * 0.86];
+    // la costa a DC metros del rumbo: entra por la izquierda y sale por arriba
+    // (en el teléfono, más adentro: el borde de arriba se apaga y se la comería)
+    DC = clamp((O[0] + 1.732 * O[1] - (franja ? (W < 600 ? 0.62 : 0.4) : 0.9) * W) / (1.732 * k), 2.8, 5.4);
+    uA = -O[0] / (k * C) - 14;
+    uB = (W - O[0]) / (k * C) + 12;
     svg.replaceChildren();
     let semilla = 11;
     const azar = () => (semilla = (semilla * 16807) % 2147483647) / 2147483647;
-    el('rect', { x: '0', y: '0', width: String(W), height: String(H), fill: 'var(--aguada-mar)', 'fill-opacity': '0.55' });
-    const gMar = el('g', { fill: 'none', 'stroke-linecap': 'round', stroke: 'var(--tinta-suave)' });
-    lineas = Array.from({ length: 32 }, (_, i) => {
-      const lejos = 0.25 + azar() * 0.35;
-      return { v: -16 + i * 1.05, fase: azar() * 6, e: el('path', { 'stroke-width': String(f1(1.15 - lejos * 0.6)), 'stroke-opacity': String(f1(0.9 - lejos * 0.6)) }, gMar) };
-    });
+    // la aguada del mar, cargada contra la costa y lavada mar adentro, como las líneas: la franja no pesa
+    const c0 = pr([0, -DC, 0]), largo = 9 * 0.866 * k;
+    const defs = el('defs', {});
+    const lavado = el('linearGradient', { id: 'albatros-lavado', gradientUnits: 'userSpaceOnUse', x1: String(f1(c0[0])), y1: String(f1(c0[1])), x2: String(f1(c0[0] + 0.5 * largo)), y2: String(f1(c0[1] + 0.866 * largo)) }, defs);
+    // la sombra del ave, rayada como las de la maqueta: rayas finas paralelas a la costa
+    const rayado = el('pattern', { id: 'albatros-rayado', width: '3', height: '3', patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(-30)' }, defs);
+    el('line', { x1: '0', y1: '1.5', x2: '3', y2: '1.5', stroke: 'var(--tinta)', 'stroke-width': '0.8' }, rayado);
+    for (const [o, a] of [[0, 0.7], [0.45, 0.35], [1, 0]]) el('stop', { offset: String(o), 'stop-color': 'var(--aguada-mar)', 'stop-opacity': String(a) }, lavado);
+    aguaMar = el('path', { fill: 'url(#albatros-lavado)' });
+    const gMar = el('g', { fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', stroke: 'var(--tinta)' });
+    lineas = AGUA.map((d, i, a) => ({ d, fase: azar() * 6, e: el('path', { 'stroke-width': String(f1(1.1 - (i / a.length) * 0.55)), 'stroke-opacity': String(f1(0.85 - (i / a.length) * 0.72)) }, gMar) }));
+    costa = el('path', { fill: 'none', stroke: 'var(--tinta)', 'stroke-width': '1.6', 'stroke-linejoin': 'round' });
+    // la playa en puntos, fija en la tierra: pasa con la costa
+    playa = Array.from({ length: 150 }, () => ({ u: azar() * AVANCE, q: azar() }));
+    arena = el('path', { fill: 'none', stroke: 'var(--tinta-suave)', 'stroke-width': '1.5', 'stroke-linecap': 'round' });
     const gOlas = el('g', { fill: 'none', 'stroke-linecap': 'round', stroke: 'var(--tinta-suave)', 'stroke-width': '0.9' });
-    olas = Array.from({ length: 46 }, () => ({ u: -30 + azar() * 60, v: -16 + azar() * 32, largo: 0.35 + azar() * 0.9, fase: azar(), dur: LOOP / (2 + Math.floor(azar() * 3)), e: el('path', {}, gOlas) }));
-    const gSombras = el('g', { fill: 'var(--tinta-suave)', stroke: 'none' });
-    sombra = el('path', {}, gSombras);
-    sombra2 = el('path', { 'fill-opacity': '0.07' }, gSombras);
+    // cortas, como las del hero: más largas se leían como rayones sueltos
+    olas = Array.from({ length: 18 }, (_, i) => ({ i, largo: 0.15 + azar() * 0.3, fase: azar(), n: 2 + Math.floor(azar() * 3), e: el('path', {}, gOlas) }));
+    sombra = el('path', { fill: 'url(#albatros-rayado)', stroke: 'none' });
+    // el apagado: papel encima, capas de un mismo contorno ondulado (como la maqueta); el ave, arriba
+    const gNiebla = el('g', { fill: 'var(--papel)', 'fill-rule': 'evenodd', stroke: 'none' });
+    // en anillos que no se pisan, cada uno con la opacidad de todas las capas que lo cubren: papel
+    // sobre papel en capas redondea y deja el borde del svg un tono más oscuro que la página
+    const capas = [`M${-W} ${-H}H${2 * W}V${2 * H}H${-W}Z`, ...NIEBLA.map((_, i) => contorno(i, franja))];
+    NIEBLA.forEach((_, i) => {
+      const alfa = 1 - NIEBLA.slice(i).reduce((m, x) => m * (1 - x), 1);
+      el('path', { d: capas[i] + capas[i + 1], 'fill-opacity': String(Math.round(alfa * 100) / 100) }, gNiebla);
+    });
     gAves = el('g', { 'stroke-linejoin': 'round', 'stroke-linecap': 'round', stroke: 'var(--tinta)' });
     alas = [0, 1].map(() => {
       const g = el('g', {}, gAves);
@@ -184,19 +249,42 @@ export function iniciar(svg: SVGSVGElement) {
   };
 
   function mar(t: number) {
-    const d = ((AVANCE * t) / LOOP) * Math.sin(PSI0); // lo que corre el agua en V
+    const f = VEL * t; // lo que corrió la costa: un punto de la tierra en U se ve en u = U + f
     const w = (2 * Math.PI) / LOOP;
-    const uMax = W / (k * C) + 8;
+    const borde = (U: number) => -DC + orilla(U);
+    const cos: V3[] = [];
+    for (let u = uA; u <= uB; u += 0.4) cos.push([u, borde(u - f), 0]);
+    const linea = cos.map(pr);
+    pone(aguaMar, { d: camino([...linea, pr([uB, 80, 0]), pr([uA, 80, 0])], true) });
+    pone(costa, { d: camino(linea) });
+    // las líneas de agua siguen la costa y se alisan mar adentro; el agua ondula y corre con ella
     for (const L of lineas) {
-      const v = (((L.v - d + 16.8) % 33.6) + 33.6) % 33.6 - 16.8;
-      const pts: Pt[] = [];
-      for (let u = -uMax; u <= uMax; u += 1.1) pts.push(pr([u, v, 0.05 * Math.sin(u * 0.55 + w * 3 * t + L.fase) + 0.035 * Math.sin(u * 1.3 - w * 2 * t + L.fase * 2)]));
+      const liso = Math.exp(-L.d / 2.5), pts: Pt[] = [];
+      for (let u = uA; u <= uB; u += 0.5) {
+        const U = u - f;
+        const z = (0.012 + 0.03 * (1 - liso)) * (Math.sin(2 * KU * U + 3 * w * t + L.fase) + 0.7 * Math.sin(4 * KU * U - 2 * w * t + L.fase * 2));
+        pts.push(pr([u, -DC + L.d + orilla(U) * liso, z]));
+      }
       L.e.setAttribute('d', camino(pts));
     }
+    // la playa: fija en la tierra, se repite cada AVANCE
+    const arenas: string[] = [];
+    for (let n = -4; n <= 3; n++) {
+      for (const p of playa) {
+        const u = p.u + n * AVANCE + f;
+        if (u < uA || u > uB) continue;
+        const q = pr([u, borde(p.u) - 0.06 - p.q * p.q * 0.7, 0]);
+        arenas.push(`M${f1(q[0])} ${f1(q[1])}h0.1`);
+      }
+    }
+    pone(arena, { d: arenas.join('') });
+    // olas sueltas: nacen mar adentro, corren con el agua y se acercan a la orilla
     for (const o of olas) {
-      const x = (t / o.dur + o.fase) % 1;
-      const v = (((o.v - d + 16) % 32) + 32) % 32 - 16 - x * 0.5;
-      pone(o.e, { d: camino([pr([o.u, v, 0]), pr([o.u + o.largo, v, 0])]), 'stroke-opacity': String(f1(Math.sin(Math.PI * x) * 0.75)) });
+      const dur = LOOP / o.n, x0 = t / dur + o.fase, c = Math.floor(x0) % o.n, x = x0 - Math.floor(x0);
+      const u = lerp(uA * 0.7, uB * 0.7, azarDe(o.i, c)) + VEL * dur * x;
+      const d = 0.7 + azarDe(o.i + 50, c) * 10 - 0.4 * x;
+      const v = -DC + d + orilla(u - f) * Math.exp(-d / 2.5);
+      pone(o.e, { d: camino([pr([u, v, 0]), pr([u + o.largo, v, 0])]), 'stroke-opacity': String(f1(Math.max(0, Math.sin(Math.PI * x) * 0.75 * (1 - d / 13)))) });
     }
   }
 
@@ -292,21 +380,23 @@ export function iniciar(svg: SVGSVGElement) {
     const alMar = (x: V3) => { const s = x[2] / SOL[2]; return pr([x[0] - SOL[0] * s, x[1] - SOL[1] * s, 0]); };
     const silueta = [...cu.anillos.map((r) => r.en(r.sup)), ...cu.anillos.map((r) => r.en(r.inf)).reverse()];
     const d = lados.map((L) => camino(L.borde.map(alMar), true)).join('') + camino(silueta.map(alMar), true);
-    pone(sombra, { d, 'fill-opacity': String(f1(0.2 - 0.06 * (e0.z - 0.6))) });
-    pone(sombra2, { d, transform: 'translate(1.5 1)' });
+    pone(sombra, { d, 'fill-opacity': String(f1(clamp(0.75 - 0.3 * (e0.z - 0.6), 0.3, 0.75))) });
   }
 
+  // para grabar cuadros exactos (docs/design/aves/cuadros.mjs), solo en desarrollo
+  let grabando = false;
+  if (import.meta.env.DEV) (window as unknown as { __albatros: (t: number) => void }).__albatros = (t) => { grabando = true; cuadro(t); };
   // quieto (movimiento reducido): un cuadro con el ala bien a la vista
   const QUIETO = 5;
   let corriendo = false, visto = false, listo = false, t0 = 0, desde = QUIETO, ultimo = QUIETO;
   const bucle = (ahora: number) => {
-    if (!corriendo || !listo) { corriendo = false; return; }
+    if (!corriendo || !listo || grabando) { corriendo = false; return; }
     ultimo = (desde + (ahora - t0) / 1000) % LOOP;
     cuadro(ultimo);
     requestAnimationFrame(bucle);
   };
   const arrancar = () => {
-    if (corriendo || quieto || !visto) return;
+    if (corriendo || quieto || !visto || grabando) return;
     corriendo = true;
     desde = ultimo;
     t0 = performance.now();

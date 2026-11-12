@@ -170,7 +170,7 @@ Esquinas rectas en todo (0 px). Bordes de 1 px: en tinta llena para el botón de
 - **Ejes isométricos comunes** (`src/data/iso.ts`): x a lo largo de la costa hacia la ciudad (en pantalla, abajo a la izquierda), y tierra adentro (arriba a la izquierda), z arriba. De cada volumen se ven el techo, la cara que da al mar (−y) y la que da a la ciudad (+x).
 - **Escala de trazos** (en unidades de la maqueta): costa 1.9; silueta y contornos 0.6–1; rayados 0.35–0.55; detalles finos 0.25–0.4.
 - **Rayados con significado:** manzanas de la ciudad a 30° cada 2.5; plataformas a −30° cada 3.6 en azul lavado; agua quieta (lagunas) a −30° cada 3; el signo de mallín para humedales; puntos para playas; aislante y sombra de los volúmenes con rayas apretadas en la cara a la sombra.
-- **Apagado irregular:** el dibujo termina con capas de un mismo contorno ondulado, cada una más adentro y con menos niebla de papel.
+- **Apagado irregular:** el dibujo termina con capas de un mismo contorno ondulado, cada una más adentro y con menos niebla de papel. Donde el dibujo se redibuja en cada cuadro (el albatros), las capas van en anillos que no se pisan, cada uno con la opacidad de todas las que lo cubren: papel sobre papel en ocho capas redondea y deja el borde del svg un tono más oscuro que la página, un rectángulo fantasma.
 
 ### Named Rules
 **The Real Ground Rule.** La costa, la ruta, el río, las calles, la pista y el relieve salen de datos reales (OpenStreetMap y Copernicus DEM, procesados por `scripts/`). Los hitos (cabo, capilla, torre, baliza) se dibujan a partir de fotografías. Nada se inventa ni se mueve de lugar.
@@ -199,13 +199,17 @@ La costa norte de Río Grande en isométrica, vista desde el mar: mar abierto co
 ### Viñetas isométricas
 Capilla de la Misión, Torre de Agua, baliza, barco, camiones, avión y satélite: dibujos de línea en los ejes comunes, más grandes que su escala real para leerse, con papel de relleno, tinta llena en techos rojos o caras a la sombra y rayado para la luz.
 
+### El albatros de Desde la isla
+Una franja a lo ancho, debajo del texto, con un albatros de ceja negra que planea a lo largo de la costa (`src/scripts/albatros.ts`, que baja recién al acercarse). Es la costa del hero vista de cerca, en los mismos ejes: la tierra arriba a la izquierda es el papel con la playa en puntos, la orilla en tinta llena y las líneas de agua de la maqueta (las mismas distancias, llevadas a metros), apretadas contra la orilla y cada vez más separadas y tenues mar adentro. La aguada del mar va cargada contra la costa y se lava mar adentro, así la mitad derecha queda casi papel y la franja no pesa entre dos bloques de letra. La sombra del ave en el agua va rayada, paralela a la costa, como las sombras de los volúmenes; nunca una silueta plana. El nombre del ave, en mono de 8,5 px, va adentro del dibujo, sobre el mar ya lavado: en el borde de abajo se leía como la volanta de la sección siguiente. La franja sube hasta debajo de la última línea del texto (por detrás de la letra) y los programas arrancan apenas se apaga, sin el aire entero de una sección: texto, mar y programas se leen de corrido.
+
 ### El cierre
-Hablemos termina con una ventana sobre el cabo de la misma maqueta del hero, reusada con `<use>` (no se dibuja dos veces) y apagada en el papel hacia el texto, arriba y abajo; el haz de la baliza es el mismo del hero y gira a su ritmo. La página abre mirando la costa y cierra con la misma luz encendida.
+Hablemos termina con una ventana sobre el cabo de la misma maqueta del hero, reusada con `<use>` (no se dibuja dos veces) y apagada en el papel hacia el texto, arriba y abajo; el haz de la baliza es el mismo del hero y gira a su ritmo, con la luz a la altura del título. El cabo no sube sobre los programas: con el albatros arriba, el texto de los programas quedaba pegado a su rayado. La página abre mirando la costa y cierra con la misma luz encendida.
 
 ### Movimiento
 - **Impresión al cargar** (una vez, ~3.5 s): la costa se traza, aparece el mar, se levanta el cabo con su relieve, se traza la ruta, la ciudad crece desde la plaza de la torre y al final aparecen las viñetas.
 - **Entrada de la letra:** el titular entra desde el primer cuadro; el resto (barra, coordenadas, bajada y botones) llega después del dibujo. Cada pieza baja 7 px y se asienta en 1.8 s, con una curva lenta y sin rebote. Si la persona hace scroll, toca o aprieta una tecla, todo aparece enseguida.
-- **Vida de la lámina:** la baliza gira su haz cada 12 s y destella cuando mira hacia quien mira; un barco cruza el cuadro y sale; dos camiones a lo sumo en la ruta; un avión aterriza y despega hacia el oeste; un satélite cruza en arco; olas sueltas van hacia la orilla.
+- **Entrada de las secciones de abajo** (`.aparece`, en `Base.astro`): una vez, al llegar a la pantalla, la letra de cada pieza baja 7 px y se asienta igual que en el hero; las que llegan juntas, una tras otra. En el índice y los programas, además, el filete se traza de izquierda a derecha. Sin JS o con movimiento reducido, todo visible desde el principio.
+- **Vida de la lámina:** la baliza gira su haz cada 12 s y destella cuando mira hacia quien mira; un barco cruza el cuadro y sale; dos camiones a lo sumo en la ruta; un avión aterriza y despega hacia el oeste; un satélite cruza en arco; olas sueltas, cortas, van hacia la orilla. En Desde la isla el albatros planea en eses desparejas a lo largo de la costa (sube al girar, baja rasante, dos aletazos por vuelta) y la cámara lo sigue: la orilla queda quieta y pasan la playa y el agua; todo se repite cada 16 s y corre solo mientras se ve.
 - **Movimiento reducido:** todo quieto desde el primer cuadro, en un buen momento (el avión en la pista, el haz sobre el mar).
 
 ### Named Rules

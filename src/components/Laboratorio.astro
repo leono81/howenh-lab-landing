@@ -78,31 +78,6 @@ const lineas = [
 </section>
 )}
 
-<script>
-  // la entrada del índice, una vez, cuando llega a la pantalla: cada filete se traza de izquierda a
-  // derecha como la costa del hero y la letra se asienta igual que en el hero (baja 7 px, sin rebote).
-  // Sin JS o con movimiento reducido no hay nada que esperar: todo está visible desde el principio.
-  const piezas = document.querySelectorAll<HTMLElement>('.laboratorio .aparece, .programas .aparece');
-  if (piezas.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    piezas.forEach((p) => p.classList.add('espera'));
-    const io = new IntersectionObserver(
-      (vistas) => {
-        // las que entran juntas van en orden, una detrás de otra
-        vistas
-          .filter((v) => v.isIntersecting)
-          .forEach((v, i) => {
-            const p = v.target as HTMLElement;
-            p.style.setProperty('--n', String(i));
-            p.classList.replace('espera', 'llega');
-            io.unobserve(p);
-          });
-      },
-      { rootMargin: '0px 0px -12% 0px' },
-    );
-    piezas.forEach((p) => io.observe(p));
-  }
-</script>
-
 <style>
   .laboratorio,
   .programas {
@@ -112,12 +87,14 @@ const lineas = [
     align-items: start;
   }
   /* los programas, al revés: la lista a la izquierda y el título a la derecha (en el HTML el título
-     va primero, para leerlo y para el teléfono) */
+     va primero, para leerlo y para el teléfono). Vienen enseguida del albatros de Desde la isla, que
+     ya deja su aire al apagarse: sin el aire entero de una sección, se leen de corrido. */
   .programas {
+    padding-top: clamp(32px, 3.5vw, 64px);
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    /* abajo viene Hablemos, cuyo cabo sube un poco sobre esta sección y del mismo lado que el título:
-       la letra va encima del cabo, que arriba ya se apaga solo. Sin fondo propio: un papel que
-       termina en el borde de la sección corta el dibujo con una recta. */
+    /* abajo viene Hablemos, con el cabo del mismo lado que el título: la letra va encima por si el
+       cabo se acerca, que arriba ya se apaga solo. Sin fondo propio: un papel que termina en el borde
+       de la sección corta el dibujo con una recta. */
     position: relative;
     z-index: 1;
   }
@@ -161,25 +138,13 @@ const lineas = [
     transform-origin: left;
   }
 
-  /* la entrada: antes de llegar a la pantalla, el filete sin trazar y la letra apenas arriba */
+  /* la entrada (.aparece, en Base): además, el filete se traza de izquierda a derecha como la costa
+     del hero, antes que la letra */
   .espera::before {
     transform: scaleX(0);
   }
-  .espera > * {
-    opacity: 0;
-    transform: translateY(-7px);
-  }
   .llega::before {
     transition: transform 1.2s cubic-bezier(0.16, 0.6, 0.2, 1) calc(var(--n) * 140ms);
-  }
-  .llega > * {
-    transition:
-      opacity 1.4s cubic-bezier(0.16, 0.6, 0.2, 1),
-      transform 1.6s cubic-bezier(0.16, 0.6, 0.2, 1);
-    transition-delay: calc(var(--n) * 140ms + 0.25s);
-  }
-  .llega > :nth-child(2) {
-    transition-delay: calc(var(--n) * 140ms + 0.4s);
   }
   dt {
     font-weight: 600;
