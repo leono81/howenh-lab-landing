@@ -393,7 +393,8 @@ const organizacion = {
     .pie .marca {
       width: 100%;
     }
-    .barra nav a:not(.cta) {
+    /* sin enlaces ni botón: la reunión ya está en el botón magenta del hero (uno por pantalla) */
+    .barra nav {
       display: none;
     }
     .marca {
@@ -404,11 +405,6 @@ const organizacion = {
     .logo {
       width: 38px;
       height: 18px;
-    }
-    .barra .cta {
-      padding: 8px 10px;
-      font-size: 11px;
-      white-space: nowrap;
     }
   }
 </style>

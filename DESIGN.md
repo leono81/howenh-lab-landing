@@ -154,7 +154,7 @@ El hero ocupa la pantalla entera (mínimo 680 px de alto). El texto vive arriba 
 
 La escala del dibujo es una sola unidad, `--u` (px por unidad de la maqueta; 100 unidades = 1 km): la da el ancho de la pantalla hasta donde deja el alto. Todo lo que se superpone al dibujo se ubica en esas mismas unidades, dentro del mismo plano.
 
-Cortes: a 900 px el hero se apila (texto arriba y, abajo, una ventana de la maqueta sobre el cabo); a 820 px la barra deja solo la marca y el botón de reunión, y el margen baja a 16 px. Ritmo: 12 px entre acciones, 30 px entre enlaces de la barra.
+Cortes: a 900 px el hero se apila (texto arriba y, abajo, una ventana de la maqueta sobre el cabo); a 820 px la barra deja solo la marca (la reunión queda en el botón magenta del hero) y el margen baja a 16 px. Hasta 900 px, Taiyin sale del hero: un cuadrado de 60 px abajo a la derecha que abre la barra encima. Ritmo: 12 px entre acciones, 30 px entre enlaces de la barra.
 
 ## Elevation & Depth
 
@@ -188,7 +188,7 @@ Tipográficos y rectos, como una etiqueta impresa.
 
 ### Navigation
 - **Barra:** arriba, sin fondo, con margen de 48 px; a la izquierda el logo (la montaña con la señal, en tinta) y la marca HOWENH LABS; a la derecha los enlaces en mono mayúscula y el botón "Agendar reunión" con borde de 1 px en tinta sobre papel.
-- **Teléfono:** quedan la marca, más chica, y el botón, sin enlaces.
+- **Teléfono:** queda solo la marca, más chica: el botón de reunión ya está en el hero.
 
 ### Coordenadas
 - Rótulo en Martian Mono 11 px, azul lavado, espaciado 0.12em: la volanta del titular y la forma de ubicar sin nombrar.

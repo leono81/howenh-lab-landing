@@ -207,8 +207,10 @@ for (const ev of ['wheel', 'touchmove', 'keydown'])
 // ---------- la hoja y el acople ----------
 
 let enHero = true;
+const telefono = matchMedia('(max-width: 900px)'); // el corte de Taiyin.astro: ahí ya vive abajo, en su cuadrado
+telefono.addEventListener('change', () => acoplar());
 function acoplar() {
-  const acoplada = !hoja.hidden && !enHero;
+  const acoplada = !hoja.hidden && !enHero && !telefono.matches;
   if (acoplada === raiz.classList.contains('acoplada')) return;
   lugar.style.height = acoplada ? `${lugar.offsetHeight}px` : ''; // el hero no cambia de alto: nada se corre
   raiz.classList.toggle('acoplada', acoplada);

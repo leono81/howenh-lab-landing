@@ -1,14 +1,24 @@
 ---
 // Taiyin en el hero (opción A del canvas, elegida el 2026-11-11; docs/taiyin.md): la barra para
 // preguntar, tres preguntas sugeridas y, debajo, la hoja con la respuesta. Cuando la página se va
-// del hero, la barra y la hoja quedan acopladas abajo. El JS se descarga recién cuando alguien se
-// acerca a la barra (el import() de abajo); sin JS, Taiyin no se muestra.
+// del hero, la barra y la hoja quedan acopladas abajo. En el teléfono (hasta 900 px, donde el hero se
+// apila) Taiyin no ocupa el hero: es un cuadrado abajo a la derecha que abre la barra encima.
+// El JS se descarga recién cuando alguien se acerca a la barra (el import() de abajo); sin JS,
+// Taiyin no se muestra.
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
 ---
 
 <noscript><style>.taiyin-lugar { display: none; }</style></noscript>
 <div class="taiyin-lugar">
-  <div class="taiyin">
+  <button type="button" class="taiyin-boton entra" style="--d: 4.9s" aria-expanded="false" aria-controls="taiyin">
+    <svg class="destello" width="20" height="20" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="1.6" fill="currentColor"></circle>
+      <path d="M11.5 8H15M10.5 10.5l2.5 2.5M8 11.5V15M5.5 10.5L3 13M4.5 8H1M5.5 5.5L3 3M8 4.5V1M10.5 5.5L13 3" stroke="currentColor" stroke-width="0.9" fill="none"></path>
+    </svg>
+    <span class="taiyin-x" aria-hidden="true">×</span>
+    Taiyin
+  </button>
+  <div class="taiyin" id="taiyin">
     <form class="taiyin-barra" autocomplete="off">
       <svg class="destello" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
         <circle cx="8" cy="8" r="1.6" fill="currentColor"></circle>
@@ -62,6 +72,11 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
       const b = (e.target as Element).closest<HTMLElement>('[data-pregunta]');
       if (b) (await cargar()).preguntar(b.dataset.pregunta!);
     });
+    // el cuadrado del teléfono abre y cierra la barra; Escape la cierra y vuelve al cuadrado
+    const boton = raiz.previousElementSibling as HTMLButtonElement;
+    const abrir = (si: boolean) => boton.setAttribute('aria-expanded', String(si));
+    boton.addEventListener('click', () => abrir(boton.getAttribute('aria-expanded') === 'false'));
+    raiz.addEventListener('keydown', (e) => e.key === 'Escape' && (abrir(false), boton.focus())); // en la compu el cuadrado no se ve: no pasa nada
   }
 </script>
 
@@ -316,6 +331,86 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
   .taiyin.acoplada .taiyin-letra,
   .taiyin.acoplada .taiyin-hoja:has(.taiyin-paso:not([hidden])) .taiyin-texto {
     display: none;
+  }
+  .taiyin-boton {
+    display: none;
+  }
+  /* teléfono y tablet (el corte del hero apilado): Taiyin sale del hero y queda en un cuadrado
+     abajo a la derecha; la barra, las sugerencias y la hoja se abren encima, en un papel aparte */
+  @media (max-width: 900px) {
+    .taiyin-lugar {
+      margin: 0;
+    }
+    /* la entrada del hero mueve al padre y un padre movido arrastra lo fijo: el cuadrado entra solo */
+    :global(.entra:has(> .taiyin-lugar)) {
+      animation: none;
+    }
+    .taiyin-boton {
+      position: fixed;
+      z-index: 30;
+      right: 16px;
+      bottom: 16px;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      background: var(--papel);
+      border: 1px solid var(--tinta);
+      color: var(--tinta);
+      font: 500 9px var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .taiyin-boton:focus-visible {
+      outline: 2px solid var(--tinta);
+      outline-offset: 3px;
+    }
+    .taiyin-x {
+      font: 400 20px/20px var(--mono);
+    }
+    .taiyin-boton[aria-expanded='false'] .taiyin-x,
+    .taiyin-boton[aria-expanded='true'] .destello {
+      display: none;
+    }
+    .taiyin-boton[aria-expanded='false'] + .taiyin {
+      display: none;
+    }
+    .taiyin {
+      position: fixed;
+      z-index: 30;
+      left: 16px;
+      right: 16px;
+      bottom: 84px;
+      max-width: 520px;
+      margin-left: auto;
+      background: var(--papel);
+      border: 1px solid var(--tinta); /* sin sombra (The Flat Paper Rule): el borde lleno lo separa */
+    }
+    /* la barra va a ras del papel, con todo el ancho: a 360 px la pregunta entra entera */
+    .taiyin-barra {
+      margin: -1px -1px 0;
+      gap: 8px;
+      padding-left: 12px;
+    }
+    .taiyin-sugerencias {
+      margin: 12px 12px 0;
+    }
+    .taiyin-aviso {
+      margin: 8px 12px 10px 6px;
+    }
+    .taiyin-hoja {
+      margin: 0;
+      border: 0;
+      max-height: min(42vh, 360px);
+    }
+    /* mientras corre un recorrido se ve solo su paso: la página queda a la vista */
+    .taiyin-hoja:has(.taiyin-paso:not([hidden])) .taiyin-texto {
+      display: none;
+    }
   }
   /* teléfono: el nombre queda para el lector de pantalla y la pregunta tiene lugar */
   @media (max-width: 520px) {

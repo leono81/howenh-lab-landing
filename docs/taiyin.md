@@ -5,7 +5,7 @@ Especificación del 2026-11-11. Las decisiones de Leono están marcadas con **(L
 ## Dónde está
 
 - `taiyin/`: el servicio. `server.mjs` (HTTP, SSE y el bucle con el modelo), `reglas.mjs` (tools, validación, filtro y límite, con `reglas.test.mjs`), `instrucciones.md` y `conocimiento.md` (el system prompt), `redteam.mjs`, `falso.mjs` (un Taiyin de mentira para ver la interfaz sin API key) y su `Dockerfile`.
-- `src/components/Taiyin.astro`: la barra, las sugerencias y la hoja, en el hero. `src/scripts/taiyin.ts`: lo que se descarga al acercarse a la barra.
+- `src/components/Taiyin.astro`: la barra, las sugerencias y la hoja, en el hero; hasta 900 px, un cuadrado abajo a la derecha que las abre encima. `src/scripts/taiyin.ts`: lo que se descarga al acercarse a la barra.
 - Penon, Facturación y Productos escuchan el evento `taiyin` (detail `penon`, `fijar` o `kenos`).
 
 ## Cómo se prueba
