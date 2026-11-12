@@ -27,6 +27,9 @@ const azar = () => (semilla = (semilla * 16807) % 2147483647) / 2147483647;
 // linterna destella.
 const [bx, by] = m.lugares.baliza;
 const luz = { x: bx, y: by - 10.2 * 2.1 };
+// en el teléfono, con el scroll, la ventana va de la baliza a la Torre de Agua (en unidades de la maqueta)
+const [tx, ty] = m.lugares.torre;
+const paseo = `--paseo-x: ${f1(bx - tx)}; --paseo-y: ${f1(by - ty)}`;
 const VUELTA = 12, FASE = 3.6 - (190 / 360) * VUELTA; // a los 3,6 s el haz ya asoma sobre el mar
 const R = 620;
 const cuna = (abre: number, r0: number, r1: number) => {
@@ -219,7 +222,7 @@ const olas = Array.from({ length: 34 }, () => {
     <div class="entra" style="--d: 4.9s"><Taiyin /></div>
   </div>
   <div class="ventana">
-    <div class="plano">
+    <div class="plano" style={paseo}>
       <div role="img" aria-label="Maqueta grabada de la costa norte de Río Grande, Tierra del Fuego, vista desde el mar: adelante la ciudad con la Torre de Agua junto a la desembocadura del río Grande; detrás el aeropuerto, la Ruta 3 y la Misión Salesiana; al fondo, el Cabo Domingo con su baliza encendida sobre el acantilado. Por el mar pasa un barco, por la ruta llegan camiones a la ciudad, un avión aterriza y despega y un satélite cruza el cielo.">
         <Maqueta />
       </div>
@@ -535,8 +538,11 @@ const olas = Array.from({ length: 34 }, () => {
     outline-offset: 3px;
   }
 
-  /* pantallas angostas: el texto arriba; abajo, una ventana de la maqueta sobre el cabo,
-     con la baliza, la luz y la Misión. El avión y el satélite quedan afuera: no se muestran. */
+  /* pantallas angostas: el texto arriba; abajo, una ventana de la maqueta sobre el cabo, con la
+     baliza y su luz. Al bajar la página la maqueta se corre por la costa (la Misión, el
+     aeropuerto) hasta la Torre de Agua (la primera del canvas https://claude.ai/artifact/7ZU4eEx85ctjRm3LZqSMMi,
+     elegida el 2026-11-12). El avión y el satélite
+     no se muestran. */
   @media (max-width: 900px) {
     .hero-a {
       --u: min(100vw / 460, 1.25px);
@@ -583,6 +589,27 @@ const olas = Array.from({ length: 34 }, () => {
     .vuelos,
     .satelite {
       display: none;
+    }
+  }
+  /* el paseo va atado al scroll de la página: sin JS, y en el compositor. Solo donde hay
+     animation-timeline: sin eso la animación terminaría al instante y la ventana quedaría en la
+     ciudad. Sin soporte (Firefox, por ahora) o con movimiento reducido, queda en el faro. */
+  @supports (animation-timeline: scroll()) {
+    @media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+      .plano {
+        animation: paseo linear both;
+      }
+      /* en otra regla a propósito: el minificador junta animation-timeline dentro del shorthand
+         `animation`, Chrome no lo acepta ahí y descarta la declaración entera */
+      .ventana .plano {
+        animation-timeline: scroll(root);
+        animation-range: 0 55svh; /* llega a la torre mientras la ventana todavía se ve entera */
+      }
+    }
+  }
+  @keyframes paseo {
+    to {
+      transform: translate(calc(var(--u) * var(--paseo-x)), calc(var(--u) * var(--paseo-y)));
     }
   }
 </style>
