@@ -14,6 +14,8 @@ const VUELTAS = 4; // llamadas al modelo por pregunta (texto → tool → texto)
 
 const client = new Anthropic();
 const pasa = limitador(+(process.env.TAIYIN_LIMITE ?? 20), 10 * 60_000); // preguntas cada 10 minutos por IP
+// tope de todos juntos, por si alguien reparte el abuso entre muchas IP; el tope de gasto de la Console va aparte
+const pasaTotal = limitador(+(process.env.TAIYIN_TOPE_HORA ?? 600), 60 * 60_000);
 // lo único que se registra: cantidades, sin contenido (GET /salud)
 const cuentas = {
   desde: new Date().toISOString(),
@@ -23,6 +25,9 @@ const cuentas = {
   cortes: {},
   tokens: { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
 };
+// una línea por hora en el log de Coolify, si hubo pedidos
+let vistos = 0;
+setInterval(() => cuentas.pedidos !== vistos && ((vistos = cuentas.pedidos), console.log('cuentas', JSON.stringify(cuentas))), 60 * 60_000).unref();
 
 const leer = (req, tope) =>
   new Promise((ok, mal) => {
@@ -33,9 +38,16 @@ const leer = (req, tope) =>
     req.on('error', mal);
   });
 
-// ponytail: detrás de un solo proxy (Traefik de Coolify), la IP real es la última de X-Forwarded-For
-// (la que agregó el proxy; las de antes las puede inventar el cliente). Con Cloudflare adelante, usar CF-Connecting-IP.
-const ipDe = (req) => (req.headers['x-forwarded-for']?.split(',').at(-1) ?? req.socket.remoteAddress ?? '').trim();
+// Detrás de un solo proxy (Traefik de Coolify, en la red interna de Docker), la IP real es la última
+// de X-Forwarded-For: la que agregó el proxy; las de antes las puede inventar el cliente. Si el pedido
+// no viene de una dirección privada, no pasó por el proxy y el encabezado no vale: se usa el socket.
+// ponytail: con Cloudflare adelante, usar CF-Connecting-IP.
+const PRIVADA = /^(?:::ffff:)?(?:10\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168\.|127\.)|^::1$/;
+const ipDe = (req) => {
+  const socket = req.socket.remoteAddress ?? '';
+  const reenviada = req.headers['x-forwarded-for']?.split(',').at(-1)?.trim();
+  return PRIVADA.test(socket) && reenviada ? reenviada : socket;
+};
 
 async function conversar(historial, enviar, signal) {
   const messages = historial.map((m) => ({ role: m.rol === 'vos' ? 'user' : 'assistant', content: m.texto }));
@@ -113,7 +125,8 @@ http
     const cerrar = (codigo) => res.writeHead(codigo).end();
     if (permitido) res.setHeader('Access-Control-Allow-Origin', origen), res.setHeader('Vary', 'Origin');
 
-    if (req.method === 'GET' && req.url === '/salud') return res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(cuentas));
+    // /salud dice solo que está vivo: las cuentas (qué reglas del filtro saltan, cuánto se usa) van al log
+    if (req.method === 'GET' && req.url === '/salud') return res.writeHead(200).end('ok');
     if (req.method === 'OPTIONS') {
       if (!permitido) return cerrar(403);
       res.setHeader('Access-Control-Allow-Methods', 'POST');
@@ -124,7 +137,7 @@ http
     if (req.method !== 'POST' || req.url !== '/chat') return cerrar(404);
     if (!permitido) return cerrar(403); // frena a otros sitios, no a un script: para eso están el límite y el tope de gasto
     if (process.env.TAIYIN_APAGADO === '1') return cerrar(503);
-    if (!pasa(ipDe(req))) return cerrar(429);
+    if (!pasa(ipDe(req)) || !pasaTotal('todos')) return cerrar(429);
 
     let mensajes;
     try {

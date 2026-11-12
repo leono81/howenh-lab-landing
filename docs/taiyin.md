@@ -65,7 +65,8 @@ En la página, cada componente escucha un `CustomEvent('taiyin', { detail })`. P
 ## Protección
 
 1. **Tope de gasto**: workspace «taiyin» en la Console con límite mensual (lo configura Leono).
-2. Límite por IP en memoria: 20 mensajes cada 10 minutos. Se pierde al reiniciar, y alcanza para un contenedor.
+2. Límite por IP en memoria: 20 mensajes cada 10 minutos. Se pierde al reiniciar, y alcanza para un contenedor. La IP sale de X-Forwarded-For solo si el pedido llega desde la red interna (el proxy de Coolify); si no, del socket. Además, un tope global de 600 preguntas por hora (`TAIYIN_TOPE_HORA`).
+   `/salud` responde solo «ok»; las cuentas (pedidos, cortes del filtro, tokens) van al log de Coolify una vez por hora.
 3. 8 turnos por conversación, 500 caracteres por mensaje y 600 tokens por respuesta.
 4. **Interruptor**: con `TAIYIN_APAGADO=1` el servidor responde 503 y la página esconde a Taiyin, sin redeploy de la landing.
 5. Turnstile queda para después, si aparece abuso.
