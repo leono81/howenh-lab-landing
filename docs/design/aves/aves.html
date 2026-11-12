@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desde la isla · aves</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600&family=EB+Garamond:ital@0;1&family=Martian+Mono:wght@400;500&display=swap">
+<style>
+  :root { --papel: #f6f7fb; --tinta: #1f3a8f; --suave: #5b6fae; --acento: #b02a78; --mar: #d6e4f1; --tierra: #e9eaee; --margen: 48px; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papel); color: var(--tinta); font-family: Archivo, sans-serif; overflow-x: hidden; }
+  .seccion { padding: 72px var(--margen) 40px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: clamp(40px, 6vw, 112px); row-gap: 8px; align-items: start; }
+  h2 { margin: 0; font: 400 clamp(36px, 4.2vw, 64px) / 1.02 'EB Garamond', serif; letter-spacing: -0.01em; }
+  .dicho { margin: 0 0 24px; font: 400 clamp(24px, 2.4vw, 36px) / 1.22 'EB Garamond', serif; max-width: 24em; }
+  .cuerpo p:last-child { margin: 0; font-size: clamp(16px, 1.25vw, 18px); line-height: 1.55; max-width: 52ch; }
+  .escena { grid-column: 1 / -1; position: relative; margin: 0 calc(-1 * var(--margen)); height: 340px; }
+  .escena svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+  /* el apagado: papel encima hacia los cuatro bordes, sin rectas */
+  .escena::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to right, var(--papel), rgb(246 247 251 / 0) 14%, rgb(246 247 251 / 0) 86%, var(--papel)),
+                linear-gradient(to bottom, var(--papel), rgb(246 247 251 / 0) 22%, rgb(246 247 251 / 0) 78%, var(--papel)); }
+  @media (max-width: 600px) {
+    :root { --margen: 16px; }
+    .seccion { grid-template-columns: 1fr; row-gap: 20px; padding-top: 64px; }
+    .escena { height: 260px; }
+  }
+</style>
+</head>
+<body>
+<section class="seccion">
+  <h2>Desde la isla</h2>
+  <div class="cuerpo">
+    <p class="dicho">Howenh Labs trabaja sobre la costa atlántica de Tierra del Fuego. Hacemos software para el lugar donde vivimos y, desde acá, para el resto del país.</p>
+    <p>Esta tierra tenía nombre mucho antes de llamarse Tierra del Fuego. Ahí tiene raíz nuestra identidad, y de ahí vienen nuestros nombres: de las lenguas de sus pueblos originarios, las primeras voces de la isla.</p>
+  </div>
+  <div class="escena"><svg aria-hidden="true"></svg></div>
+</section>
+<script src="aves.js"></script>
+</body>
+</html>
