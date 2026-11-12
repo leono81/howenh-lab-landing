@@ -6,6 +6,7 @@
 // satélite y el mar. Con animaciones CSS sobre divs encima de la maqueta enmascarada, Chrome la
 // re-rasteriza en cada cuadro y en pantallas de 2x la maqueta desaparece; con SMIL no pasa.
 import Maqueta from './Maqueta.astro';
+import Taiyin from './Taiyin.astro';
 import m from '../data/maqueta.json';
 import { iso, pol, lin, rayas, type P } from '../data/iso';
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
@@ -215,6 +216,7 @@ const olas = Array.from({ length: 34 }, () => {
       <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar una reunión →</a>
       <a class="secundario" href="#laboratorio">Conocer el laboratorio ↓</a>
     </div>
+    <div class="entra" style="--d: 4.9s"><Taiyin /></div>
   </div>
   <div class="ventana">
     <div class="plano">

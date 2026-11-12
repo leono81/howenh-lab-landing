@@ -341,6 +341,16 @@ const quieto = enU(focos[1].u);
       if (s >= 3.9) arrancar();
       else parar();
     };
+    // Taiyin (src/scripts/taiyin.ts) pide una altura de la pila: baja hasta donde s vale eso
+    addEventListener('taiyin', (e) => {
+      const d = (e as CustomEvent).detail;
+      if (typeof d?.penon !== 'number') return;
+      const antes = angosto.matches ? texto.offsetHeight + 24 : 0;
+      const alto = (angosto.matches ? lamina : panel).offsetHeight;
+      const arriba = pista.getBoundingClientRect().top + scrollY;
+      scrollTo({ top: arriba + antes + (d.penon / 4.4) * (pista.offsetHeight - antes - alto), behavior: 'smooth' });
+      d.hecho = true;
+    });
     pista.classList.add('con-scroll');
     addEventListener('scroll', () => (pedido ||= requestAnimationFrame(pintar)), { passive: true });
     addEventListener('resize', () => (pedido ||= requestAnimationFrame(pintar)));

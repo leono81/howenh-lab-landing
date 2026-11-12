@@ -437,6 +437,15 @@ const rayasMesa = Array.from({ length: 29 }, (_, i) => `M${(i + 1) * 2} 0v3`).jo
       f.addEventListener('focusin', fijar(f.dataset.producto!));
       f.addEventListener('focusout', fijar(null));
     });
+    // Taiyin (src/scripts/taiyin.ts) fija un producto, como si la persona pasara por su fila
+    addEventListener('taiyin', (e) => {
+      const d = (e as CustomEvent).detail;
+      if (!(d?.fijar in FIN)) return;
+      fijo = d.fijar;
+      sec.dataset.fijo = d.fijar;
+      if (!cuadro) pintar();
+      d.hecho = true;
+    });
     new IntersectionObserver(([v]) => {
       visible = v.isIntersecting;
       if (visible && !cuadro) pintar();

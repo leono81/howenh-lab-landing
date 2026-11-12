@@ -1,0 +1,358 @@
+---
+// Taiyin en el hero (opción A del canvas, elegida el 2026-11-11; docs/taiyin.md): la barra para
+// preguntar, tres preguntas sugeridas y, debajo, la hoja con la respuesta. Cuando la página se va
+// del hero, la barra y la hoja quedan acopladas abajo. El JS se descarga recién cuando alguien se
+// acerca a la barra (el import() de abajo); sin JS, Taiyin no se muestra.
+const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
+---
+
+<noscript><style>.taiyin-lugar { display: none; }</style></noscript>
+<div class="taiyin-lugar">
+  <div class="taiyin">
+    <form class="taiyin-barra" autocomplete="off">
+      <svg class="destello" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+        <circle cx="8" cy="8" r="1.6" fill="currentColor"></circle>
+        <path d="M11.5 8H15M10.5 10.5l2.5 2.5M8 11.5V15M5.5 10.5L3 13M4.5 8H1M5.5 5.5L3 3M8 4.5V1M10.5 5.5L13 3" stroke="currentColor" stroke-width="0.9" fill="none"></path>
+      </svg>
+      <label for="taiyin-campo">Taiyin</label>
+      <input id="taiyin-campo" name="pregunta" type="text" maxlength="500" placeholder="Preguntale sobre el laboratorio…" aria-describedby="taiyin-aviso" enterkeyhint="send" />
+      <button type="submit" aria-label="Preguntar">↵</button>
+    </form>
+    <div class="taiyin-sugerencias">
+      <button type="button" data-pregunta="¿Qué es Penon?">¿Qué es Penon?</button>
+      <button type="button" data-pregunta="Mostrame el laboratorio en un minuto">El laboratorio en un minuto</button>
+      <button type="button" data-pregunta="Quiero una reunión con el equipo">Quiero una reunión</button>
+    </div>
+    <p class="taiyin-aviso" id="taiyin-aviso">Es una IA y puede equivocarse · No guardamos la conversación</p>
+
+    <section class="taiyin-hoja" aria-label="Respuesta de Taiyin" hidden>
+      <div class="taiyin-cabeza">
+        <p class="taiyin-pregunta"></p>
+        <button type="button" class="taiyin-nueva">Nueva</button>
+        <button type="button" class="taiyin-cerrar" aria-label="Cerrar">×</button>
+      </div>
+      <p class="taiyin-texto" aria-live="polite"></p>
+      <p class="taiyin-paso" hidden><span class="taiyin-cuenta"></span><span class="taiyin-paso-texto"></span></p>
+      <form class="taiyin-ficha" hidden>
+        <label>Organización <input name="organizacion" maxlength="80" /></label>
+        <label>Interés <input name="interes" maxlength="80" /></label>
+        <label>Nombre <input name="nombre" maxlength="80" placeholder="completalo vos" /></label>
+        <div class="taiyin-ficha-acciones">
+          <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar →</a>
+          <a class="secundario taiyin-correo" href="mailto:contacto@howenh-labs.com">Por correo</a>
+        </div>
+      </form>
+      <p class="taiyin-letra">La conversación la procesa Anthropic y no se guarda. No escribas datos personales. Vale lo publicado en la página.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+  // nada de Taiyin se descarga hasta que alguien se acerca a la barra
+  const raiz = document.querySelector<HTMLElement>('.taiyin');
+  if (raiz) {
+    let modulo: Promise<typeof import('../scripts/taiyin')> | undefined;
+    const cargar = () => (modulo ??= import('../scripts/taiyin'));
+    for (const ev of ['focusin', 'pointerenter', 'touchstart']) raiz.addEventListener(ev, cargar, { once: true, passive: true });
+    raiz.querySelector('.taiyin-barra')!.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      (await cargar()).preguntar(raiz.querySelector<HTMLInputElement>('#taiyin-campo')!.value);
+    });
+    raiz.querySelector('.taiyin-sugerencias')!.addEventListener('click', async (e) => {
+      const b = (e.target as Element).closest<HTMLElement>('[data-pregunta]');
+      if (b) (await cargar()).preguntar(b.dataset.pregunta!);
+    });
+  }
+</script>
+
+<style>
+  .taiyin-lugar {
+    margin-top: 20px;
+    max-width: 560px;
+  }
+  .taiyin {
+    display: flex;
+    flex-direction: column;
+    color: var(--tinta);
+  }
+  .taiyin-barra {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 48px;
+    padding: 0 6px 0 14px;
+    background: var(--papel);
+    border: 1px solid var(--tinta);
+  }
+  .destello {
+    flex: none;
+    color: var(--acento);
+  }
+  .taiyin[aria-busy] .destello {
+    animation: piensa 1.2s ease-in-out infinite;
+  }
+  @keyframes piensa {
+    50% {
+      transform: scale(1.45) rotate(45deg);
+    }
+  }
+  .taiyin-barra label {
+    font: 500 11px var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-right: 12px;
+    border-right: 1px solid var(--tinta-suave);
+  }
+  .taiyin-barra input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    background: none;
+    color: var(--tinta);
+    font: 400 16px var(--sans); /* 16 px: el teléfono no hace zoom al enfocarla */
+  }
+  .taiyin-barra input::placeholder {
+    color: var(--tinta-suave);
+    opacity: 1;
+  }
+  .taiyin-barra input:focus {
+    outline: none;
+  }
+  .taiyin-barra:focus-within {
+    outline: 2px solid var(--tinta);
+    outline-offset: 3px;
+  }
+  .taiyin button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .taiyin-barra button {
+    width: 44px;
+    height: 44px;
+    font: 400 14px var(--mono);
+    color: var(--tinta-suave);
+  }
+  .taiyin-sugerencias {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .taiyin-sugerencias button {
+    padding: 8px 10px;
+    border: 1px solid var(--tinta-suave);
+    background: var(--papel);
+    font: 400 10px/1.2 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .taiyin-sugerencias button:hover {
+    border-color: var(--acento);
+    color: var(--acento);
+  }
+  .taiyin-sugerencias button:focus-visible,
+  .taiyin-cabeza button:focus-visible {
+    outline: 2px solid var(--tinta);
+    outline-offset: 2px;
+  }
+  .taiyin-aviso {
+    align-self: flex-start;
+    margin: 8px 0 0 -6px;
+    padding: 2px 6px;
+    background: var(--papel); /* pasa por encima del dibujo de la ciudad */
+    font: 400 10px/1.4 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+  }
+  /* con una conversación abierta, la hoja ocupa el lugar de las sugerencias */
+  .taiyin.abierta .taiyin-sugerencias,
+  .taiyin.abierta .taiyin-aviso {
+    display: none;
+  }
+
+  .taiyin-hoja {
+    margin-top: -1px;
+    max-height: min(46vh, 440px);
+    overflow-y: auto;
+    padding: 14px 16px 12px;
+    background: var(--papel);
+    border: 1px solid var(--tinta-suave);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .taiyin-hoja[hidden] {
+    display: none;
+  }
+  .taiyin-cabeza {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: -8px -8px -4px 0;
+  }
+  .taiyin-pregunta {
+    flex: 1;
+    font-size: 14px;
+    color: var(--tinta-suave);
+  }
+  .taiyin-cabeza button {
+    min-width: 40px;
+    min-height: 40px;
+    font: 400 10px var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+  }
+  .taiyin-cabeza .taiyin-cerrar {
+    font-size: 18px;
+  }
+  .taiyin-texto {
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+  .taiyin-texto:empty {
+    display: none;
+  }
+  .taiyin-paso {
+    display: grid;
+    gap: 4px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .taiyin-paso[hidden] {
+    display: none;
+  }
+  .taiyin-cuenta {
+    font: 400 10px var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--acento);
+  }
+  .taiyin-ficha {
+    border: 1px solid var(--tinta);
+    padding: 4px 12px 12px;
+  }
+  .taiyin-ficha[hidden] {
+    display: none;
+  }
+  .taiyin-ficha label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--aguada-mar);
+    font: 400 9px var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+  }
+  .taiyin-ficha input {
+    flex: 1;
+    min-width: 0;
+    height: 36px;
+    border: 0;
+    background: none;
+    text-align: right;
+    font: 400 16px var(--sans);
+    color: var(--tinta);
+  }
+  .taiyin-ficha input::placeholder {
+    color: var(--tinta-suave);
+    opacity: 1;
+  }
+  .taiyin-ficha-acciones {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .taiyin-ficha-acciones a {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+  }
+  .taiyin-ficha-acciones .primario {
+    background: var(--accion);
+    color: var(--papel);
+  }
+  .taiyin-ficha-acciones .secundario {
+    border: 1px solid var(--tinta-suave);
+    color: var(--tinta);
+  }
+  .taiyin-letra {
+    padding-top: 8px;
+    border-top: 1px solid var(--aguada-mar);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--tinta-suave);
+  }
+
+  /* fuera del hero: la conversación queda abajo, con la barra al pie */
+  .taiyin.acoplada {
+    position: fixed;
+    z-index: 30;
+    left: 50%;
+    bottom: 16px;
+    width: min(720px, calc(100vw - 32px));
+    transform: translateX(-50%);
+    flex-direction: column-reverse;
+  }
+  .taiyin.acoplada .taiyin-hoja {
+    margin: 0 0 -1px;
+    max-height: min(34vh, 300px);
+  }
+  /* abajo, lo justo para no tapar lo que se muestra: el aviso ya se leyó en el hero y, mientras
+     corre un recorrido, se ve solo su paso */
+  .taiyin.acoplada .taiyin-letra,
+  .taiyin.acoplada .taiyin-hoja:has(.taiyin-paso:not([hidden])) .taiyin-texto {
+    display: none;
+  }
+  /* teléfono: el nombre queda para el lector de pantalla y la pregunta tiene lugar */
+  @media (max-width: 520px) {
+    .taiyin-barra label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+  }
+
+  /* la luz de carta sobre lo que Taiyin muestra (la pone src/scripts/taiyin.ts en el body) */
+  :global(.taiyin-luz) {
+    position: fixed;
+    z-index: 20;
+    pointer-events: none;
+    outline: 1px solid var(--acento);
+    outline-offset: 6px;
+    animation: luz 0.5s ease-out;
+  }
+  :global(.taiyin-luz svg) {
+    position: absolute;
+    left: -17px;
+    top: -17px;
+    color: var(--acento);
+  }
+  @keyframes luz {
+    from {
+      opacity: 0;
+      outline-offset: 16px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .taiyin[aria-busy] .destello,
+    :global(.taiyin-luz) {
+      animation: none;
+    }
+  }
+</style>

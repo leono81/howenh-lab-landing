@@ -40,6 +40,7 @@ Orden en `src/pages/index.astro`: Hero → Laboratorio → Proyectos (Penon + Es
 
 ## Pendiente
 **Lo que falta, en orden** (al 2026-11-11, con el sitio ya publicado):
+- **Taiyin** (el agente, `docs/taiyin.md`): hecho y con red-team 54/54. Falta levantar el servicio `taiyin/` en Coolify (`taiyin.howenh-labs.com`, variable `ANTHROPIC_API_KEY`) **antes** de redeployar la landing: si no, la barra del hero contesta «está descansando».
 - Probar en iPhone (Safari: el cierre usa `<use>` con SMIL) y el link en WhatsApp (imagen para compartir).
 - Search Console: cargar `https://howenh-labs.com/sitemap.xml`; pasar la página por la prueba de resultados enriquecidos.
 - Verificar compresión en producción: `curl -sI -H 'Accept-Encoding: gzip' https://howenh-labs.com | grep -i content-encoding`.

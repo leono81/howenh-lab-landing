@@ -232,6 +232,14 @@ const horas = Array.from({ length: HORAS }, (_, h) => ({ t: `${String(PRIMERA_HO
         reloj = window.setTimeout(() => mostrar((i + 1) % actos.length), +actos[i].dataset.largo! * 1000);
       };
       kenos.classList.add('al-ritmo');
+      // Taiyin (src/scripts/taiyin.ts) pide un acto: se muestra ese y la ronda sigue desde ahí
+      addEventListener('taiyin', (e) => {
+        const d = (e as CustomEvent).detail;
+        if (typeof d?.kenos !== 'number' || !actos[d.kenos]) return;
+        clearTimeout(reloj);
+        mostrar(d.kenos);
+        d.hecho = true;
+      });
       new IntersectionObserver(
         ([v]) => {
           clearTimeout(reloj);

@@ -9,3 +9,7 @@ flow/
 .claude/skills/
 .claude/settings.local.json
 .impeccable/mocks/
+
+# Taiyin
+.env
+taiyin/redteam-*.md
