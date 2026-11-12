@@ -1,8 +1,10 @@
 ---
 // Laboratorio: el índice. Las cuatro líneas de trabajo, cada una con el enlace a su prueba más abajo.
-// Después, los programas que eligieron a Howenh (canvas «Programas en la landing», D1, 2026-11-12),
-// armados igual que el índice pero al revés: el título a la derecha. Anthropic va en texto (su logo
-// pide aprobación previa); ElevenLabs con su logo oficial en negro, como da su guía de marca.
+// Con parte="programas" dibuja en cambio los programas que eligieron a Howenh (canvas «Programas en la
+// landing», D1, 2026-11-12), que van al final, antes de Hablemos: armados igual que el índice (comparten
+// estilo y entrada) pero al revés, con el título a la derecha. Anthropic va en texto (su logo pide
+// aprobación previa); ElevenLabs con su logo oficial en negro, como da su guía de marca.
+const { parte = 'indice' } = Astro.props as { parte?: 'indice' | 'programas' };
 const lineas = [
   {
     titulo: 'Inteligencia artificial e ingeniería',
@@ -26,6 +28,7 @@ const lineas = [
   },
 ];
 ---
+{parte === 'indice' && (
 <section class="seccion laboratorio" id="laboratorio" aria-labelledby="lab-titulo">
   <div class="cabeza aparece">
     <h2 id="lab-titulo">Qué hace el laboratorio</h2>
@@ -51,7 +54,9 @@ const lineas = [
     }
   </dl>
 </section>
+)}
 
+{parte === 'programas' && (
 <section class="seccion programas" id="programas" aria-labelledby="prog-titulo">
   <div class="cabeza aparece">
     <h2 id="prog-titulo">Programas que nos eligieron</h2>
@@ -71,6 +76,7 @@ const lineas = [
     </div>
   </dl>
 </section>
+)}
 
 <script>
   // la entrada del índice, una vez, cuando llega a la pantalla: cada filete se traza de izquierda a
@@ -109,6 +115,11 @@ const lineas = [
      va primero, para leerlo y para el teléfono) */
   .programas {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    /* abajo viene Hablemos, cuyo cabo sube un poco sobre esta sección y del mismo lado que el título:
+       la letra va encima del cabo, que arriba ya se apaga solo. Sin fondo propio: un papel que
+       termina en el borde de la sección corta el dibujo con una recta. */
+    position: relative;
+    z-index: 1;
   }
   .programas .cabeza {
     grid-area: 1 / 2;
