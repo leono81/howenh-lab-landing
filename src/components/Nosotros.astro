@@ -5,15 +5,17 @@
 // 2026-11-11): quien es de acá la reconoce.
 // El cabo no se dibuja de nuevo: es la misma lámina del hero (#maqueta-lamina) y el mismo haz
 // (#haz-baliza), reusados con <use> y vistos por una ventana sobre la baliza.
-// Debajo de Desde la isla, a todo el ancho, un albatros de ceja negra planea a lo largo de la costa
+// Desde la Patagonia (antes «Desde la isla»; Leono, 2026-11-12). Debajo, a todo el ancho, un albatros de
+// ceja negra planea a lo largo de la costa
 // (canvas «Desde la isla: aves» y «el albatros en la lámina», opción A, 2026-11-12;
-// src/scripts/albatros.ts, que baja recién al acercarse). La franja es liviana y se mete apenas
-// debajo de la letra de arriba: texto y mar se leen de corrido, y después viene Hablemos.
+// src/scripts/albatros.ts, que baja recién al acercarse). La franja es liviana y sube hasta debajo del
+// título: la letra de la derecha queda en un claro de papel que el script deja en el dibujo, como el
+// del hero. Texto y mar se leen de corrido, y después viene Hablemos.
 const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
 const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la linterna a 154,59 del borde
 ---
 <section class="seccion nosotros" id="nosotros" aria-labelledby="nos-titulo">
-  <div class="aparece"><h2 id="nos-titulo">Desde la isla</h2></div>
+  <div class="aparece"><h2 id="nos-titulo">Desde la Patagonia</h2></div>
   <div class="cuerpo aparece">
     <p class="dicho">Howenh Labs trabaja sobre la costa atlántica de Tierra del Fuego. Hacemos software para el lugar donde vivimos y, desde acá, para el resto del país.</p>
     <p>Esta tierra tenía nombre mucho antes de llamarse Tierra del Fuego. Ahí tiene raíz nuestra identidad, y de ahí vienen nuestros nombres: de las lenguas de sus pueblos originarios, las primeras voces de la isla.</p>
@@ -26,6 +28,14 @@ const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la li
 </section>
 
 <script>
+  // la franja sube hasta debajo del título: lo que sube es lo que la letra de la derecha baja más que él
+  const seccion = document.querySelector<HTMLElement>('.nosotros')!;
+  const titulo = seccion.querySelector<HTMLElement>('#nos-titulo')!;
+  const cuerpo = seccion.querySelector<HTMLElement>('.cuerpo')!;
+  // con offset*, que no ven la entrada (la letra baja 7 px con transform)
+  const abajo = (e: HTMLElement) => e.offsetTop + e.offsetHeight;
+  new ResizeObserver(() => seccion.style.setProperty('--subida', `${Math.max(0, abajo(cuerpo) - abajo(titulo))}px`)).observe(cuerpo);
+
   // el albatros: su código baja recién cuando la sección se acerca a la pantalla
   const lienzo = document.querySelector<SVGSVGElement>('.mar svg');
   if (lienzo) {
@@ -33,7 +43,7 @@ const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la li
       ([e]) => {
         if (!e.isIntersecting) return;
         io.disconnect();
-        import('../scripts/albatros').then((m) => m.iniciar(lienzo));
+        import('../scripts/albatros').then((m) => m.iniciar(lienzo, cuerpo));
       },
       { rootMargin: '600px 0px' },
     );
@@ -82,12 +92,14 @@ const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la li
   }
   /* el mar del albatros: a sangre por los dos lados; se apaga en el papel con el contorno irregular
      que dibuja el script (papel pintado encima, sin rectas ni máscaras) */
+  /* sube hasta 24 px debajo del título (--subida: lo mide el script de arriba) y crece lo mismo hacia
+     arriba; la letra de la derecha queda encima, en el claro de papel */
   .mar {
     grid-column: 1 / -1;
     position: relative;
-    margin: -48px calc(-1 * var(--margen)) 0;
-    height: clamp(240px, 25vw, 350px);
-    z-index: -1; /* debajo de la letra, que llega hasta su apagado */
+    margin: calc(-8px - var(--subida, 40px)) calc(-1 * var(--margen)) 0;
+    height: calc(var(--subida, 40px) + clamp(240px, 25vw, 350px));
+    z-index: -1; /* debajo de la letra */
   }
   .mar svg {
     position: absolute;
@@ -158,6 +170,11 @@ const ventana = '1424.4 312.2 214.5 214.5'; // unidades de la maqueta, con la li
     }
     .contacto .texto {
       padding-top: 0;
+    }
+    /* en una columna la letra va toda arriba: la franja no sube, se mete apenas debajo de ella */
+    .mar {
+      margin-top: -48px;
+      height: clamp(240px, 25vw, 350px);
     }
     /* en el teléfono el ave ocupa casi todo el ancho: el nombre va abajo, a la derecha, lejos del
        título siguiente, que va a la izquierda */

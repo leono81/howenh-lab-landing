@@ -79,7 +79,7 @@ function estado(t: number) {
   return { lat: A * Math.sin(fi) + 0.32 * ola(t, 1, 0.2), z: 1.12 + 0.52 * Math.sin(fi - 1.0) + 0.07 * ola(t, 5, 0.3) };
 }
 
-export function iniciar(svg: SVGSVGElement) {
+export function iniciar(svg: SVGSVGElement, texto?: Element) {
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let W = 0, H = 0, k = 1, O: Pt = [0, 0];
   const pr = (p: V3): Pt => [O[0] + k * C * (p[0] + p[1]), O[1] + k * (S * (p[1] - p[0]) - p[2])];
@@ -100,32 +100,38 @@ export function iniciar(svg: SVGSVGElement) {
   let cuerpoG: { g: Element; cola: Element; contorno: Element; sombreado: Element; manto: Element; cejas: Element; pico: Element; culmen: Element };
   let DC = 4.5, uA = -20, uB = 20;
 
-  // el contorno del apagado: un rectángulo redondeado que ondula a lo largo de su borde (las ondas se
-  // miden en px, así ondula igual en lo largo y en lo corto), abierto del lado que va a sangre
-  function contorno(capa: number, franja: boolean) {
-    // la onda (A) no saca nunca el contorno de afuera hasta el borde del svg: ahí quedaría una recta
-    const fx = (franja ? 0.14 : 0.2) * W, fy = 0.24 * H, A = 0.22 * fy, a = (capa + 1) / NIEBLA.length;
-    const x0 = franja ? A + fx * a : -0.6 * W, x1 = franja ? 1.6 * W : W - A - fx * a, y0 = A + fy * a, y1 = H - A - fy * a;
-    const R = Math.min(fy * 1.6, (y1 - y0) / 2, (x1 - x0) / 2);
-    // el borde, recorrido por tramos: rectas y cuartos de círculo
-    const tramos: [number, (s: number) => [Pt, Pt]][] = [];
-    const recta = (p: Pt, q: Pt): [number, (s: number) => [Pt, Pt]] => {
-      const L = Math.hypot(q[0] - p[0], q[1] - p[1]);
-      return [L, (s) => [[p[0] + ((q[0] - p[0]) * s) / L, p[1] + ((q[1] - p[1]) * s) / L], [(q[1] - p[1]) / L, -(q[0] - p[0]) / L]]];
-    };
-    const arco = (c: Pt, a0: number): [number, (s: number) => [Pt, Pt]] => [(Math.PI / 2) * R, (s) => { const an = a0 + s / R; return [[c[0] + R * Math.cos(an), c[1] + R * Math.sin(an)], [Math.cos(an), Math.sin(an)]]; }];
-    tramos.push(recta([x0 + R, y0], [x1 - R, y0]), arco([x1 - R, y0 + R], -Math.PI / 2), recta([x1, y0 + R], [x1, y1 - R]), arco([x1 - R, y1 - R], 0));
-    tramos.push(recta([x1 - R, y1], [x0 + R, y1]), arco([x0 + R, y1 - R], Math.PI / 2), recta([x0, y1 - R], [x0, y0 + R]), arco([x0 + R, y0 + R], Math.PI));
-    const pts: Pt[] = [];
-    let s0 = 0;
-    for (const [L, en] of tramos) {
-      for (let s = 0; s < L; s += 10) {
-        const [p, n] = en(s), u = s0 + s;
-        const r = A * (0.55 * Math.sin(u / 70 + 1.3) + 0.3 * Math.sin(u / 27 + 0.4) + 0.15 * Math.sin(u / 11 + 2.2));
-        pts.push([p[0] + n[0] * r, p[1] + n[1] * r]);
-      }
-      s0 += L;
-    }
+  // el contorno del apagado: un polígono de esquinas redondeadas que ondula a lo largo de su borde (las
+  // ondas se miden en px, así ondula igual en lo largo y en lo corto), abierto a la derecha, que va a
+  // sangre. Si la franja sube al lado de la letra, arriba a la derecha queda un claro de papel para ella.
+  let fx = 0, fy = 0, fn = 0, A = 0, claro: Pt | null = null;
+  function contorno(capa: number) {
+    const a = (capa + 1) / NIEBLA.length;
+    const x0 = A + fx * a, y0 = A + fy * a, x1 = 1.6 * W, y1 = H - A - fy * a;
+    const v: Pt[] = claro
+      ? [[x0, y0], [claro[0] - A - fn * a, y0], [claro[0] - A - fn * a, claro[1] + A + fn * a], [x1, claro[1] + A + fn * a], [x1, y1], [x0, y1]]
+      : [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+    // el borde: rectas y, en cada esquina, una curva (cuadrática con la esquina de control)
+    const base: Pt[] = [];
+    const largo = (p: Pt, q: Pt) => Math.hypot(q[0] - p[0], q[1] - p[1]);
+    const hacia = (p: Pt, q: Pt, d: number): Pt => { const L = largo(p, q) || 1; return [p[0] + ((q[0] - p[0]) * d) / L, p[1] + ((q[1] - p[1]) * d) / L]; };
+    const esquinas = v.map((p, i) => {
+      const q0 = v[(i + v.length - 1) % v.length], q2 = v[(i + 1) % v.length];
+      const r = Math.min(fy * 1.6, largo(q0, p) / 2, largo(p, q2) / 2);
+      return [hacia(p, q0, r), p, hacia(p, q2, r)];
+    });
+    esquinas.forEach(([a0, p, a1], i) => {
+      const prev = esquinas[(i + esquinas.length - 1) % esquinas.length][2], L = largo(prev, a0);
+      for (let d = 0; d < L; d += 10) base.push(hacia(prev, a0, d));
+      for (let j = 0; j < 10; j++) { const t = j / 10; base.push([(1 - t) ** 2 * a0[0] + 2 * (1 - t) * t * p[0] + t * t * a1[0], (1 - t) ** 2 * a0[1] + 2 * (1 - t) * t * p[1] + t * t * a1[1]]); }
+    });
+    // la onda, hacia afuera (la onda A no saca nunca el contorno hasta el borde del svg ni hasta la letra)
+    let s = 0;
+    const pts = base.map((p, i) => {
+      const q0 = base[(i + base.length - 1) % base.length], q1 = base[(i + 1) % base.length], L = largo(q0, q1) || 1;
+      if (i) s += largo(base[i - 1], p);
+      const r = A * (0.55 * Math.sin(s / 70 + 1.3) + 0.3 * Math.sin(s / 27 + 0.4) + 0.15 * Math.sin(s / 11 + 2.2));
+      return [p[0] + ((q1[1] - q0[1]) / L) * r, p[1] - ((q1[0] - q0[0]) / L) * r] as Pt;
+    });
     return camino(pts, true);
   }
 
@@ -134,13 +140,20 @@ export function iniciar(svg: SVGSVGElement) {
     H = svg.clientHeight;
     if (!W || !H) return false;
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    // a lo ancho (debajo del texto, y en el teléfono) o al costado del texto
-    const franja = W / H > 1.4;
-    k = franja ? Math.min(H / 4.25, W / 6.5) : Math.min(H / 4.6, W / 6);
-    O = franja ? [W * 0.5, H * 0.8] : [W * 0.52, H * 0.86];
+    // la letra que sube al lado: su caja, en las medidas del svg (en el teléfono va arriba, no al lado)
+    const caja = svg.getBoundingClientRect(), t = texto?.getBoundingClientRect();
+    claro = t && t.bottom - caja.top > 0 && t.left - caja.left > 0.3 * W ? [t.left - caja.left - 40, t.bottom - caja.top + 12] : null;
+    const Hb = H - (claro ? claro[1] : 0); // la franja de abajo, la que se ve entera
+    fx = 0.14 * W;
+    fy = 0.2 * Hb;
+    fn = 0.22 * Hb;
+    A = 0.22 * fy;
+    k = Math.min(Hb / 4.25, W / 6.5);
+    // con la letra al lado, el ave planea abajo del título, a la izquierda, más arriba
+    O = claro ? [W * 0.3, claro[1] + 0.55 * Hb] : [W * 0.5, H * 0.8];
     // la costa a DC metros del rumbo: entra por la izquierda y sale por arriba
     // (en el teléfono, más adentro: el borde de arriba se apaga y se la comería)
-    DC = clamp((O[0] + 1.732 * O[1] - (franja ? (W < 600 ? 0.62 : 0.4) : 0.9) * W) / (1.732 * k), 2.8, 5.4);
+    DC = clamp((O[0] + 1.732 * O[1] - (claro ? 0.42 : W < 600 ? 0.62 : 0.4) * W) / (1.732 * k), 2.8, 5.4);
     uA = -O[0] / (k * C) - 14;
     uB = (W - O[0]) / (k * C) + 12;
     svg.replaceChildren();
@@ -169,7 +182,7 @@ export function iniciar(svg: SVGSVGElement) {
     const gNiebla = el('g', { fill: 'var(--papel)', 'fill-rule': 'evenodd', stroke: 'none' });
     // en anillos que no se pisan, cada uno con la opacidad de todas las capas que lo cubren: papel
     // sobre papel en capas redondea y deja el borde del svg un tono más oscuro que la página
-    const capas = [`M${-W} ${-H}H${2 * W}V${2 * H}H${-W}Z`, ...NIEBLA.map((_, i) => contorno(i, franja))];
+    const capas = [`M${-W} ${-H}H${2 * W}V${2 * H}H${-W}Z`, ...NIEBLA.map((_, i) => contorno(i))];
     NIEBLA.forEach((_, i) => {
       const alfa = 1 - NIEBLA.slice(i).reduce((m, x) => m * (1 - x), 1);
       el('path', { d: capas[i] + capas[i + 1], 'fill-opacity': String(Math.round(alfa * 100) / 100) }, gNiebla);
@@ -409,11 +422,11 @@ export function iniciar(svg: SVGSVGElement) {
     if (visto) arrancar();
     else corriendo = false;
   }).observe(svg);
-  // al cambiar el tamaño se vuelve a armar la escena con la nueva escala
-  let ancho = W;
+  // al cambiar el tamaño (el ancho, o el alto cuando cambia la letra de al lado) se vuelve a armar
+  let medida = `${W}x${H}`;
   new ResizeObserver(() => {
-    if (svg.clientWidth === ancho) return;
-    ancho = svg.clientWidth;
+    if (`${svg.clientWidth}x${svg.clientHeight}` === medida) return;
+    medida = `${svg.clientWidth}x${svg.clientHeight}`;
     listo = montar();
     if (listo) cuadro(ultimo);
     arrancar();
