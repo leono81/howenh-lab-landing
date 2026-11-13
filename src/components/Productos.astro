@@ -208,6 +208,9 @@ const horas = Array.from({ length: HORAS }, (_, h) => ({ t: `${String(PRIMERA_HO
   // Kenos, cuando llega a la pantalla: los cinco actos pasan de a uno (la agenda, la historia, las órdenes, la presentación y los números), cada uno con su
   // reloj SMIL desde cero y durante data-largo segundos; la lista de al lado se completa al mismo
   // ritmo y marca el acto que se ve. Fuera de pantalla todo queda en pausa.
+  // RITMO acelera todo junto: el reloj SMIL no corre solo, lo adelanta un rAF a RITMO veces el tiempo
+  // real (Leono, 2026-11-13: «deberían ir más rápido»).
+  const RITMO = 1.7;
   // Sin JS o con movimiento reducido: la agenda armada y quieta, y la lista entera.
   const kenos = document.querySelector<HTMLElement>('.kenos');
   const actos = [...(kenos?.querySelectorAll<SVGSVGElement>('svg.acto') ?? [])];
@@ -216,7 +219,16 @@ const horas = Array.from({ length: HORAS }, (_, h) => ({ t: `${String(PRIMERA_HO
   if (kenos && actos.length) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) actos[0].setCurrentTime(+actos[0].dataset.quieto!);
     else {
-      let actual = 0, reloj = 0;
+      let actual = 0, reloj = 0, cuadro = 0;
+      const correr = (svg: SVGSVGElement) => {
+        cancelAnimationFrame(cuadro);
+        const t0 = performance.now();
+        const paso = (ahora: number) => {
+          svg.setCurrentTime(((ahora - t0) / 1000) * RITMO);
+          cuadro = requestAnimationFrame(paso);
+        };
+        cuadro = requestAnimationFrame(paso);
+      };
       const mostrar = (i: number) => {
         actual = i;
         actos.forEach((a, j) => {
@@ -224,12 +236,12 @@ const horas = Array.from({ length: HORAS }, (_, h) => ({ t: `${String(PRIMERA_HO
           if (j !== i) a.pauseAnimations();
         });
         actos[i].setCurrentTime(0);
-        actos[i].unpauseAnimations();
+        correr(actos[i]);
         items.forEach((li, j) => {
           li.toggleAttribute('data-ve', j <= i);
           li.toggleAttribute('data-actual', j === i);
         });
-        reloj = window.setTimeout(() => mostrar((i + 1) % actos.length), +actos[i].dataset.largo! * 1000);
+        reloj = window.setTimeout(() => mostrar((i + 1) % actos.length), (+actos[i].dataset.largo! * 1000) / RITMO);
       };
       kenos.classList.add('al-ritmo');
       // Taiyin (src/scripts/taiyin.ts) pide un acto: se muestra ese y la ronda sigue desde ahí
@@ -243,7 +255,7 @@ const horas = Array.from({ length: HORAS }, (_, h) => ({ t: `${String(PRIMERA_HO
       new IntersectionObserver(
         ([v]) => {
           clearTimeout(reloj);
-          if (!v.isIntersecting) return actos[actual].pauseAnimations();
+          if (!v.isIntersecting) return cancelAnimationFrame(cuadro);
           mostrar(actual);
         },
         { threshold: 0.3 },
