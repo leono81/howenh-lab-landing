@@ -13,6 +13,13 @@ Lo publicado por Howenh Labs. Sale del texto de la página y de `docs/penon-hech
   3. Estación terrena: una estación propia en la isla.
   4. Software en producción: sistemas para profesionales de la salud, comercios y estudios contables, en uso con clientes reales.
 
+## Programas que nos eligieron
+
+Están en la sección del laboratorio, abajo de la presentación.
+
+- Claude Startups, de Anthropic. Con Claude funciona Taiyin, el asistente de esta página.
+- Startup Grant de ElevenLabs: la beca para startups de la plataforma de voz con inteligencia artificial.
+
 ## Penon
 
 - Detección temprana y vigilancia satelital de incendios forestales en Tierra del Fuego.
