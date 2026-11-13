@@ -41,7 +41,7 @@ export const HERRAMIENTAS = [
   ),
   tool(
     'preparar_reunion',
-    'Arma el pedido de reunión para que lo mande el visitante (por la agenda o por su correo). Usala cuando quieran una reunión, una demostración, contratar algo, trabajar en Howenh o hablar con alguien. Completá solo con lo que la persona ya dijo y dejá vacío lo demás. Nunca pidas datos personales.',
+    'Muestra las formas de contacto: agendar una reunión, escribir por correo (con lo que la persona ya dijo escrito en el mail) o las redes, Instagram y LinkedIn. Usala cuando quieran una reunión, una demostración, contratar algo, trabajar en Howenh, hablar con alguien o contactarse. Completá solo con lo que la persona ya dijo y dejá vacío lo demás. Nunca pidas datos personales.',
     {
       organizacion: texto('Su organización o empresa, si la dijo; si no, vacío.'),
       interes: texto('Qué quiere ver o charlar, en pocas palabras.'),
@@ -58,7 +58,7 @@ export const RESULTADOS = {
   mostrar_capas_penon: `Hecho: la página está recorriendo las capas con sus textos; no los repitas. ${RESPONDE}`,
   fijar: `Hecho: la página lo muestra. ${RESPONDE}`,
   recorrido: `Hecho: la página está haciendo el recorrido con sus textos; no lo repitas. ${RESPONDE}`,
-  preparar_reunion: `Hecho: el visitante ve la ficha con los botones para agendar o mandar el correo. ${RESPONDE}`,
+  preparar_reunion: `Hecho: el visitante ve los botones para agendar, escribir por correo o ir a las redes. ${RESPONDE}`,
 };
 
 const objeto = (o, claves) => o !== null && typeof o === 'object' && !Array.isArray(o) && Object.keys(o).every((k) => claves.includes(k));

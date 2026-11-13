@@ -5,7 +5,7 @@ import http from 'node:http';
 const GUION = [
   [/penon|incend|fuego/, [{ tipo: 'texto', texto: 'Penon es nuestro sistema de detección temprana de incendios forestales para Tierra del Fuego. ' }, { tipo: 'accion', accion: 'mostrar_capas_penon' }, { tipo: 'texto', texto: '¿Querés que te cuente algo más?' }]],
   [/minuto|recorr|laboratorio/, [{ tipo: 'texto', texto: 'Te muestro el laboratorio.' }, { tipo: 'accion', accion: 'recorrido' }]],
-  [/reuni|kenos|clinica|clínica/, [{ tipo: 'texto', texto: 'Te preparo el pedido. Revisalo y elegí cómo mandarlo.' }, { tipo: 'accion', accion: 'preparar_reunion', organizacion: 'Clínica', interes: 'Ver Kenos', nombre: '' }]],
+  [/reuni|kenos|clinica|clínica/, [{ tipo: 'texto', texto: 'Te dejo cómo contactarnos: agendá una reunión, escribinos o seguinos en las redes.' }, { tipo: 'accion', accion: 'preparar_reunion', organizacion: 'Clínica', interes: 'Ver Kenos', nombre: '' }]],
   [/factur|hown|celular/, [{ tipo: 'accion', accion: 'fijar', cosa: 'hown' }, { tipo: 'texto', texto: 'Sí, con Hown: le mandás un audio o un texto por Telegram y te devuelve la factura de ARCA con su PDF.' }]],
   [/convenio/, [{ tipo: 'texto', texto: 'Tenemos un conve' }, { tipo: 'corte' }]],
   [/receta/, [{ tipo: 'rechazo' }]],

@@ -55,9 +55,8 @@ const hoja = raiz.querySelector<HTMLElement>('.taiyin-hoja')!;
 const elPregunta = hoja.querySelector<HTMLElement>('.taiyin-pregunta')!;
 const elTexto = hoja.querySelector<HTMLElement>('.taiyin-texto')!;
 const elPaso = hoja.querySelector<HTMLElement>('.taiyin-paso')!;
-const ficha = hoja.querySelector<HTMLFormElement>('.taiyin-ficha')!;
+const ficha = hoja.querySelector<HTMLElement>('.taiyin-ficha')!;
 const correo = ficha.querySelector<HTMLAnchorElement>('.taiyin-correo')!;
-const copiado = ficha.querySelector<HTMLElement>('.taiyin-copiado')!;
 
 const historial: Msj[] = [];
 let ocupado = false;
@@ -160,31 +159,12 @@ async function fijar(cosa: string) {
   luz([acto >= 0 ? el.querySelectorAll('.hace li')[acto] : el.querySelector(`.fila[data-producto="${cosa}"]`)]);
 }
 
-const pedido = () => {
-  const v = (k: string) => (ficha.elements.namedItem(k) as HTMLInputElement).value.trim();
-  return [v('interes') && `Me interesa: ${v('interes')}.`, v('organizacion') && `Organización: ${v('organizacion')}.`, v('nombre') && `Soy ${v('nombre')}.`].filter(Boolean).join('\n');
-};
-function armarCorreo() {
-  const cuerpo = ['Hola, quiero coordinar una reunión con Howenh Labs.', pedido()].filter(Boolean).join('\n');
-  correo.href = `mailto:${CORREO}?subject=${encodeURIComponent('Reunión con Howenh Labs')}&body=${encodeURIComponent(cuerpo)}`;
-}
-ficha.addEventListener('input', armarCorreo);
-// la agenda de Google no acepta datos por la URL (no está documentado): el pedido va al portapapeles
-// y la persona lo pega en la nota de la cita. El enlace se abre igual, se copie o no.
-ficha.querySelector('.primario')!.addEventListener('click', () => {
-  const texto = pedido();
-  if (!texto) return;
-  navigator.clipboard?.writeText(texto).then(() => {
-    copiado.hidden = false;
-    copiado.scrollIntoView({ block: 'nearest' }); // la hoja tiene su propio scroll y la línea queda abajo
-  }, () => {});
-});
-ficha.addEventListener('submit', (e) => e.preventDefault());
-
+// la agenda de Google no toma datos por la URL: lo que Taiyin sabe del pedido viaja solo en el correo
 async function reunion(a: Accion) {
-  for (const k of ['organizacion', 'interes', 'nombre'] as const) (ficha.elements.namedItem(k) as HTMLInputElement).value = a[k] ?? '';
-  armarCorreo();
-  copiado.hidden = true;
+  const cuerpo = ['Hola, quiero coordinar una reunión con Howenh Labs.', a.interes && `Me interesa: ${a.interes}.`, a.organizacion && `Organización: ${a.organizacion}.`, a.nombre && `Soy ${a.nombre}.`]
+    .filter(Boolean)
+    .join('\n');
+  correo.href = `mailto:${CORREO}?subject=${encodeURIComponent('Reunión con Howenh Labs')}&body=${encodeURIComponent(cuerpo)}`;
   ficha.hidden = false;
   const el = document.querySelector('#contacto');
   if (!el) return;

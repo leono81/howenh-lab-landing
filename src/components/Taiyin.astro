@@ -43,16 +43,13 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
       </div>
       <p class="taiyin-texto" aria-live="polite"></p>
       <p class="taiyin-paso" hidden><span class="taiyin-cuenta"></span><span class="taiyin-paso-texto"></span></p>
-      <form class="taiyin-ficha" hidden>
-        <label>Organización <input name="organizacion" maxlength="80" /></label>
-        <label>Interés <input name="interes" maxlength="80" /></label>
-        <label>Nombre <input name="nombre" maxlength="80" placeholder="completalo vos" /></label>
+      <nav class="taiyin-ficha" aria-label="Contacto" hidden>
         <div class="taiyin-ficha-acciones">
           <a class="primario" href={agenda} target="_blank" rel="noopener">Agendar →</a>
           <a class="secundario taiyin-correo" href="mailto:contacto@howenh-labs.com">Por correo</a>
         </div>
-        <p class="taiyin-copiado" role="status" hidden>Copiamos tu pedido: pegalo en «¿Qué te gustaría hablar?» al reservar.</p>
-      </form>
+        <p class="taiyin-redes">O por <a href="https://www.instagram.com/howenhlabs/" target="_blank" rel="noopener">Instagram</a> y <a href="https://www.linkedin.com/company/howenh-labs" target="_blank" rel="noopener">LinkedIn</a></p>
+      </nav>
       <p class="taiyin-letra">La conversación la procesa Anthropic y no se guarda. No escribas datos personales. Vale lo publicado en la página.</p>
     </section>
   </div>
@@ -261,40 +258,10 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     text-transform: uppercase;
     color: var(--acento);
   }
-  .taiyin-ficha {
-    border: 1px solid var(--tinta);
-    padding: 4px 12px 12px;
-  }
   .taiyin-ficha[hidden] {
     display: none;
   }
-  .taiyin-ficha label {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    border-bottom: 1px solid var(--aguada-mar);
-    font: 400 9px var(--mono);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--tinta-suave);
-  }
-  .taiyin-ficha input {
-    flex: 1;
-    min-width: 0;
-    height: 36px;
-    border: 0;
-    background: none;
-    text-align: right;
-    font: 400 16px var(--sans);
-    color: var(--tinta);
-  }
-  .taiyin-ficha input::placeholder {
-    color: var(--tinta-suave);
-    opacity: 1;
-  }
   .taiyin-ficha-acciones {
-    margin-top: 12px;
     display: flex;
     gap: 8px;
   }
@@ -316,13 +283,14 @@ const agenda = 'https://calendar.app.google/ucnmS77YVC4ax2TE9';
     border: 1px solid var(--tinta-suave);
     color: var(--tinta);
   }
-  .taiyin-copiado {
+  .taiyin-redes {
     margin-top: 8px;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--tinta-suave);
   }
-  .taiyin-copiado[hidden] {
-    display: none;
+  .taiyin-redes a {
+    color: var(--tinta);
+    text-underline-offset: 3px;
   }
   .taiyin-letra {
     padding-top: 8px;
