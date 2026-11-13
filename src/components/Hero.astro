@@ -593,8 +593,11 @@ const olas = Array.from({ length: 34 }, () => {
   }
   /* el paseo va atado al scroll de la página: sin JS, y en el compositor. Solo donde hay
      animation-timeline: sin eso la animación terminaría al instante y la ventana quedaría en la
-     ciudad. Sin soporte (Firefox, por ahora) o con movimiento reducido, queda en el faro. */
-  @supports (animation-timeline: scroll()) {
+     ciudad. Sin soporte (Firefox, por ahora) o con movimiento reducido, queda en el faro.
+     En WebKit (Safari y todo navegador de iPhone; -apple-system-body es solo suyo) también queda
+     en el faro: el plano que se mueve es una capa de la maqueta entera y iOS deja pedazos sin
+     pintar, con el hero en blanco (captura del 2026-11-13). */
+  @supports (animation-timeline: scroll()) and (not (font: -apple-system-body)) {
     @media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
       .plano {
         animation: paseo linear both;
